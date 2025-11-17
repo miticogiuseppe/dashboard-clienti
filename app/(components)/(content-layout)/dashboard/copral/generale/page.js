@@ -37,6 +37,28 @@ import {
   sumByKey,
 } from "@/utils/excelUtils";
 import { createOptions, createSeries } from "@/utils/graphUtils";
+import dayjs from "dayjs";
+import AppmerceChart from "@/components/AppmerceChart";
+
+// Utility per calcolare range date
+const calcolaRange = (periodo) => {
+  const oggi = dayjs();
+  const inizio = {
+    settimana: oggi.subtract(7, "day"),
+    mese: oggi.subtract(1, "month"),
+    anno: oggi.startOf("year"),
+  }[periodo];
+  return {
+    startDate: inizio.format("YYYY-MM-DD"),
+    endDate: oggi.format("YYYY-MM-DD"),
+  };
+};
+
+// Utility per formattare date
+const fmt = (d) => {
+  if (!d) return "";
+  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
+};
 
 const Sales = () => {
   const [sheetData, setSheetData] = useState(undefined);
@@ -47,6 +69,11 @@ const Sales = () => {
   const [startDate, setStartDate] = useState(undefined);
   const [pickerDate, setPickerDate] = useState(undefined);
   const [productCount, setProductCount] = useState(0);
+
+  const [pickerDateTS, setPickerDateTS] = useState([null, null]);
+  const [periodoTS, setPeriodoTS] = useState("mese");
+  const { startDate: startDateTS, endDate: endDateTS } =
+    calcolaRange(periodoTS);
 
   const handleDateChange = (date) => {
     setPickerDate(date);
@@ -249,34 +276,59 @@ const Sales = () => {
               </Col>
             ))}
             <Col xxl={8} xl={6}>
-              <Card className="custom-card">
+              <Card className="custom-card h-100">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Sales Overview</Card.Title>
+                  <Card.Title>TS Azienda</Card.Title>
                   <SpkDropdown
                     toggleas="a"
                     Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Sort By"
+                    Toggletext="Periodo"
                   >
-                    <Dropdown.Item href="#!">This Week</Dropdown.Item>
-                    <Dropdown.Item href="#!">Last Week</Dropdown.Item>
-                    <Dropdown.Item href="#!">This Month</Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        setPeriodoTS("settimana");
+                        setPickerDateTS([null, null]);
+                      }}
+                    >
+                      Questa settimana
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        setPeriodoTS("mese");
+                        setPickerDateTS([null, null]);
+                      }}
+                    >
+                      Ultimo mese
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        setPeriodoTS("anno");
+                        setPickerDateTS([null, null]);
+                      }}
+                    >
+                      Anno corrente
+                    </Dropdown.Item>
                   </SpkDropdown>
                 </Card.Header>
                 <Card.Body>
-                  <div id="sales-overview">
-                    {graphSeries.length > 0 && graphOptions?.chart?.type && (
-                      <Spkapexcharts
-                        chartOptions={graphOptions}
-                        chartSeries={graphSeries}
-                        type={graphOptions.chart.type}
-                        width={"100%"}
-                        height={315}
-                      />
-                    )}
-                  </div>
+                  <SpkFlatpickr
+                    options={{ mode: "range", dateFormat: "Y-m-d" }}
+                    onfunChange={(date) => setPickerDateTS(date)}
+                    value={pickerDateTS}
+                  />
+                  <p className="text-muted mb-2">
+                    Visualizzazione: ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
+                    {fmt(pickerDateTS?.[1]) || endDateTS})
+                  </p>
+                  <AppmerceChart
+                    title="TS Azienda"
+                    startDate={fmt(pickerDateTS?.[0]) || startDateTS}
+                    endDate={fmt(pickerDateTS?.[1]) || endDateTS}
+                  />
                 </Card.Body>
               </Card>
             </Col>
+
             {/* <Col xxl={4} xl={6}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="pb-0 justify-content-between">

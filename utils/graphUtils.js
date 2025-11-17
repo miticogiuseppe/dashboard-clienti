@@ -133,7 +133,7 @@ const defaultOptions = {
     y: {
       formatter: function (y) {
         if (typeof y !== "undefined") {
-          return y.toFixed(0) + "%";
+          return y.toFixed(0);
         }
         return y;
       },

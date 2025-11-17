@@ -353,6 +353,14 @@ export const MENUITEMS = [
       },
 
       {
+        path: "/dashboard/copral/copral_nas",
+        type: "link",
+        active: false,
+        selected: false,
+        title: "Copral NAS",
+        ready: true,
+      },
+      {
         path: "/pages/empty",
         type: "link",
         active: false,
