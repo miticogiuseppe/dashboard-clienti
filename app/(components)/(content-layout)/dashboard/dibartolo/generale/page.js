@@ -64,8 +64,8 @@ const Generale = () => {
   const [sheetData, setSheetData] = useState(undefined);
   const [graphSeries, setGraphSeries] = useState([]);
   const [graphOptions, setGraphOptions] = useState([]);
-  const [agents, setAgents] = useState([]);
-  const [selectedAgent, setSelectedAgent] = useState(undefined);
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(undefined);
   const [startDate, setStartDate] = useState(undefined);
   const [pickerDate, setPickerDate] = useState(undefined);
   const [productCount, setProductCount] = useState(0);
@@ -90,14 +90,14 @@ const Generale = () => {
 
   useEffect(() => {
     (async () => {
-      const response = await fetch("/data/APPMERCE-000.xlsx");
+      const response = await fetch("/data/Analisi.xlsx");
       const blob = await response.blob();
 
-      let jsonSheet = await loadSheet(blob, "APPMERCE-000_1");
+      let jsonSheet = await loadSheet(blob, "appmerce_db");
       setSheetData(jsonSheet);
 
-      let agents = extractValues(jsonSheet, "Des. Agente");
-      setAgents(agents);
+      let products = extractValues(jsonSheet, "Descrizione famiglia");
+      setProducts(products);
     })();
   }, [setSheetData]);
 
@@ -107,28 +107,32 @@ const Generale = () => {
     let jsonSheet = sheetData;
 
     // Parse delle date
-    jsonSheet = parseDates(jsonSheet, ["Data ord"]);
-    jsonSheet = orderSheet(jsonSheet, ["Data ord"], ["asc"]);
+    jsonSheet = parseDates(jsonSheet, ["Data ordine"]);
+    jsonSheet = orderSheet(jsonSheet, ["Data ordine"], ["asc"]);
 
     // Filtro per intervallo di date
     if (startDate && startDate[0] && startDate[1]) {
       jsonSheet = filterByRange(
         jsonSheet,
-        "Data ord",
+        "Data ordine",
         moment(startDate[0]),
         moment(startDate[1])
       );
     } else {
-      jsonSheet = filterByWeek(jsonSheet, "Data ord", moment(), 2);
+      jsonSheet = filterByWeek(jsonSheet, "Data ordine", moment(), 2);
     }
 
-    // Filtro per agente selezionato
-    if (selectedAgent) {
-      jsonSheet = filterSheet(jsonSheet, "Des. Agente", selectedAgent);
+    // Filtro per famiglia selezionata
+    if (selectedProduct) {
+      jsonSheet = filterSheet(
+        jsonSheet,
+        "Descrizione famiglia",
+        selectedProduct
+      );
     }
 
-    // Somma quantità per articolo (puoi sostituire "Articolo" con "Macchina" se serve)
-    const counters = sumByKey(jsonSheet, "Articolo", "Qta da ev");
+    // Somma quantità per articolo
+    const counters = sumByKey(jsonSheet, "Articolo", "Qta/kg da ev.");
 
     // Ordina e limita (top 20 articoli)
     const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 20);
@@ -155,12 +159,12 @@ const Generale = () => {
 
     setGraphSeries(series);
     setGraphOptions(options);
-  }, [sheetData, selectedAgent, startDate]);
+  }, [sheetData, selectedProduct, startDate]);
 
   useEffect(() => {
     if (!sheetData) return;
     const total = sheetData.reduce((acc, row) => {
-      const value = parseFloat(row["Qta da ev"]);
+      const value = parseFloat(row["Qta/kg da ev."]);
       return acc + (isNaN(value) ? 0 : value);
     }, 0);
     setProductCount(Math.round(total));
@@ -168,7 +172,7 @@ const Generale = () => {
 
   return (
     <Fragment>
-      <Seo title="Copral Dashboard" />
+      <Seo title="Dibartolo Dashboard" />
 
       {/* <!-- Start::page-header --> */}
       <div className="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
@@ -216,11 +220,11 @@ const Generale = () => {
             Togglevariant="white"
             Customclass="inline-block"
           >
-            <Dropdown.Item onClick={() => setSelectedAgent(undefined)}>
-              --- Tutti gli agenti ---
+            <Dropdown.Item onClick={() => setSelectedProduct(undefined)}>
+              --- Tutti i prodotti ---
             </Dropdown.Item>
-            {agents.map((x) => (
-              <Dropdown.Item key={x} onClick={() => setSelectedAgent(x)}>
+            {products.map((x) => (
+              <Dropdown.Item key={x} onClick={() => setSelectedProduct(x)}>
                 {x}
               </Dropdown.Item>
             ))}
