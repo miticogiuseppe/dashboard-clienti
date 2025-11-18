@@ -180,10 +180,10 @@ const Sales = () => {
               </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              Sales
+              Generale
             </li>
           </SpkBreadcrumb>
-          <h1 className="page-title fw-medium fs-18 mb-0">Sales Dashboard</h1>
+          <h1 className="page-title fw-medium fs-18 mb-0">Generale</h1>
         </div>
         <div className="sc-container">
           <div className="form-group">
