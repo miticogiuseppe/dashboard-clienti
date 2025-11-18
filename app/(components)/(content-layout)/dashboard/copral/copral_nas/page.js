@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 const copralNasTest = {
   nome: "Copral NAS",
   fileStorico: "/data/STORICO_COPRAL_NAS.zip",
-  fileAppmerce: "/data/APPMERCE-001.xlsx",
+  fileAppmerce: "/data/APPMERCE-000.xlsx",
   appmerce: {
     ordini: 90,
     produzione: 1450,
