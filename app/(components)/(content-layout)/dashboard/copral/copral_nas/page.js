@@ -12,8 +12,8 @@ import Dropdown from "react-bootstrap/Dropdown";
 import dayjs from "dayjs";
 
 const copralNasTest = {
-  nome: "Copral NAS",
-  fileStorico: "/data/STORICO_COPRAL_NAS.zip",
+  nome: "Troncatrice (Mecal)",
+  fileStorico: "/data/STORICO_TRONCATRICE.zip",
   fileAppmerce: "/data/APPMERCE-000.xlsx",
   appmerce: {
     ordini: 90,
@@ -53,11 +53,11 @@ export default function PaginaCopralNas() {
 
   return (
     <Fragment>
-      <Seo title="Macchina - Copral NAS" />
+      <Seo title="Macchina - Troncatrice (Mecal)" />
       <Pageheader
         title="Macchine"
-        currentpage="Copral NAS"
-        activepage="Copral NAS"
+        currentpage="Troncatrice (Mecal)"
+        activepage="Troncatrice (Mecal)"
         showActions={false}
       />
 

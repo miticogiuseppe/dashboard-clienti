@@ -357,7 +357,7 @@ export const MENUITEMS = [
         type: "link",
         active: false,
         selected: false,
-        title: "Copral NAS",
+        title: "Troncatrice (Mecal)",
         ready: true,
       },
       {
