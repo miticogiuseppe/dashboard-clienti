@@ -12,9 +12,15 @@ import Dropdown from "react-bootstrap/Dropdown";
 import dayjs from "dayjs";
 
 const copralNasTest = {
-  nome: "Copral NAS",
-  fileStorico: "/data/STORICO_COPRAL_NAS.zip",
-  fileAppmerce: "/data/APPMERCE-000.xlsx",
+  nome: "Troncatrice (Mecal)",
+
+  // Endpoint API invece dei file statici
+  fileStorico: "/api/fetch-resource?id=STORICO_TRONCATRICE",
+  fileAppmerce: "/api/fetch-resource?id=APPMERCE",
+
+  // Tenant hardcoded (Copral)
+  tenant: "Copral",
+
   appmerce: {
     ordini: 90,
     produzione: 1450,
@@ -63,7 +69,7 @@ export default function PaginaCopralNas() {
 
       <Row>
         <Col xxl={12}>
-          <MacchinaDashboard {...copralNasTest} />
+          <MacchinaDashboard {...copralNasTest} tenant={copralNasTest.tenant} />
         </Col>
       </Row>
 
