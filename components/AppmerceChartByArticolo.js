@@ -11,7 +11,7 @@ import {
   sumByKey,
   orderSheet,
 } from "@/utils/excelUtils";
-import { createOptions } from "@/utils/graphUtils"; // 👈 come AppmerceChart
+import { createOptions } from "@/utils/graphUtils";
 
 // ApexCharts
 const Spkapexcharts = dynamic(
@@ -64,7 +64,7 @@ export default function AppmerceChartByArticolo({ startDate, endDate }) {
           },
         ];
 
-        // 🔎 Usa createOptions come AppmerceChart
+        // Usa createOptions come AppmerceChart
         const chartOptions = createOptions(
           counters,
           "Descrizione",
