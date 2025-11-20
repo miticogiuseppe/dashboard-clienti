@@ -2,7 +2,43 @@
 import React from "react";
 import { Row, Col, Card } from "react-bootstrap";
 
-const MacchinaDashboard = ({ nome, fileStorico, appmerce, fileAppmerce }) => {
+const MacchinaDashboard = ({
+  nome,
+  fileStorico,
+  appmerce,
+  fileAppmerce,
+  tenant,
+}) => {
+  const downloadFile = async (url) => {
+    const res = await fetch(url, {
+      headers: {
+        "x-tenant": tenant,
+      },
+    });
+
+    if (!res.ok) {
+      alert("Errore nel download");
+      return;
+    }
+
+    const blob = await res.blob();
+    const tempUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = tempUrl;
+
+    // nome file preso dalle response headers
+    const filename =
+      res.headers
+        .get("Content-Disposition")
+        ?.split("filename=")[1]
+        ?.replace(/"/g, "") || "download.bin";
+
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(tempUrl);
+  };
+
   return (
     <Row className="mb-4 align-items-stretch">
       <Col xl={4} className="d-flex">
@@ -12,22 +48,21 @@ const MacchinaDashboard = ({ nome, fileStorico, appmerce, fileAppmerce }) => {
           </Card.Header>
           <Card.Body>
             <p>
-              <a
-                href={fileStorico}
-                download
+              <button
+                onClick={() => downloadFile(fileStorico)}
                 className="btn btn-primary btn-sm me-2"
               >
                 Scarica STORICO
-              </a>
-              <a
-                href={fileAppmerce}
-                download
+              </button>
+
+              <button
+                onClick={() => downloadFile(fileAppmerce)}
                 className="btn btn-secondary btn-sm"
               >
                 Scarica APPMERCE
-              </a>
+              </button>
             </p>
-            <ul className="list-unstyled">
+            {/* <ul className="list-unstyled">
               <li>
                 <strong>Ordini ricevuti:</strong> {appmerce.ordini}
               </li>
@@ -37,7 +72,7 @@ const MacchinaDashboard = ({ nome, fileStorico, appmerce, fileAppmerce }) => {
               <li>
                 <strong>Ultima consegna:</strong> {appmerce.dataConsegna}
               </li>
-            </ul>
+            </ul> */}
           </Card.Body>
         </Card>
       </Col>

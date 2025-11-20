@@ -13,8 +13,14 @@ import dayjs from "dayjs";
 
 const copralNasTest = {
   nome: "Troncatrice (Mecal)",
-  fileStorico: "/data/STORICO_TRONCATRICE.zip",
-  fileAppmerce: "/data/APPMERCE-000.xlsx",
+
+  // Endpoint API invece dei file statici
+  fileStorico: "/api/fetch-resource?id=STORICO_TRONCATRICE",
+  fileAppmerce: "/api/fetch-resource?id=APPMERCE",
+
+  // Tenant hardcoded (Copral)
+  tenant: "Copral",
+
   appmerce: {
     ordini: 90,
     produzione: 1450,
@@ -63,7 +69,7 @@ export default function PaginaCopralNas() {
 
       <Row>
         <Col xxl={12}>
-          <MacchinaDashboard {...copralNasTest} />
+          <MacchinaDashboard {...copralNasTest} tenant={copralNasTest.tenant} />
         </Col>
       </Row>
 

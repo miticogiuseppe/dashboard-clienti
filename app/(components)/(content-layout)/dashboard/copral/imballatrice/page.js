@@ -13,8 +13,11 @@ import dayjs from "dayjs";
 
 const imballatricetest = {
   nome: "Imballatrice",
-  fileStorico: "/data/STORICO_IMBALLATRICE.zip",
-  fileAppmerce: "/data/APPMERCE-000.xlsx",
+  fileStorico: "/api/fetch-resource?id=STORICO_IMBALLATRICE",
+  fileAppmerce: "/api/fetch-resource?id=APPMERCE",
+
+  // Tenant hardcoded (Copral)
+  tenant: "Copral",
   appmerce: {
     ordini: 128,
     imballaggi: 2340,
@@ -67,7 +70,10 @@ export default function PaginaImballatrice() {
 
       <Row>
         <Col xxl={12}>
-          <MacchinaDashboard {...imballatricetest} />
+          <MacchinaDashboard
+            {...imballatricetest}
+            tenant={imballatricetest.tenant}
+          />
         </Col>
       </Row>
 
