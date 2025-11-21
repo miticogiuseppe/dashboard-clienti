@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 const tostini = {
   nome: "Tostini",
   fileStorico: "/data/STORICO_TRONCATRICE.zip",
-  fileAppmerce: "/data/APPMERCE-000.xlsx",
+  fileAppmerce: "/api/fetch-resource?id=ANALISI",
   appmerce: {
     ordini: 90,
     produzione: 1450,

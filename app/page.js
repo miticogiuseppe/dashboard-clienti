@@ -7,6 +7,7 @@ import { Card, Col, Form, Nav, Tab } from "react-bootstrap";
 import { basePath } from "../next.config";
 import SpkAlert from "../shared/@spk-reusable-components/reusable-uielements/spk-alert";
 import { auth } from "../shared/firebase/firebaseapi";
+import { hardcodedUsers } from "@/shared/hardcodedUsers";
 
 const page = () => {
   const [passwordshow1, setpasswordshow1] = useState(false);
@@ -31,16 +32,16 @@ const page = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // 🔹 Admin hardcoded
-    const adminEmail = "Copral";
-    const adminPassword = "Copral2025!";
-
-    if (email === adminEmail && password === adminPassword) {
-      RouteChange();
+    //Check users
+    const user = hardcodedUsers.find(
+      (user) => user.email === email && user.password === password
+    );
+    if (user) {
+      router.push(user.route);
       return;
     }
 
-    // 🔹 Login Firebase
+    // Login Firebase
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
