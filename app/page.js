@@ -37,6 +37,7 @@ const page = () => {
       (user) => user.email === email && user.password === password
     );
     if (user) {
+      localStorage.setItem("loggedUser", user.name);
       router.push(user.route);
       return;
     }

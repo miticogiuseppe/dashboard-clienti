@@ -1,0 +1,52 @@
+// shared/layouts-components/sidebar/menus/menuCopral.js
+import { Dashboardicon, Appsicon, Pagesicon } from "../icons";
+
+export const menuCopral = [
+  { menutitle: "MAIN" },
+  {
+    title: "Dashboards",
+    icon: Dashboardicon,
+    type: "sub",
+    children: [
+      {
+        path: "/dashboard/copral/generale",
+        title: "Generale",
+        type: "link",
+        ready: true,
+      },
+    ],
+  },
+  { menutitle: "WEB APPS" },
+  {
+    title: "Apps",
+    icon: Appsicon,
+    type: "sub",
+    children: [
+      {
+        title: "Calendario",
+        path: "/dashboard/copral/calendario",
+        type: "link",
+        ready: true,
+      },
+    ],
+  },
+  {
+    title: "Pages",
+    icon: Pagesicon,
+    type: "sub",
+    children: [
+      {
+        path: "/dashboard/copral/imballatrice",
+        title: "Imballatrice",
+        type: "link",
+        ready: true,
+      },
+      {
+        path: "/dashboard/copral/copral_nas",
+        title: "Troncatrice (Mecal)",
+        type: "link",
+        ready: true,
+      },
+    ],
+  },
+];
