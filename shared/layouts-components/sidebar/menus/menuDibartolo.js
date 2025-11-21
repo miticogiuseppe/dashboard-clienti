@@ -1,6 +1,4 @@
-// shared/layouts-components/sidebar/menus/menuDibartolo.js
-import { read } from "xlsx";
-import { Dashboardicon, Appsicon, Pagesicon } from "../icons";
+import { Appsicon, Dashboardicon, Pagesicon } from "../icons";
 
 export const menuDibartolo = [
   { menutitle: "MAIN" },
@@ -27,6 +25,26 @@ export const menuDibartolo = [
       {
         title: "Calendario",
         path: "/dashboard/dibartolo/calendario",
+        type: "link",
+        ready: false,
+      },
+    ],
+  },
+
+  {
+    title: "Pages",
+    icon: Pagesicon,
+    type: "sub",
+    children: [
+      {
+        path: "/dashboard/dibartolo/tostini",
+        title: "Tostini",
+        type: "link",
+        ready: true,
+      },
+      {
+        path: "/dashboard/copral/copral_nas",
+        title: "Troncatrice (Mecal)",
         type: "link",
         ready: false,
       },
