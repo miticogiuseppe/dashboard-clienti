@@ -1,5 +1,5 @@
-Folder PATH listing
-Volume serial number is 00000057 66FC:9467
+Elenco del percorso delle cartelle
+Numero di serie del volume: 561B-B2C8
 C:.
 |   .env.local
 |   .eslintrc.json
@@ -21,6 +21,7 @@ C:.
 |   |   package.json
 |   |   react-loadable-manifest.json
 |   |   trace
+|   |   _events.json
 |   |   
 |   +---cache
 |   |   |   .rscinfo
@@ -52,7 +53,9 @@ C:.
 |   |       |       26.pack.gz
 |   |       |       27.pack.gz
 |   |       |       28.pack.gz
+|   |       |       29.pack.gz
 |   |       |       3.pack.gz
+|   |       |       30.pack.gz
 |   |       |       4.pack.gz
 |   |       |       5.pack.gz
 |   |       |       6.pack.gz
@@ -86,7 +89,16 @@ C:.
 |   |               21.pack.gz
 |   |               22.pack.gz
 |   |               23.pack.gz
+|   |               24.pack.gz
+|   |               25.pack.gz
+|   |               26.pack.gz
+|   |               27.pack.gz
+|   |               28.pack.gz
+|   |               29.pack.gz
 |   |               3.pack.gz
+|   |               30.pack.gz
+|   |               31.pack.gz
+|   |               32.pack.gz
 |   |               4.pack.gz
 |   |               5.pack.gz
 |   |               6.pack.gz
@@ -116,25 +128,24 @@ C:.
 |   |   |   |   
 |   |   |   +---(components)
 |   |   |   |   \---(content-layout)
-|   |   |   |       +---Calendario
-|   |   |   |       |       page.js
-|   |   |   |       |       page_client-reference-manifest.js
-|   |   |   |       |       
-|   |   |   |       +---dashboard
-|   |   |   |       |   +---macchine
-|   |   |   |       |   |   \---imballatricetest
-|   |   |   |       |   |           page.js
-|   |   |   |       |   |           page_client-reference-manifest.js
-|   |   |   |       |   |           
-|   |   |   |       |   \---sales
-|   |   |   |       |           page.js
-|   |   |   |       |           page_client-reference-manifest.js
-|   |   |   |       |           
-|   |   |   |       \---pages
-|   |   |   |           \---empty
-|   |   |   |                   page.js
-|   |   |   |                   page_client-reference-manifest.js
-|   |   |   |                   
+|   |   |   |       \---dashboard
+|   |   |   |           \---copral
+|   |   |   |               +---calendario
+|   |   |   |               |       page.js
+|   |   |   |               |       page_client-reference-manifest.js
+|   |   |   |               |       
+|   |   |   |               +---copral_nas
+|   |   |   |               |       page.js
+|   |   |   |               |       page_client-reference-manifest.js
+|   |   |   |               |       
+|   |   |   |               +---generale
+|   |   |   |               |       page.js
+|   |   |   |               |       page_client-reference-manifest.js
+|   |   |   |               |       
+|   |   |   |               \---imballatrice
+|   |   |   |                       page.js
+|   |   |   |                       page_client-reference-manifest.js
+|   |   |   |                       
 |   |   |   +---favicon.ico
 |   |   |   |       route.js
 |   |   |   |       
@@ -209,21 +220,20 @@ C:.
 |   |   |       |   \---(content-layout)
 |   |   |       |       |   layout.js
 |   |   |       |       |   
-|   |   |       |       +---Calendario
-|   |   |       |       |       page.js
-|   |   |       |       |       
-|   |   |       |       +---dashboard
-|   |   |       |       |   +---macchine
-|   |   |       |       |   |   \---imballatricetest
-|   |   |       |       |   |           page.js
-|   |   |       |       |   |           
-|   |   |       |       |   \---sales
-|   |   |       |       |           page.js
-|   |   |       |       |           
-|   |   |       |       \---pages
-|   |   |       |           \---empty
-|   |   |       |                   page.js
-|   |   |       |                   
+|   |   |       |       \---dashboard
+|   |   |       |           \---copral
+|   |   |       |               +---calendario
+|   |   |       |               |       page.js
+|   |   |       |               |       
+|   |   |       |               +---copral_nas
+|   |   |       |               |       page.js
+|   |   |       |               |       
+|   |   |       |               +---generale
+|   |   |       |               |       page.js
+|   |   |       |               |       
+|   |   |       |               \---imballatrice
+|   |   |       |                       page.js
+|   |   |       |                       
 |   |   |       \---_not-found
 |   |   |               page.js
 |   |   |               
@@ -233,9 +243,11 @@ C:.
 |   |   |       |   
 |   |   |       \---(components)
 |   |   |           \---(content-layout)
-|   |   |               \---Calendario
-|   |   |                       page.css
-|   |   |                       
+|   |   |               \---dashboard
+|   |   |                   \---copral
+|   |   |                       \---calendario
+|   |   |                               page.css
+|   |   |                               
 |   |   +---development
 |   |   |       _buildManifest.js
 |   |   |       _ssgManifest.js
@@ -302,18 +314,17 @@ C:.
 |   |   |       transparent.4b379b74.png
 |   |   |       
 |   |   \---webpack
-|   |           34b11e7ee5070760.webpack.hot-update.json
+|   |           4eb2da005ce55091.webpack.hot-update.json
 |   |           633457081244afec._.hot-update.json
-|   |           70d9e34e5c7b87b9.webpack.hot-update.json
-|   |           ab0f744b3dac355f.webpack.hot-update.json
-|   |           b5a1d04f99bbde10.webpack.hot-update.json
-|   |           e1c4a243a88b6866.webpack.hot-update.json
-|   |           webpack.34b11e7ee5070760.hot-update.js
-|   |           webpack.70d9e34e5c7b87b9.hot-update.js
-|   |           webpack.ab0f744b3dac355f.hot-update.js
-|   |           webpack.b5a1d04f99bbde10.hot-update.js
-|   |           webpack.e1c4a243a88b6866.hot-update.js
-|   |           _app-pages-browser_node_modules_react-apexcharts_dist_react-apexcharts_min_js.70d9e34e5c7b87b9.hot-update.js
+|   |           7752ca75fde863a2.webpack.hot-update.json
+|   |           838c155d1c7cb51d.webpack.hot-update.json
+|   |           83ad9df39afb6369.webpack.hot-update.json
+|   |           f0a3f12eeacd4196.webpack.hot-update.json
+|   |           webpack.4eb2da005ce55091.hot-update.js
+|   |           webpack.7752ca75fde863a2.hot-update.js
+|   |           webpack.838c155d1c7cb51d.hot-update.js
+|   |           webpack.83ad9df39afb6369.hot-update.js
+|   |           webpack.f0a3f12eeacd4196.hot-update.js
 |   |           
 |   \---types
 |       |   cache-life.d.ts
@@ -329,21 +340,20 @@ C:.
 |               \---(content-layout)
 |                   |   layout.ts
 |                   |   
-|                   +---Calendario
-|                   |       page.ts
-|                   |       
-|                   +---dashboard
-|                   |   +---macchine
-|                   |   |   \---imballatricetest
-|                   |   |           page.ts
-|                   |   |           
-|                   |   \---sales
-|                   |           page.ts
-|                   |           
-|                   \---pages
-|                       \---empty
-|                               page.ts
-|                               
+|                   \---dashboard
+|                       \---copral
+|                           +---calendario
+|                           |       page.ts
+|                           |       
+|                           +---copral_nas
+|                           |       page.ts
+|                           |       
+|                           +---generale
+|                           |       page.ts
+|                           |       
+|                           \---imballatrice
+|                                   page.ts
+|                                   
 +---app
 |   |   favicon.ico
 |   |   globals.scss
@@ -352,117 +362,60 @@ C:.
 |   |   page.js
 |   |   page.module.css
 |   |   
-|   +---(components)
-|   |   |   layout.js
-|   |   |   
-|   |   +---(authentication-layout)
-|   |   |   |   layout.js
-|   |   |   |   
-|   |   |   \---authentication
-|   |   |       \---error
-|   |   |           \---401-error
-|   |   |                   page.js
-|   |   |                   
-|   |   +---(content-layout)
-|   |   |   |   layout.js
-|   |   |   |   
-|   |   |   +---Calendario
-|   |   |   |       page.js
-|   |   |   |       
-|   |   |   +---dashboard
-|   |   |   |   +---macchine
-|   |   |   |   |   \---imballatricetest
-|   |   |   |   |           page.js
-|   |   |   |   |           
-|   |   |   |   \---sales
-|   |   |   |           page.js
-|   |   |   |           
-|   |   |   +---homepage
-|   |   |   |       page.js
-|   |   |   |       
-|   |   |   +---liste
-|   |   |   |   +---Consumabili
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---magazzino_fragranze
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---mrp
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---ordini_esportati
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---ordini_evasi
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   \---stock
-|   |   |   |           page.js
-|   |   |   |           
-|   |   |   +---pages
-|   |   |   |   +---empty
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---Imballatrice
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---profile
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   +---profile-settings
-|   |   |   |   |       page.js
-|   |   |   |   |       
-|   |   |   |   \---profilo
-|   |   |   |           page.js
-|   |   |   |           
-|   |   |   +---report
-|   |   |   |       page.js
-|   |   |   |       
-|   |   |   \---src
-|   |   |       +---components
-|   |   |       |       OrderCalendar.css
-|   |   |       |       OrderCalendar.js
-|   |   |       |       OrderListModal.js
-|   |   |       |       
-|   |   |       \---utils
-|   |   |               excelUtils.js
-|   |   |               generateExcel.js
-|   |   |               generateExcel2.js
-|   |   |               graphUtils.js
-|   |   |               
-|   |   \---(landing-layout)
-|   |           layout.js
-|   |           
-|   +---area-riservata
-|   |   \---[utente]
-|   |       +---amministrativa
-|   |       |       page.js
-|   |       |       
-|   |       +---calendario
-|   |       |       page.js
-|   |       |       
-|   |       +---dashboard
-|   |       |       page.js
-|   |       |       
-|   |       +---drive
-|   |       |       page.js
-|   |       |       
-|   |       +---macchine
-|   |       |       page.js
-|   |       |       
-|   |       \---profile
-|   |               page.js
-|   |               
-|   +---components
-|   |       GraficoApex.js
-|   |       GraficoBarre.js
-|   |       Macchina.js
-|   |       MacchinaDashboard.js
-|   |       ProfileComponent.js
-|   |       
-|   \---data
-|           macchine.json
-|           
+|   \---(components)
+|       |   layout.js
+|       |   
+|       +---(authentication-layout)
+|       |   |   layout.js
+|       |   |   
+|       |   \---authentication
+|       |       \---error
+|       |           \---401-error
+|       |                   page.js
+|       |                   
+|       +---(content-layout)
+|       |   |   layout.js
+|       |   |   
+|       |   +---dashboard
+|       |   |   \---copral
+|       |   |       +---calendario
+|       |   |       |       page.js
+|       |   |       |       
+|       |   |       +---copral_nas
+|       |   |       |       page.js
+|       |   |       |       
+|       |   |       +---generale
+|       |   |       |       page.js
+|       |   |       |       
+|       |   |       \---imballatrice
+|       |   |               page.js
+|       |   |               
+|       |   +---profile
+|       |   |       page.js
+|       |   |       
+|       |   +---profile-settings
+|       |   |       page.js
+|       |   |       
+|       |   \---testPage
+|       |           page.js
+|       |           
+|       \---(landing-layout)
+|               layout.js
+|               
++---components
+|       AppmerceChart.js
+|       AppmerceChartByArticolo.js
+|       GraficoApex.js
+|       GraficoBarre.js
+|       MacchinaDashboard.js
+|       OrderCalendar.css
+|       OrderCalendar.js
+|       OrderListModal.js
+|       ProfileComponent.js
+|       
++---data
+|       macchine.json
+|       
 +---node_modules
 |   |   .package-lock.json
 |   |   
@@ -44118,16 +44071,23 @@ C:.
 |   |   |                   
 |   |   +---images
 |   |   |   +---brand-logos
+|   |   |   |       desktop-dark.bak.png
 |   |   |   |       desktop-dark.png
 |   |   |   |       desktop-logo.png
+|   |   |   |       desktop-logo.png.bak
+|   |   |   |       desktop-white.bak.png
 |   |   |   |       desktop-white.png
 |   |   |   |       favicon.ico
+|   |   |   |       favicon.ico.bak
 |   |   |   |       firbase.png
 |   |   |   |       logo-supply-cerchio.png
 |   |   |   |       nextjs.png
 |   |   |   |       toggle-dark.png
+|   |   |   |       toggle-dark.png.bak
 |   |   |   |       toggle-logo.png
+|   |   |   |       toggle-logo.png.bak
 |   |   |   |       toggle-white.png
+|   |   |   |       toggle-white.png.bak
 |   |   |   |       
 |   |   |   +---company-logos
 |   |   |   |       1.png
@@ -44695,122 +44655,129 @@ C:.
 |   |           
 |   \---data
 |           APPMERCE-000.xlsx
+|           imballatrice_a.xlsx
 |           STORICO_IMBALLATRICE.zip
 |           
-\---shared
-    +---@spk-reusable-components
-    |   +---reusable-dashboards
-    |   |       spk-cards.js
-    |   |       spk-countrycard.js
-    |   |       spk-recentacticvecard.js
-    |   |       
-    |   +---reusable-pages
-    |   |   |   spk-pricingcards.js
-    |   |   |   spk-teamcards.js
-    |   |   |   spkblogcards.js
-    |   |   |   spkprofilefriendscard.js
-    |   |   |   
-    |   |   +---reviews
-    |   |   |       reviewsalignmentcard.js
-    |   |   |       reviewstyle3.js
-    |   |   |       reviewstyle5.js
-    |   |   |       reviewstyles2.js
-    |   |   |       spkreviewstyle1.js
-    |   |   |       
-    |   |   \---timeline
-    |   |           spk-timeline1.js
-    |   |           spk-timeline2.js
-    |   |           spk-timeline3.js
-    |   |           
-    |   +---reusable-plugins
-    |   |       spk-apexcharts.js
-    |   |       spk-flatpicker.js
-    |   |       spk-lightbox.js
-    |   |       spk-reactselect.js
-    |   |       
-    |   +---reusable-tables
-    |   |       tables-component.js
-    |   |       
-    |   \---reusable-uielements
-    |           spk-alert.js
-    |           spk-badge.js
-    |           spk-breadcrumb.js
-    |           spk-button.js
-    |           spk-dropdown.js
-    |           spk-listgroup.js
-    |           spk-progress.js
-    |           spk-tooltips.js
-    |           
-    +---data
-    |   +---dashboard
-    |   |       salesdata.js
-    |   |       
-    |   +---pages
-    |   |   |   chatdata.js
-    |   |   |   faqsdata.js
-    |   |   |   filemanagerdata.js
-    |   |   |   landingdata.js
-    |   |   |   pricingdata.js
-    |   |   |   profiledata.js
-    |   |   |   reviewsdata.js
-    |   |   |   searchdata.js
-    |   |   |   timelinedata.js
-    |   |   |   todolistdata.js
-    |   |   |   
-    |   |   +---blog
-    |   |   |       blogdata.js
-    |   |   |       blogdetailsdata.js
-    |   |   |       createblogdata.js
-    |   |   |       
-    |   |   +---email
-    |   |   |       mailappdata.js
-    |   |   |       mailsettingsdata.js
-    |   |   |       
-    |   |   \---invoice
-    |   |           invoicelistdata.js
-    |   |           
-    |   \---switcherdata
-    |           switcherdata.js
-    |           
-    +---firebase
-    |       firebaseapi.js
-    |       
-    +---layouts-components
-    |   |   contextapi.js
-    |   |   
-    |   +---backtotop
-    |   |       backtotop.js
-    |   |       
-    |   +---footer
-    |   |       footer.js
-    |   |       
-    |   +---header
-    |   |       header copy.js
-    |   |       header.js
-    |   |       
-    |   +---loader
-    |   |       loader.js
-    |   |       
-    |   +---page-header
-    |   |       pageheader.js
-    |   |       
-    |   +---seo
-    |   |       seo.js
-    |   |       
-    |   +---showcode
-    |   |       showcode.js
-    |   |       
-    |   +---sidebar
-    |   |       menuloop.js
-    |   |       nav.js
-    |   |       sidebar.js
-    |   |       
-    |   \---switcher
-    |           landing-switcher.js
-    |           switcher.js
-    |           
-    \---redux
-            action.js
-            reducer.js
-            store.js
-            
++---shared
+|   +---@spk-reusable-components
+|   |   +---reusable-dashboards
+|   |   |       spk-cards.js
+|   |   |       spk-countrycard.js
+|   |   |       spk-recentacticvecard.js
+|   |   |       
+|   |   +---reusable-pages
+|   |   |   |   spk-pricingcards.js
+|   |   |   |   spk-teamcards.js
+|   |   |   |   spkblogcards.js
+|   |   |   |   spkprofilefriendscard.js
+|   |   |   |   
+|   |   |   +---reviews
+|   |   |   |       reviewsalignmentcard.js
+|   |   |   |       reviewstyle3.js
+|   |   |   |       reviewstyle5.js
+|   |   |   |       reviewstyles2.js
+|   |   |   |       spkreviewstyle1.js
+|   |   |   |       
+|   |   |   \---timeline
+|   |   |           spk-timeline1.js
+|   |   |           spk-timeline2.js
+|   |   |           spk-timeline3.js
+|   |   |           
+|   |   +---reusable-plugins
+|   |   |       spk-apexcharts.js
+|   |   |       spk-flatpicker.js
+|   |   |       spk-lightbox.js
+|   |   |       spk-reactselect.js
+|   |   |       
+|   |   +---reusable-tables
+|   |   |       tables-component.js
+|   |   |       
+|   |   \---reusable-uielements
+|   |           spk-alert.js
+|   |           spk-badge.js
+|   |           spk-breadcrumb.js
+|   |           spk-button.js
+|   |           spk-dropdown.js
+|   |           spk-listgroup.js
+|   |           spk-progress.js
+|   |           spk-tooltips.js
+|   |           
+|   +---data
+|   |   +---dashboard
+|   |   |       salesdata.js
+|   |   |       
+|   |   +---pages
+|   |   |   |   chatdata.js
+|   |   |   |   faqsdata.js
+|   |   |   |   filemanagerdata.js
+|   |   |   |   landingdata.js
+|   |   |   |   pricingdata.js
+|   |   |   |   profiledata.js
+|   |   |   |   reviewsdata.js
+|   |   |   |   searchdata.js
+|   |   |   |   timelinedata.js
+|   |   |   |   todolistdata.js
+|   |   |   |   
+|   |   |   +---blog
+|   |   |   |       blogdata.js
+|   |   |   |       blogdetailsdata.js
+|   |   |   |       createblogdata.js
+|   |   |   |       
+|   |   |   +---email
+|   |   |   |       mailappdata.js
+|   |   |   |       mailsettingsdata.js
+|   |   |   |       
+|   |   |   \---invoice
+|   |   |           invoicelistdata.js
+|   |   |           
+|   |   \---switcherdata
+|   |           switcherdata.js
+|   |           
+|   +---firebase
+|   |       firebaseapi.js
+|   |       
+|   +---layouts-components
+|   |   |   contextapi.js
+|   |   |   
+|   |   +---backtotop
+|   |   |       backtotop.js
+|   |   |       
+|   |   +---footer
+|   |   |       footer.js
+|   |   |       
+|   |   +---header
+|   |   |       header copy.js
+|   |   |       header.js
+|   |   |       
+|   |   +---loader
+|   |   |       loader.js
+|   |   |       
+|   |   +---page-header
+|   |   |       pageheader.js
+|   |   |       
+|   |   +---seo
+|   |   |       seo.js
+|   |   |       
+|   |   +---showcode
+|   |   |       showcode.js
+|   |   |       
+|   |   +---sidebar
+|   |   |       menuloop.js
+|   |   |       nav.js
+|   |   |       sidebar.js
+|   |   |       
+|   |   \---switcher
+|   |           landing-switcher.js
+|   |           switcher.js
+|   |           
+|   \---redux
+|           action.js
+|           reducer.js
+|           store.js
+|           
+\---utils
+        excelUtils.js
+        generateExcel.js
+        generateExcel2.js
+        graphUtils.js
+        

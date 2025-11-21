@@ -1,22 +1,33 @@
 "use client";
 import Link from "next/link";
-import React, { Fragment, useEffect, useState } from "react";
-import SimpleBar from "simplebar-react";
-import { FILTERED_MENU } from "./nav";
-import Menuloop from "./menuloop";
-import store from "../../redux/store";
-import { ThemeChanger } from "../../redux/action";
 import { usePathname } from "next/navigation";
+import { Fragment, useEffect, useState } from "react";
 import { connect } from "react-redux";
-import SpkTooltips from "../../@spk-reusable-components/reusable-uielements/spk-tooltips";
+import SimpleBar from "simplebar-react";
 import nextConfig from "../../../next.config";
+import SpkTooltips from "../../@spk-reusable-components/reusable-uielements/spk-tooltips";
+import { ThemeChanger } from "../../redux/action";
+import store from "../../redux/store";
+import Menuloop from "./menuloop";
+import { filterMenu, menuCopral, menuDibartolo } from "./menus";
 
 const Sidebar = ({ local_varaiable, ThemeChanger }) => {
   let { basePath } = nextConfig;
-
-  const [menuitems, setMenuitems] = useState(FILTERED_MENU);
-
   const path = usePathname();
+
+  const [menuitems, setMenuitems] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const user = localStorage.getItem("loggedUser");
+      let menu = [];
+
+      if (user === "Copral") menu = menuCopral;
+      else if (user === "Dibartolo") menu = menuDibartolo;
+
+      setMenuitems(filterMenu(menu));
+    }
+  }, []);
 
   function closeMenu() {
     const closeMenudata = (items) => {

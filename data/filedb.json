@@ -1,0 +1,22 @@
+{
+  "Copral": [
+    {
+      "id": "APPMERCE",
+      "path": "I:\\Il mio Drive\\003_Condivisione\\Copral\\4.0\\APPMERCE-000.xlsx"
+    },
+    {
+      "id": "STORICO_TRONCATRICE",
+      "path": "I:\\Il mio Drive\\003_Condivisione\\Copral\\4.0\\STORICO_TRONCATRICE.csv"
+    },
+    {
+      "id": "STORICO_IMBALLATRICE",
+      "path": "I:\\Il mio Drive\\003_Condivisione\\Copral\\4.0\\STORICO_IMBALLATRICE.zip"
+    }
+  ],
+  "Dibartolo": [
+    {
+      "id": "ANALISI",
+      "path": "I:\\Il mio Drive\\003_Condivisione\\Dibartolo\\4.0\\Analisi\\Analisi.xlsx"
+    }
+  ]
+}

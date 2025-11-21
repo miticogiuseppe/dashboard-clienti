@@ -4,7 +4,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Dropdown, Form, ListGroup, Modal } from "react-bootstrap";
 import { ThemeChanger, removeFromCart } from "../../redux/action";
 import { connect, useDispatch, useSelector } from "react-redux";
-import { MENUITEMS } from "../sidebar/nav";
+//import { MENUITEMS } from "../sidebar/index";
 import SimpleBar from "simplebar-react";
 import { basePath } from "../../../next.config";
 import SpkButton from "../../@spk-reusable-components/reusable-uielements/spk-button";
