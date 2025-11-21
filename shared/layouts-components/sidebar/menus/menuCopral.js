@@ -1,4 +1,3 @@
-// shared/layouts-components/sidebar/menus/menuCopral.js
 import { Dashboardicon, Appsicon, Pagesicon } from "../icons";
 
 export const menuCopral = [

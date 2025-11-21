@@ -1,4 +1,3 @@
-// shared/layouts-components/sidebar/icons.js
 export const Dashboardicon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
