@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import _ from "lodash";
 import moment from "moment";
+import path from "path";
 
 const excelDateToMoment = (excelDate) => {
   // Excel conta 1 come 1 gennaio 1900, ma ha il bug del 29/02/1900
@@ -37,6 +38,17 @@ const loadSheetFromUrl = async (url, sheetName) => {
   const response = await fetch(url);
   const data = await response.arrayBuffer();
   const workbook = XLSX.read(data, { type: "array" });
+  const sheet = workbook.Sheets[sheetName];
+  return XLSX.utils.sheet_to_json(sheet);
+};
+
+const loadSheetFromFile = (relativePath, sheetName) => {
+  const filePath = path.resolve(
+    process.env.NEXT_PUBLIC_DRIVE_PATH,
+    relativePath
+  );
+  const data = fs.readFileSync(filePath);
+  const workbook = XLSX.read(data, { type: "buffer" });
   const sheet = workbook.Sheets[sheetName];
   return XLSX.utils.sheet_to_json(sheet);
 };
@@ -122,11 +134,21 @@ const extractValues = (data, col) => {
   );
 };
 
-const sumByKey = (jsonSheet, groupKey, valueKey) => {
+const sumByKey = (jsonSheet, groupKey, valueKey, fixEmpty = false) => {
+  // 1. Caso: Calcola la somma totale (groupKey è null o undefined)
+  if (!groupKey) {
+    return _.sumBy(jsonSheet, (item) => Number(item[valueKey]) || 0);
+  }
+
+  // 2. Caso: Raggruppa per chiave (Comportamento originale)
   const grouped = _.groupBy(jsonSheet, groupKey);
+
   return _.map(grouped, (items, key) => {
+    let computedKey = key;
+    if (fixEmpty && !key) computedKey = "NO REFERENCE";
+
     return {
-      [groupKey]: key,
+      [groupKey]: computedKey,
       count: _.sumBy(items, (item) => Number(item[valueKey]) || 0),
     };
   });
@@ -146,4 +168,5 @@ export {
   filterByRange,
   sumByKey,
   loadSheetFromUrl,
+  loadSheetFromFile,
 };
