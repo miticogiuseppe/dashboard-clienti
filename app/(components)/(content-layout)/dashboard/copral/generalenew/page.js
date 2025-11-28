@@ -43,6 +43,8 @@ const Ecommerce = () => {
 
   const [totalUniqueOrders, setTotalUniqueOrders] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
+  const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
 
   const tenant = "Copral";
 
@@ -102,25 +104,54 @@ const Ecommerce = () => {
         );
 
         const tableData = sortedData.slice(0, 6);
-        setRecentOrders(tableData);
+        setRecentOrders(tableData); // Raggruppa per 'descfam' e somma 'Qta da ev'
 
-        // Raggruppa per 'descfam' e somma 'Qta da ev'
         const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
 
         setSalesCategories(grouped.map((x) => x.descfam));
         setSalesSeries(grouped.map((x) => x.count));
 
         let orders = extractValues(sheetData, "Nr.ord");
-        setOrders(orders);
+        setOrders(orders); // Calcola e imposta il totale degli ordini unici (DENOMINATORE)
 
-        // 💡 NUOVA LOGICA: Calcola e imposta il totale degli ordini unici
         const uniqueOrdersCount = new Set(orders).size;
-        setTotalUniqueOrders(uniqueOrdersCount);
+        setTotalUniqueOrders(uniqueOrdersCount); // Calcola e imposta il totale dei clienti unici
 
-        // 💡 LOGICA AGGIUNTIVA: Calcola e imposta la quantità totale (se la funzione sumByKey lo permette)
-        // Ho supposto che sumByKey con keyToGroup=null restituisca la somma totale, altrimenti è necessaria una funzione di utilità separata.
+        const customerNames = extractValues(sheetData, "Ragione sociale");
+        const uniqueCustomersCount = new Set(customerNames).size;
+        setTotalUniqueCustomers(uniqueCustomersCount); // Calcola e imposta la quantità totale
+
         const totalQta = sumByKey(sheetData, null, "Qta da ev");
-        setTotalQuantity(totalQta);
+        setTotalQuantity(totalQta); // 💡 LOGICA DINAMICA PER LA PERCENTUALE (Esempio: Ordini Evasi)
+
+        // ----------------------------------------------------
+        // ----------------------------------------------------
+
+        // 1. Filtra i dati in cui "Qta da ev" è 0 (o null/vuoto)
+        // Questo identifica gli ordini che sono stati completamente evasi.
+        const completedOrdersData = sheetData.filter(
+          (item) =>
+            parseFloat(item["Qta da ev"]) === 0 ||
+            item["Qta da ev"] === null ||
+            item["Qta da ev"] === ""
+        );
+
+        // 2. Conta gli ordini unici completati (NUMERATORE)
+        const completedOrdersNumbers = extractValues(
+          completedOrdersData,
+          "Nr.ord"
+        );
+        const uniqueCompletedOrdersCount = new Set(completedOrdersNumbers).size;
+
+        // 3. Calcola la percentuale
+        let completionRate = 0;
+        if (uniqueOrdersCount > 0) {
+          completionRate =
+            (uniqueCompletedOrdersCount / uniqueOrdersCount) * 100;
+        }
+
+        // 4. Imposta lo Stato (arrotondato all'intero)
+        setOrdersCompletionRate(Math.round(completionRate));
       } catch (err) {
         console.error("Errore caricamento Excel:", err);
       }
@@ -128,7 +159,6 @@ const Ecommerce = () => {
 
     fetchData();
   }, []);
-
   const chartOptions = {
     ...Reportoptions,
     xaxis: {
@@ -143,9 +173,26 @@ const Ecommerce = () => {
       return {
         ...card,
         count: totalUniqueOrders.toLocaleString("it-IT"),
+        percentage: ordersCompletionRate,
       };
     }
-    // Restituisce le altre card invariate
+    // 💡 AGGIUNGI QUESTO: 2. Gestisce la card "Total Unique Customers"
+    if (card.title === "Total Unique Customers") {
+      // Usa il nuovo stato 'totalUniqueCustomers'
+      return {
+        ...card,
+        count: totalUniqueCustomers.toLocaleString("it-IT"),
+      };
+    }
+    // 💡 AGGIUNGI QUESTO: 3. Gestisce la card "Total Quantity" (se ne hai una)
+    if (card.title === "Total Quantity") {
+      // Usa lo stato 'totalQuantity'
+      return {
+        ...card,
+        count: totalQuantity.toLocaleString("it-IT"),
+      };
+    } // Restituisce le altre card invariate
+
     return card;
   });
 
