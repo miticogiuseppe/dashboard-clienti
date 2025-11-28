@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 const imballatricetest = {
   nome: "Imballatrice",
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
-  fileAppmerce: "/api/download-resource?id=APPMERCE",
+  fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 
   // Tenant hardcoded (Copral)
   tenant: "Copral",
