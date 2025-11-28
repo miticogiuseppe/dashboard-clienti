@@ -164,6 +164,7 @@ const Ecommerce = () => {
         title="Dashboards"
         currentpage="Ecommerce"
         activepage="Ecommerce"
+        showActions={false}
       />
       {/* <!-- End::page-header --> */}
 
