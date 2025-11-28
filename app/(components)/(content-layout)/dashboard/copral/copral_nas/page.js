@@ -15,8 +15,8 @@ const copralNasTest = {
   nome: "Troncatrice (Mecal)",
 
   // Endpoint API invece dei file statici
-  fileStorico: "/api/fetch-resource?id=STORICO_TRONCATRICE",
-  fileAppmerce: "/api/fetch-resource?id=APPMERCE",
+  fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
+  fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 
   // Tenant hardcoded (Copral)
   tenant: "Copral",

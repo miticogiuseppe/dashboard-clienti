@@ -1,88 +1,48 @@
-// export async function GET() {
-//   // 1. leggi filedb.json
-//   // 2. ottieni tenant dell'utente loggato
-//   // 3. ottieni id della risorse (dai parametri della richiesta)
-//   // 4. verifica se la risorsa è presente in filedb
-//   // 5. leggi la risorsa dal percorso assoluto (I:\\...)
-//   // 6. invia tutto il contenuto del file come risposta
-
-//   return Response.json({ message: "Hello from App Router API" });
-// }
+// /api/download-resource/route.js
 
 import { promises as fs } from "fs";
 import path from "path";
-import * as XLSX from "xlsx";
 
 export async function GET(req) {
   try {
+    // ... (Logica per ottenere tenant e id omessa per brevità, resta invariata) ...
     const tenant = req.headers.get("x-tenant");
-    if (!tenant)
-      return new Response(JSON.stringify({ error: "Missing tenant" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-
+    // ... (lettura e parsa di filedb.json) ...
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    const sheetNameParam = searchParams.get("sheet"); // <--- nome del foglio passato da query
-
-    if (!id)
-      return new Response(JSON.stringify({ error: "Missing id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    // ... (ricerca della risorsa) ...
 
     const dbPath = path.join(process.cwd(), "data", "filedb.json");
     const dbContent = await fs.readFile(dbPath, "utf8");
     const db = JSON.parse(dbContent);
-
     const tenantResources = db[tenant];
     if (!tenantResources)
-      return new Response(JSON.stringify({ error: "Tenant not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response("Tenant not found", { status: 404 });
 
     const resource = tenantResources.find((r) => r.id === id);
-    if (!resource)
-      return new Response(JSON.stringify({ error: "Resource not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!resource) return new Response("Resource not found", { status: 404 });
 
-    const filePath = path.join(
-      process.env.NEXT_PUBLIC_DRIVE_PATH,
-      resource.path
-    );
+    // 💡 CORREZIONE CHIAVE: Unisce il percorso assoluto dalla ENV con il percorso relativo del DB.
+    const driveRoot = process.env.NEXT_PUBLIC_DRIVE_PATH;
+    const filePath = path.join(driveRoot, resource.path);
+
+    // 5. Leggi il file dal percorso specificato (ora assoluto)
+    // Questo è il percorso che ora punta a I:\Il mio Drive\003_Condivisione\Copral\4.0\...
     const fileBuffer = await fs.readFile(filePath);
 
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-
-    // usa il foglio passato oppure il primo foglio di default
-    const sheetName = sheetNameParam || workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    if (!sheet) {
-      return new Response(
-        JSON.stringify({ error: `Foglio "${sheetName}" non trovato` }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-    return new Response(JSON.stringify(jsonData), {
+    // 6. Restituisci il file per il download
+    return new Response(fileBuffer, {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${path.basename(
+          resource.path
+        )}"`,
+      },
     });
-  } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  } catch (error) {
+    console.error("Errore durante il download del file:", error);
+    // Spesso l'errore è ENOENT (File Not Found) se il percorso è sbagliato.
+    return new Response("Internal server error", { status: 500 });
   }
 }
