@@ -41,14 +41,16 @@ const Spkapexcharts = ({
     },
   };
 
-  const safeSeries = Array.isArray(chartSeries)
-    ? chartSeries.map((s) => ({
-        ...s,
-        data: Array.isArray(s.data)
-          ? s.data.filter((p) => p && p.x !== undefined && p.y !== undefined)
-          : [],
-      }))
-    : [];
+  const safeSeries =
+    type === "radialBar"
+      ? chartSeries // deve rimanere [92]
+      : Array.isArray(chartSeries)
+      ? chartSeries.map((s) => ({
+          ...s,
+          data: Array.isArray(s.data) ? s.data : [],
+        }))
+      : [];
+
   console.log("chartSeries:", chartSeries);
   console.log("safeSeries:", safeSeries);
 

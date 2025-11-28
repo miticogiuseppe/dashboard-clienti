@@ -13,8 +13,8 @@ import dayjs from "dayjs";
 
 const imballatricetest = {
   nome: "Imballatrice",
-  fileStorico: "/api/fetch-resource?id=STORICO_IMBALLATRICE",
-  fileAppmerce: "/api/fetch-resource?id=APPMERCE",
+  fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
+  fileAppmerce: "/api/download-resource?id=APPMERCE",
 
   // Tenant hardcoded (Copral)
   tenant: "Copral",
@@ -121,7 +121,7 @@ export default function PaginaImballatrice() {
                 value={pickerDateTS}
               />
               <p className="text-muted mb-2">
-                Visualizzazione: ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
+                ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
                 {fmt(pickerDateTS?.[1]) || endDateTS})
               </p>
               <AppmerceChart
@@ -176,8 +176,7 @@ export default function PaginaImballatrice() {
                 value={pickerDateArt}
               />
               <p className="text-muted mb-2">
-                Visualizzazione: {periodoArt} (
-                {fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
+                {periodoArt} ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
               <AppmerceChartByArticolo

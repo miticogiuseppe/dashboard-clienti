@@ -170,7 +170,8 @@ const createOptions = (
   countArray,
   keyCol,
   formatFunc = undefined,
-  chartType = "bar"
+  chartType = "bar",
+  fillColor = "var(--primary-color)"
 ) => {
   let options = _.cloneDeep(defaultOptions);
   options.chart = {
@@ -180,6 +181,7 @@ const createOptions = (
   options.xaxis.categories = _.map(countArray, (o) =>
     o[keyCol] ? (formatFunc ? formatFunc(o[keyCol]) : o[keyCol]) : ""
   );
+  options.colors[0] = fillColor;
   return options;
 };
 

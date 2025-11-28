@@ -317,7 +317,7 @@ const Sales = () => {
                     value={pickerDateTS}
                   />
                   <p className="text-muted mb-2">
-                    Visualizzazione: ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
+                    ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
                     {fmt(pickerDateTS?.[1]) || endDateTS})
                   </p>
                   <AppmerceChart

@@ -1,6 +1,6 @@
 "use client";
 // import { MENUITEMS } from "../../../shared/layouts-components/sidebar/index";
-import store from "../../../shared/redux/store";
+import store from "../../redux/store";
 import { ClassAttributes, InputHTMLAttributes, JSX, useState } from "react";
 
 export function Dark(actionfunction, clicked) {
