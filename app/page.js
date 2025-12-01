@@ -25,7 +25,7 @@ const page = () => {
   };
 
   const RouteChange = () => {
-    router.push("/dashboard/copral/generale");
+    router.push("/dashboard/copral/generalenew");
   };
 
   // Funzione login unica (admin hardcoded + Firebase)

@@ -8,7 +8,7 @@ export const menuCopral = [
     type: "sub",
     children: [
       {
-        path: "/dashboard/copral/generale",
+        path: "/dashboard/copral/generalenew",
         title: "Generale",
         type: "link",
         ready: true,

@@ -366,15 +366,77 @@ const svg4 = (
     <path d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z"></path>
   </svg>
 );
+
+// ... (Dopo la definizione di svg4)
+
+const svg5 = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="32"
+    height="32"
+    fill="#000000" // Il tuo template usa fill sul tag SVG
+    viewBox="0 0 256 256"
+  >
+       {" "}
+    {/* Ho rimosso <rect> e ho corretto gli attributi dei path e circle.
+        Ho anche rimosso gli attributi 'stroke' e 'fill' dal contenuto,
+        lasciando che il 'fill' sul tag <svg> gestisca il colore.
+        NOTA: l'icona originale è fatta con STROKE, potresti dover
+        provare a cambiarla in "fill" per il tuo template.
+    */}
+        <circle cx="84" cy="108" r="52" opacity="0.2" />   {" "}
+    <path
+      d="M10.23,200a88,88,0,0,1,147.54,0"
+      stroke="#000000" // Manteniamo lo stroke per l'icona di "linea"
+      strokeLinecap="round" // Correzione CamelCase
+      strokeLinejoin="round" // Correzione CamelCase
+      strokeWidth="16" // Correzione CamelCase
+      fill="none" // Importante: mantieni fill="none" se è un tratto di linea
+    />
+       {" "}
+    <path
+      d="M172,160a87.93,87.93,0,0,1,73.77,40"
+      stroke="#000000"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="16"
+      fill="none"
+    />
+       {" "}
+    <circle
+      cx="84"
+      cy="108"
+      r="52"
+      stroke="#000000"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="16"
+      fill="none"
+    />
+       {" "}
+    <path
+      d="M152.69,59.7A52,52,0,1,1,172,160"
+      stroke="#000000"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="16"
+      fill="none"
+    />
+     {" "}
+  </svg>
+);
+
+// ... (Ora puoi usare svg5 nell'array Ecommercecard)
+
 export const Ecommercecard = [
   {
     id: 1,
-    title: "Total Sales",
+    title: "Total Unique Customers",
     count: "15,432",
     //inc: "Increased By",
     //percentageChange: "5.1%",
     //icon: "ti ti-trending-up",
-    svgIcon: svg1,
+    svgIcon: svg5,
     backgroundColor: "primary svg-white",
     color: "success",
   },
