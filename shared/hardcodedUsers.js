@@ -2,7 +2,7 @@ export const hardcodedUsers = [
   {
     email: "Copral",
     password: "Copral2025!",
-    route: "/dashboard/copral/generale",
+    route: "/dashboard/copral/generalenew",
     name: "Copral",
   },
   {
