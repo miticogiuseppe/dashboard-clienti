@@ -29,6 +29,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Card, Col, Dropdown, Pagination, Row } from "react-bootstrap";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { extractValues } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
+
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
@@ -40,11 +42,11 @@ const Ecommerce = () => {
   const [salesSeries, setSalesSeries] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [orders, setOrders] = useState([]);
-
   const [totalUniqueOrders, setTotalUniqueOrders] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const tenant = "Copral";
 
@@ -154,6 +156,8 @@ const Ecommerce = () => {
         setOrdersCompletionRate(Math.round(completionRate));
       } catch (err) {
         console.error("Errore caricamento Excel:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -205,6 +209,7 @@ const Ecommerce = () => {
   return (
     <Fragment>
       {/* <!-- Start::page-header --> */}
+      <Preloader show={isLoading} />
       <Seo title="Dashboards-Ecommerce" />
 
       <Pageheader
