@@ -56,9 +56,8 @@ const Ecommerce = () => {
       return new Date(0);
     }
 
-    // 1. CASO: E' un NUMERO SERIALE Excel (il tuo 45853 è questo)
+    // 1. CASO: E' un NUMERO SERIALE Excel
     if (typeof dateValue === "number" && dateValue > 40000) {
-      // 45853 corrisponde a 12/11/2025
       const excelEpoch = new Date("1899-12-30");
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
       const date = new Date(
@@ -124,13 +123,9 @@ const Ecommerce = () => {
         setTotalUniqueCustomers(uniqueCustomersCount); // Calcola e imposta la quantità totale
 
         const totalQta = sumByKey(sheetData, null, "Qta da ev");
-        setTotalQuantity(totalQta); // 💡 LOGICA DINAMICA PER LA PERCENTUALE (Esempio: Ordini Evasi)
+        setTotalQuantity(totalQta); // Calcola e imposta la percentuale di completamento degli ordini
 
-        // ----------------------------------------------------
-        // ----------------------------------------------------
-
-        // 1. Filtra i dati in cui "Qta da ev" è 0 (o null/vuoto)
-        // Questo identifica gli ordini che sono stati completamente evasi.
+        // Ordini che sono stati evasi.
         const completedOrdersData = sheetData.filter(
           (item) =>
             parseFloat(item["Qta da ev"]) === 0 ||
@@ -171,7 +166,7 @@ const Ecommerce = () => {
   };
 
   const dynamicCards = Ecommercecard.map((card) => {
-    // Trova la card "Total Orders" (supponendo che sia l'unica con quel titolo)
+    // Trova la card "Total Orders"
     if (card.title === "Total Orders") {
       // Restituisce una nuova card con il conteggio aggiornato dallo stato
       return {
@@ -180,7 +175,7 @@ const Ecommerce = () => {
         percentage: ordersCompletionRate,
       };
     }
-    // 💡 AGGIUNGI QUESTO: 2. Gestisce la card "Total Unique Customers"
+
     if (card.title === "Total Unique Customers") {
       // Usa il nuovo stato 'totalUniqueCustomers'
       return {
@@ -188,20 +183,18 @@ const Ecommerce = () => {
         count: totalUniqueCustomers.toLocaleString("it-IT"),
       };
     }
-    // 💡 AGGIUNGI QUESTO: 3. Gestisce la card "Total Quantity" (se ne hai una)
+
     if (card.title === "Total Quantity") {
       // Usa lo stato 'totalQuantity'
       return {
         ...card,
         count: totalQuantity.toLocaleString("it-IT"),
       };
-    } // Restituisce le altre card invariate
+    }
 
     return card;
   });
 
-  // Aggiungi qui un controllo per la Card dei "Total Orders" nel box del grafico grande
-  // Siccome la hai anche nel box grande qui sotto, è una ripetizione del dato (ma lo gestiamo)
   const totalOrdersCardData =
     dynamicCards.find((c) => c.title === "Total Orders") || {};
   // La proprietà 'count' di questo oggetto è il valore formattato.

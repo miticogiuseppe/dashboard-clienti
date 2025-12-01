@@ -717,9 +717,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     }
   }
   const handleClick = (event) => {
-    // Your logic here
-    event.preventDefault(); // Prevents the default anchor behavior (navigation)
-    // ... other logic you want to perform on click
+    event.preventDefault();
   };
   return (
     <Fragment>
