@@ -735,7 +735,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
         onMouseLeave={() => Outhover()}
       >
         <div className="main-sidebar-header">
-          <Link href="/dashboard/sales" className="header-logo">
+          <Link href="https://www.alfredsupply.it/" className="header-logo">
             <img
               src={`${
                 process.env.NODE_ENV === "production" ? basePath : ""

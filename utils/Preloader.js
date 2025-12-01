@@ -15,7 +15,7 @@ export default (props) => {
         className="loader-element animate__animated animate__jackInTheBox"
         src={REACT_LOGO_PATH}
         height={80}
-        alt="React Logo" // È buona pratica aggiungere sempre l'alt
+        alt="React Logo"
       />
     </div>
   );
