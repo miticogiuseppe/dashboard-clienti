@@ -172,7 +172,7 @@ export default function PaginaCopralNas() {
                 value={pickerDateArt}
               />
               <p className="text-muted mb-2">
-                {periodoArt} ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
+                ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
               <AppmerceChartByArticolo
