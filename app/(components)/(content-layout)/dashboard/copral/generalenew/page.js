@@ -234,7 +234,7 @@ const Ecommerce = () => {
             <Col xl={9}>
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">Sales Report</div>
+                  <div className="card-title">Report</div>
                   <div className="d-flex gap-2">
                     <div className="btn btn-sm btn-outline-light">Today</div>
                     <div className="btn btn-sm btn-outline-light">Weakly</div>
