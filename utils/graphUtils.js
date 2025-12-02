@@ -85,6 +85,11 @@ const defaultOptions = {
         cssClass: "apexcharts-yaxis-label",
       },
     },
+    labels: {
+      formatter: function (y) {
+        return y.toFixed(0) + "";
+      },
+    },
   },
   xaxis: {
     type: "category",
@@ -117,7 +122,7 @@ const defaultOptions = {
       offsetY: 0,
     },
     labels: {
-      rotate: -90,
+      rotate: -45,
       style: {
         colors: "#8c9097",
         fontSize: "11px",
@@ -156,4 +161,13 @@ const createOptions = (
   return options;
 };
 
-export { createSeries, createOptions };
+const emptySeries = () => {
+  return [];
+};
+const emptyOptions = () => {
+  let options = _.cloneDeep(defaultOptions);
+  options.xaxis.categories = [];
+  return options;
+};
+
+export { createSeries, createOptions, emptySeries, emptyOptions };
