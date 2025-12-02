@@ -18,7 +18,6 @@ const copralNasTest = {
   fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 
-  // Tenant hardcoded (Copral)
   tenant: "Copral",
 
   appmerce: {
@@ -172,7 +171,7 @@ export default function PaginaCopralNas() {
                 value={pickerDateArt}
               />
               <p className="text-muted mb-2">
-                {periodoArt} ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
+                ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
               <AppmerceChartByArticolo

@@ -426,8 +426,6 @@ const svg5 = (
   </svg>
 );
 
-// ... (Ora puoi usare svg5 nell'array Ecommercecard)
-
 export const Ecommercecard = [
   {
     id: 1,

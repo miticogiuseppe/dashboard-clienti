@@ -1,7 +1,7 @@
 "use client";
 import OrderCalendar from "@/components/OrderCalendar";
-import { useEffect, useState } from "react";
 import { loadOrdersFromExcel } from "@/utils/excelUtils";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [orders, setOrders] = useState([]);
@@ -16,16 +16,10 @@ export default function Home() {
 
   useEffect(() => {
     // Carica automaticamente il file Excel
-    // console.log("sto caricando il file excel");
     const fetchOrders = async () => {
       const response = await fetch("/data/APPMERCE-000.xlsx");
       const blob = await response.blob();
       const newOrders = await loadOrdersFromExcel(blob);
-
-      // console.log(
-      //   "Ordini caricati da public/data/APPMERCE-000.xlsx",
-      //   newOrders
-      // );
 
       setOrders(newOrders);
     };

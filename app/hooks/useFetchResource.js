@@ -30,7 +30,7 @@ export function useFetchResource() {
 
       const blob = await res.blob();
 
-      // Estrai il filename dal header Content-Disposition
+      // Estrai il filename da header Content-Disposition
       const disposition = res.headers.get("Content-Disposition");
       let filename = "download.xlsx";
       if (disposition && disposition.includes("filename=")) {

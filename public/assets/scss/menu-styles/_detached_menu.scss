@@ -1,4 +1,4 @@
-@use '../variables';
+@use "../variables";
 /* Start:: detached_menu */
 [data-vertical-style="detached"] {
   @media (min-width: 1600px) {
@@ -162,16 +162,16 @@
             padding: 1.2rem 1.65rem;
             position: relative;
             &:before {
-                content: "\f3c2";
-                font-family: remixicon !important;
-                position: absolute;
-                font-size: 8px;
-                inset-inline-start: 2.25rem;
-                inset-inline-end: 0;
-                inset-block-start: 1.25rem;
-                inset-block-end: 0;
-                opacity: 1;
-                color: variables.$menu-prime-color;
+              content: "\f3c2";
+              font-family: remixicon !important;
+              position: absolute;
+              font-size: 8px;
+              inset-inline-start: 2.25rem;
+              inset-inline-end: 0;
+              inset-block-start: 1.25rem;
+              inset-block-end: 0;
+              opacity: 1;
+              color: variables.$menu-prime-color;
             }
           }
         }
