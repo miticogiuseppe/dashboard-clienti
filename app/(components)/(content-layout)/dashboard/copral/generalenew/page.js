@@ -9,7 +9,7 @@ import {
 } from "@/shared/data/dashboard/ecommercedata";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { extractValues, sumByKey } from "@/utils/excelUtils";
+import { extractValues, sumByKey, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -23,17 +23,17 @@ const Spkapexcharts = dynamic(
 );
 
 const Ecommerce = () => {
+  const tenant = "Copral";
+
+  const [isLoading, setIsLoading] = useState(true);
+
   const [salesCategories, setSalesCategories] = useState([]);
   const [salesSeries, setSalesSeries] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [totalUniqueOrders, setTotalUniqueOrders] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const tenant = "Copral";
 
   const parseDate = (dateValue) => {
     if (!dateValue || dateValue === 0) {
@@ -75,65 +75,62 @@ const Ecommerce = () => {
     return new Date(0);
   };
 
+  let a = 1;
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // fetch del foglio Excel
         const res = await fetch(
           "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
           {
             headers: { "x-tenant": tenant },
           }
         );
-        const sheetData = await res.json();
-        const sortedData = sheetData.sort(
-          (a, b) => parseDate(b["Data ord"]) - parseDate(a["Data ord"])
-        );
+        let sheetData = await res.json();
+        sheetData = parseDates(sheetData, ["Data ord"]);
 
-        const tableData = sortedData.slice(0, 6);
-        setRecentOrders(tableData); // Raggruppa per 'descfam' e somma 'Qta da ev'
-
-        const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
-
-        setSalesCategories(grouped.map((x) => x.descfam));
-        setSalesSeries(grouped.map((x) => x.count));
-
+        // ottiene tutti i numeri d'ordine (univoci)
         let orders = extractValues(sheetData, "Nr.ord");
-        setOrders(orders); // Calcola e imposta il totale degli ordini unici (DENOMINATORE)
+        setOrders(orders);
 
-        const uniqueOrdersCount = new Set(orders).size;
-        setTotalUniqueOrders(uniqueOrdersCount); // Calcola e imposta il totale dei clienti unici
-
-        const customerNames = extractValues(sheetData, "Ragione sociale");
-        const uniqueCustomersCount = new Set(customerNames).size;
-        setTotalUniqueCustomers(uniqueCustomersCount); // Calcola e imposta la quantità totale
-
-        const totalQta = sumByKey(sheetData, null, "Qta da ev");
-        setTotalQuantity(totalQta); // Calcola e imposta la percentuale di completamento degli ordini
-
-        // Ordini che sono stati evasi.
+        // ottiene percentuale ordini evasi
         const completedOrdersData = sheetData.filter(
           (item) =>
             parseFloat(item["Qta da ev"]) === 0 ||
             item["Qta da ev"] === null ||
             item["Qta da ev"] === ""
         );
-
-        // 2. Conta gli ordini unici completati (NUMERATORE)
-        const completedOrdersNumbers = extractValues(
+        const uniqueCompletedOrdersCount = extractValues(
           completedOrdersData,
           "Nr.ord"
-        );
-        const uniqueCompletedOrdersCount = new Set(completedOrdersNumbers).size;
-
-        // 3. Calcola la percentuale
-        let completionRate = 0;
-        if (uniqueOrdersCount > 0) {
-          completionRate =
-            (uniqueCompletedOrdersCount / uniqueOrdersCount) * 100;
-        }
-
-        // 4. Imposta lo Stato (arrotondato all'intero)
+        ).length;
+        let completionRate =
+          (uniqueCompletedOrdersCount / uniqueOrdersCount) * 100;
         setOrdersCompletionRate(Math.round(completionRate));
+
+        // ottiene i 6 ordini più recenti
+        const sortedData = sheetData.sort((a, b) =>
+          a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+        );
+        const tableData = sortedData.slice(0, 6);
+        setRecentOrders(tableData);
+
+        // calcola sommatorie 'Qta da ev' raggruppate per 'descfam'
+        const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
+        setSalesCategories(grouped.map((x) => x.descfam));
+        setSalesSeries(grouped.map((x) => x.count));
+
+        // Calcola e imposta il totale dei clienti unici
+        const customerNames = extractValues(
+          sheetData,
+          "Ragione sociale"
+        ).length;
+        setTotalUniqueCustomers(uniqueCustomersCount);
+
+        // calcola somma delle qta da evadere
+        const totalQta = sumByKey(sheetData, null, "Qta da ev");
+        setTotalQuantity(totalQta);
       } catch (err) {
         console.error("Errore caricamento Excel:", err);
       } finally {
@@ -142,7 +139,7 @@ const Ecommerce = () => {
     };
 
     fetchData();
-  }, []);
+  }, [ciccio]);
   const chartOptions = {
     ...Reportoptions,
     xaxis: {
@@ -156,7 +153,7 @@ const Ecommerce = () => {
       // Restituisce una nuova card con il conteggio aggiornato dallo stato
       return {
         ...card,
-        count: totalUniqueOrders.toLocaleString("it-IT"),
+        count: orders.length.toLocaleString("it-IT"),
         percentage: ordersCompletionRate,
       };
     }
@@ -275,7 +272,7 @@ const Ecommerce = () => {
 
                           <td>
                             {row["Data ord"]
-                              ? parseDate(row["Data ord"]).toLocaleDateString()
+                              ? row["Data ord"].toDate().toLocaleDateString()
                               : "N/A"}
                           </td>
                         </tr>
@@ -295,7 +292,7 @@ const Ecommerce = () => {
                     <div>
                       <p className="mb-1">Ordini Totali Unici</p>
                       <h4 className="text-primary mb-0">
-                        {totalUniqueOrders.toLocaleString("it-IT")}
+                        {orders.length.toLocaleString("it-IT")}
                       </h4>
                     </div>
                   </div>
