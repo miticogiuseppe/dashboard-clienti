@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import PeriodSelector from "@/components/PeriodSelector";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -32,6 +33,8 @@ const Ecommerce = () => {
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const tenant = "Copral";
 
@@ -89,10 +92,21 @@ const Ecommerce = () => {
           (a, b) => parseDate(b["Data ord"]) - parseDate(a["Data ord"])
         );
 
+        let filteredData = sheetData;
+        if (startDate && endDate) {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+
+          filteredData = sheetData.filter((item) => {
+            const d = parseDate(item["Data ord"]);
+            return d >= start && d <= end;
+          });
+        }
+
         const tableData = sortedData.slice(0, 6);
         setRecentOrders(tableData); // Raggruppa per 'descfam' e somma 'Qta da ev'
 
-        const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
+        const grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
 
         setSalesCategories(grouped.map((x) => x.descfam));
         setSalesSeries(grouped.map((x) => x.count));
@@ -142,7 +156,7 @@ const Ecommerce = () => {
     };
 
     fetchData();
-  }, []);
+  }, [startDate, endDate]);
   const chartOptions = {
     ...Reportoptions,
     xaxis: {
@@ -225,10 +239,19 @@ const Ecommerce = () => {
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Report</div>
-                  <div className="d-flex gap-2">
-                    <div className="btn btn-sm btn-outline-light">Today</div>
-                    <div className="btn btn-sm btn-outline-light">Weakly</div>
-                    <div className="btn btn-sm btn-light">Yearly</div>
+                  <div className="d-flex align-items-center">
+                    <PeriodSelector
+                      onChange={(range) => {
+                        console.log(
+                          "Start:",
+                          range.startDate,
+                          "End:",
+                          range.endDate
+                        );
+                        setStartDate(range.startDate);
+                        setEndDate(range.endDate);
+                      }}
+                    />
                   </div>
                 </Card.Header>
                 <Card.Body className="pb-2">
