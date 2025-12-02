@@ -166,7 +166,7 @@ const Ecommerce = () => {
       };
     }
 
-    if (card.title === "Totale Clienti") {
+    if (card.title === "Totale clienti") {
       // Usa il nuovo stato 'totalUniqueCustomers'
       return {
         ...card,
@@ -262,14 +262,21 @@ const Ecommerce = () => {
                       tableClass="text-nowrap table-hover"
                       header={[
                         { title: "Numero Ordine" },
+                        { title: "Sezione" },
                         { title: "Ragione Sociale" },
-                        { title: "Data Acquisto" },
+                        { title: "Agente" },
+                        { title: "Data ordine" },
                       ]}
                     >
                       {recentOrders.map((row, index) => (
                         <tr key={index}>
+                          {/* Numero Ordine */}
                           <td>{row["Nr.ord"] || "N/A"}</td>
 
+                          {/* Sezione */}
+                          <td>{row["Sez"] ?? "N/A"}</td>
+
+                          {/* Ragione Sociale */}
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="fw-semibold">
@@ -278,6 +285,10 @@ const Ecommerce = () => {
                             </div>
                           </td>
 
+                          {/* Agente */}
+                          <td>{row["Des. Agente"] || "N/A"}</td>
+
+                          {/* Data Ordine */}
                           <td>
                             {row["Data ord"]
                               ? parseDate(row["Data ord"]).toLocaleDateString()
