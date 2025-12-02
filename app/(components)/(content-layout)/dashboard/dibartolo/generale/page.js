@@ -4,26 +4,13 @@ const Spkapexcharts = dynamic(
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
   { ssr: false }
 );
-import moment from "moment";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
-import { Card, Col, Dropdown, Row } from "react-bootstrap";
+import AppmerceChart from "@/components/AppmerceChart";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
-import SpkCountrycard from "@/shared/@spk-reusable-components/reusable-dashboards/spk-countrycard";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
-import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
 import SpkBreadcrumb from "@/shared/@spk-reusable-components/reusable-uielements/spk-breadcrumb";
 import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import {
-  Cardsdata,
-  Countrydata,
-  Recentorders,
-  Staticoptions,
-  Staticseries,
-} from "@/shared/data/dashboard/salesdata";
+import { Cardsdata, Recentorders } from "@/shared/data/dashboard/salesdata";
 import Seo from "@/shared/layouts-components/seo/seo";
 import {
   extractValues,
@@ -33,12 +20,14 @@ import {
   loadSheet,
   orderSheet,
   parseDates,
-  sheetCount,
   sumByKey,
 } from "@/utils/excelUtils";
-import { createOptions, createSeries } from "@/utils/graphUtils";
 import dayjs from "dayjs";
-import AppmerceChart from "@/components/AppmerceChart";
+import moment from "moment";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { Fragment, useEffect, useState } from "react";
+import { Card, Col, Dropdown, Row } from "react-bootstrap";
 
 // Utility per calcolare range date
 const calcolaRange = (periodo) => {
@@ -152,9 +141,7 @@ const Generale = () => {
     const options = {
       chart: { type: "bar" },
       dataLabels: { enabled: true },
-      xaxis: {
-        // categorie prese direttamente da `x` in data
-      },
+      xaxis: {},
     };
 
     setGraphSeries(series);

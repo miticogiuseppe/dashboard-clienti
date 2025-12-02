@@ -18,7 +18,6 @@ const copralNasTest = {
   fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 
-  // Tenant hardcoded (Copral)
   tenant: "Copral",
 
   appmerce: {
