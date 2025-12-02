@@ -145,11 +145,16 @@ const Ecommerce = () => {
     xaxis: {
       categories: salesCategories,
     },
+    yaxis: {
+      labels: {
+        formatter: (value) => Number(value.toFixed(0)),
+      },
+    },
   };
 
   const dynamicCards = Ecommercecard.map((card) => {
-    // Trova la card "Total Orders"
-    if (card.title === "Total Orders") {
+    // Trova la card "Totale ordini"
+    if (card.title === "Totale ordini") {
       // Restituisce una nuova card con il conteggio aggiornato dallo stato
       return {
         ...card,
@@ -158,7 +163,7 @@ const Ecommerce = () => {
       };
     }
 
-    if (card.title === "Total Unique Customers") {
+    if (card.title === "Totale Clienti") {
       // Usa il nuovo stato 'totalUniqueCustomers'
       return {
         ...card,
@@ -178,7 +183,7 @@ const Ecommerce = () => {
   });
 
   const totalOrdersCardData =
-    dynamicCards.find((c) => c.title === "Total Orders") || {};
+    dynamicCards.find((c) => c.title === "Totale ordini") || {};
   // La proprietà 'count' di questo oggetto è il valore formattato.
 
   return (
@@ -285,7 +290,7 @@ const Ecommerce = () => {
             <div className="col-xxl-4 col-xl-5">
               <div className="card custom-card">
                 <div className="card-header justify-content-between">
-                  <div className="card-title">Total Orders</div>
+                  <div className="card-title">Totale ordini</div>
                 </div>
                 <div className="card-body">
                   <div className="d-flex justify-content-center align-items-center text-center bg-light p-3 rounded-1 order-content">
