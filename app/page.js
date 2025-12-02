@@ -93,70 +93,12 @@ const page = () => {
                     id="left-tabs-example"
                     defaultActiveKey="react"
                   >
-                    {/* <Nav
-                      variant="pills"
-                      className="justify-content-center authentication-tabs"
-                    >
-                      <Nav.Item className="d-none">
-                        <Nav.Link eventKey="react">
-                          <img
-                            src={`${
-                              process.env.NODE_ENV === "production"
-                                ? basePath
-                                : ""
-                            }/assets/images/brand-logos/nextjs.png`}
-                            alt="logo"
-                            className="avatar avatar-sm"
-                          />
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item className="d-none">
-                        <Nav.Link eventKey="firebase">
-                          <img
-                            src={`${
-                              process.env.NODE_ENV === "production"
-                                ? basePath
-                                : ""
-                            }/assets/images/brand-logos/firbase.png`}
-                            alt="logo"
-                            className="avatar avatar-sm"
-                          />
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav> */}
                     <Tab.Content>
                       {/* React Tab (Hardcoded admin + Firebase login) */}
                       <Tab.Pane eventKey="react" className="border-0">
                         <Card.Body>
                           <p className="h5 mb-2 text-center">Sign In</p>
-                          {/*  <p className="mb-4 text-muted op-7 fw-normal text-center">
-                            Welcome back Henry !
-                          </p>
-                          <div className="d-flex mb-3 justify-content-between gap-2 flex-wrap flex-lg-nowrap">
-                            <SpkButton
-                              Buttonvariant=""
-                              Size="lg"
-                              Customclass="btn-light-ghost border d-flex align-items-center justify-content-center flex-fill bg-light"
-                              Buttontype="button"
-                            >
-                              <span className="avatar avatar-xs flex-shrink-0">
-                                <img
-                                  src={`${
-                                    process.env.NODE_ENV === "production"
-                                      ? basePath
-                                      : ""
-                                  }/assets/images/media/apps/google.png`}
-                                  alt=""
-                                />
-                              </span>
-                              <span className="lh-1 ms-2 fs-13 text-default">
-                                Signup with Google
-                              </span>
-                            </SpkButton>
-                          </div> 
-                          <div className="text-center my-3 authentication-barrier">
-                            <span>OR</span>
-                          </div> */}
+
                           <div className="row gy-3">
                             {err && <SpkAlert variant="danger">{err}</SpkAlert>}
                             <Col xl={12}>
