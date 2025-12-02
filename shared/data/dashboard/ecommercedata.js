@@ -150,7 +150,7 @@ export const Reportoptions = {
   },
 };
 
-//Total Orders
+//Totale ordini
 export const Orderseries = [92];
 export const Orderoptions = {
   chart: {
@@ -429,7 +429,7 @@ const svg5 = (
 export const Ecommercecard = [
   {
     id: 1,
-    title: "Total Unique Customers",
+    title: "Totale Clienti",
     count: "15,432",
     //inc: "Increased By",
     //percentageChange: "5.1%",
@@ -462,7 +462,7 @@ export const Ecommercecard = [
   // },
   {
     id: 4,
-    title: "Total Orders",
+    title: "Totale ordini",
     count: "",
     // inc: "Increased By",
     //percentageChange: "2.3%",

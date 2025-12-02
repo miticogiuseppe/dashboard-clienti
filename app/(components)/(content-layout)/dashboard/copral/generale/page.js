@@ -357,7 +357,7 @@ const Sales = () => {
                     <div className="flex-fill d-flex align-items-start justify-content-between">
                       <div>
                         <span className="fs-11 mb-1 d-block fw-medium">
-                          TOTAL ORDERS
+                          Totale ordini
                         </span>
                         <div className="d-flex align-items-center justify-content-between">
                           <h4 className="mb-0 d-flex align-items-center">
