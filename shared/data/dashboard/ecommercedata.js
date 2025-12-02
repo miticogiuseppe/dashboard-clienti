@@ -150,7 +150,7 @@ export const Reportoptions = {
   },
 };
 
-//Total Orders
+//Totale ordini
 export const Orderseries = [92];
 export const Orderoptions = {
   chart: {
@@ -429,46 +429,24 @@ const svg5 = (
 export const Ecommercecard = [
   {
     id: 1,
-    title: "Total Unique Customers",
-    count: "15,432",
-    //inc: "Increased By",
-    //percentageChange: "5.1%",
-    //icon: "ti ti-trending-up",
-    svgIcon: svg5,
-    backgroundColor: "primary svg-white",
-    color: "success",
-  },
-  // {
-  //   id: 2,
-  //   title: "Revenue",
-  //   count: "$245,147",
-  //   inc: "Increased By",
-  //   percentageChange: "0.6%",
-  //   icon: "ti ti-trending-up",
-  //   svgIcon: svg2,
-  //   backgroundColor: "primary1 svg-white",
-  //   color: "success",
-  // },
-  // {
-  //   id: 3,
-  //   title: "Average Order Value",
-  //   count: "$120",
-  //   inc: "Decreased By",
-  //   percentageChange: "1.08%",
-  //   icon: "ti ti-trending-down",
-  //   svgIcon: svg3,
-  //   backgroundColor: "primary2 svg-white",
-  //   color: "danger",
-  // },
-  {
-    id: 4,
-    title: "Total Orders",
+    title: "Totale ordini",
     count: "",
     // inc: "Increased By",
     //percentageChange: "2.3%",
     //icon: "ti ti-trending-up",
     svgIcon: svg4,
     backgroundColor: "primary3 svg-white",
+    color: "success",
+  },
+  {
+    id: 2,
+    title: "Totale Clienti",
+    count: "15,432",
+    //inc: "Increased By",
+    //percentageChange: "5.1%",
+    //icon: "ti ti-trending-up",
+    svgIcon: svg5,
+    backgroundColor: "primary svg-white",
     color: "success",
   },
 ];

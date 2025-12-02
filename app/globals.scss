@@ -29,13 +29,11 @@
 }
 .preloader {
   //per desktop e tablet
-  position: fixed; /* CRUCIALE per la copertura dello schermo */
-  top: 68px; /* Considera l'altezza dell'header se presente */
-  left: 240px; /* Considera la larghezza della sidebar se presente */
-  width: calc(
-    100% - 240px
-  ); /* Considera la larghezza della sidebar se presente */
-  height: calc(100vh - 68px); /* Considera l'altezza dell'header se presente */
+  position: fixed;
+  top: 68px;
+  left: 240px;
+  width: calc(100% - 240px);
+  height: calc(100vh - 68px);
   z-index: 9999;
   background-color: #f7f7f9;
   display: flex;
@@ -47,26 +45,17 @@
   visibility: visible;
 }
 
-/* Questa è la regola che NASCONDE l'elemento, usando la classe che il tuo JS applica */
 .preloader.show {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Stili Mobile (quando la sidebar è nascosta/collassata) */
 @media (max-width: 767px) {
   .preloader {
-    /* Torna a sinistra */
     left: 0;
-
-    /* Torna a larghezza totale dello schermo */
     width: 100%;
-
-    /* Mantieni il TOP sotto l'header */
     top: 68px;
-
-    /* Mantieni l'altezza corretta */
     height: calc(100vh - 68px);
   }
 }
