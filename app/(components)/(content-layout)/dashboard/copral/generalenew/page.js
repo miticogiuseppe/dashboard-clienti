@@ -270,13 +270,10 @@ const Ecommerce = () => {
                     >
                       {recentOrders.map((row, index) => (
                         <tr key={index}>
-                          {/* Numero Ordine */}
                           <td>{row["Nr.ord"] || "N/A"}</td>
 
-                          {/* Sezione */}
                           <td>{row["Sez"] ?? "N/A"}</td>
 
-                          {/* Ragione Sociale */}
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="fw-semibold">
@@ -285,10 +282,8 @@ const Ecommerce = () => {
                             </div>
                           </td>
 
-                          {/* Agente */}
                           <td>{row["Des. Agente"] || "N/A"}</td>
 
-                          {/* Data Ordine */}
                           <td>
                             {row["Data ord"]
                               ? parseDate(row["Data ord"]).toLocaleDateString()
