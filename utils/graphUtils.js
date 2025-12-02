@@ -1,68 +1,79 @@
 const defaultOptions = {
   chart: {
-    redrawOnWindowResize: true,
-    height: 315,
-    type: "bar",
+    height: 404,
     toolbar: {
       show: false,
     },
     dropShadow: {
       enabled: true,
       enabledOnSeries: undefined,
-      top: 7,
+      top: 10,
       left: 0,
       blur: 1,
-      color: ["transparent", "transparent", "rgb(227, 84, 212)"],
-      opacity: 0.05,
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: "18%",
-      borderRadius: 2,
+      color: "rgba(0, 0, 0, 0.1)",
+      opacity: 0.3,
     },
   },
   grid: {
-    borderColor: "#f1f1f1",
-    strokeDashArray: 3,
+    show: true,
+    borderColor: "rgba(119, 119, 142, 0.1)",
+    strokeDashArray: 4,
   },
   dataLabels: {
     enabled: false,
   },
   stroke: {
-    width: [0, 2, 2],
-    curve: "smooth",
+    width: [1.5, 1.5, 1],
+    curve: ["smooth", "straight"],
+    dashArray: [4, 4, 0],
   },
   legend: {
     show: true,
-    fontSize: "12px",
-    position: "bottom",
+    position: "top",
     horizontalAlign: "center",
-    fontWeight: 500,
-    height: 40,
-    offsetX: 0,
-    offsetY: 10,
+    fontWeight: 600,
+    fontSize: "11px",
+    tooltipHoverFormatter: function (val, opts) {
+      return (
+        val +
+        " - " +
+        opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] +
+        ""
+      );
+    },
     labels: {
-      colors: "#9ba5b7",
+      colors: "#74767c",
     },
     markers: {
-      width: 7,
-      height: 7,
-      shape: "circle",
-      size: 3.5,
+      width: 8,
+      height: 8,
+      size: 4,
       strokeWidth: 0,
-      strokeColor: "#fff",
-      fillColors: undefined,
       radius: 12,
       offsetX: 0,
       offsetY: 0,
     },
   },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      borderRadius: 6,
+      borderRadiusApplication: "all",
+      borderRadiusWhenStacked: "last",
+      columnWidth: "15%",
+    },
+  },
+  fill: {
+    type: ["soild", "soild", "soild"],
+    gradient: {
+      opacityFrom: 0.6,
+      opacityTo: 1,
+    },
+  },
   colors: [
+    "rgba(227, 84, 212, 1)",
+    "rgba(255, 93, 159, 0.06)",
     "var(--primary-color)",
-    "rgba(119, 119, 142, 0.05)",
-    "rgb(227, 84, 212)",
   ],
   yaxis: {
     title: {
@@ -72,18 +83,6 @@ const defaultOptions = {
         fontFamily: "poppins, sans-serif",
         fontWeight: 600,
         cssClass: "apexcharts-yaxis-label",
-      },
-    },
-    labels: {
-      formatter: function (y) {
-        return y.toFixed(0) + "";
-      },
-      show: true,
-      style: {
-        colors: "#8c9097",
-        fontSize: "11px",
-        fontWeight: 600,
-        cssClass: "apexcharts-xaxis-label",
       },
     },
   },
@@ -97,7 +96,7 @@ const defaultOptions = {
       "May",
       "Jun",
       "Jul",
-      "Agu",
+      "Aug",
       "Sep",
       "Oct",
       "Nov",
@@ -127,40 +126,12 @@ const defaultOptions = {
       },
     },
   },
-  tooltip: {
-    shared: true,
-    intersect: false,
-    y: {
-      formatter: function (y) {
-        if (typeof y !== "undefined") {
-          return y.toFixed(0);
-        }
-        return y;
-      },
-    },
-  },
-  fill: {
-    colors: undefined,
-    opacity: 0.025,
-    type: ["solid", "solid"],
-    gradient: {
-      shade: "light",
-      type: "horizontal",
-      shadeIntensity: 0.5,
-      gradientToColors: ["#fdc530"],
-      inverseColors: true,
-      opacityFrom: 0.35,
-      opacityTo: 0.05,
-      stops: [0, 50, 100],
-      colorStops: ["#fdc530"],
-    },
-  },
 };
 
-const createSeries = (countArray) => {
+const createSeries = (countArray, name = "Counters") => {
   return [
     {
-      name: "Counters",
+      name: name,
       type: "column",
       data: _.map(countArray, "count"),
     },

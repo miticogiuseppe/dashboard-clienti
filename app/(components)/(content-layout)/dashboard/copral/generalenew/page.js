@@ -10,10 +10,11 @@ import {
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { extractValues, sumByKey, parseDates } from "@/utils/excelUtils";
+import { createSeries, createOptions } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
 const Spkapexcharts = dynamic(
@@ -27,125 +28,64 @@ const Ecommerce = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const [salesCategories, setSalesCategories] = useState([]);
-  const [salesSeries, setSalesSeries] = useState([]);
+  // dati grafici
+  const [chartOptions, setChartOptions] = useState(undefined);
+  const [chartSeries, setChartSeries] = useState(undefined);
+
   const [recentOrders, setRecentOrders] = useState([]);
   const [orders, setOrders] = useState([]);
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
 
-  const parseDate = (dateValue) => {
-    if (!dateValue || dateValue === 0) {
-      // Gestione di valori nulli, undefined o 0
-      return new Date(0);
-    }
-
-    // 1. CASO: E' un NUMERO SERIALE Excel
-    if (typeof dateValue === "number" && dateValue > 40000) {
-      const excelEpoch = new Date("1899-12-30");
-      const millisecondsPerDay = 24 * 60 * 60 * 1000;
-      const date = new Date(
-        excelEpoch.getTime() + dateValue * millisecondsPerDay
+  const getData = useCallback(async () => {
+    try {
+      // fetch del foglio Excel
+      const res = await fetch(
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        {
+          headers: { "x-tenant": tenant },
+        }
       );
+      let sheetData = await res.json();
+      sheetData = parseDates(sheetData, ["Data ord"]);
 
-      // Controllo di validità
-      if (isNaN(date.getTime())) {
-        return new Date(0);
-      }
-      return date;
+      // ottiene tutti i numeri d'ordine (univoci)
+      let orders = extractValues(sheetData, "Nr.ord");
+      setOrders(orders);
+
+      // ottiene i 6 ordini più recenti
+      const sortedData = sheetData.sort((a, b) =>
+        a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+      );
+      const tableData = sortedData.slice(0, 6);
+      setRecentOrders(tableData);
+
+      // calcola sommatorie 'Qta da ev' raggruppate per 'descfam'
+      const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
+      setChartOptions(createOptions(grouped, "descfam"));
+      setChartSeries(createSeries(grouped, "Sales"));
+
+      // Calcola e imposta il totale dei clienti unici
+      const uniqueCustomersCount = extractValues(
+        sheetData,
+        "Ragione sociale"
+      ).length;
+      setTotalUniqueCustomers(uniqueCustomersCount);
+
+      // calcola somma delle qta da evadere
+      const totalQta = sumByKey(sheetData, null, "Qta da ev");
+      setTotalQuantity(totalQta);
+    } catch (err) {
+      console.error("Errore caricamento Excel:", err);
+    } finally {
+      setIsLoading(false);
     }
-
-    // 2. CASO: E' una STRINGA (Solo se il valore originale non era un numero Excel)
-    const dateString = String(dateValue).trim();
-
-    // 2A. Formato ISO standard AAAA-MM-GG (es. "2025-11-12")
-    if (dateString.includes("-") && dateString.split("-").length === 3) {
-      return new Date(dateString);
-    }
-
-    // 2B. Formato Italiano GG/MM/AAAA (es. "12/11/2025")
-    const parts = dateString.split("/");
-    if (parts.length === 3) {
-      // Conversione: GG/MM/AAAA -> MM/GG/AAAA per new Date()
-      return new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
-    }
-
-    // Fallback se nessun formato è stato riconosciuto
-    return new Date(0);
-  };
-
-  let a = 1;
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // fetch del foglio Excel
-        const res = await fetch(
-          "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-          {
-            headers: { "x-tenant": tenant },
-          }
-        );
-        let sheetData = await res.json();
-        sheetData = parseDates(sheetData, ["Data ord"]);
-
-        // ottiene tutti i numeri d'ordine (univoci)
-        let orders = extractValues(sheetData, "Nr.ord");
-        setOrders(orders);
-
-        // ottiene percentuale ordini evasi
-        const completedOrdersData = sheetData.filter(
-          (item) =>
-            parseFloat(item["Qta da ev"]) === 0 ||
-            item["Qta da ev"] === null ||
-            item["Qta da ev"] === ""
-        );
-        const uniqueCompletedOrdersCount = extractValues(
-          completedOrdersData,
-          "Nr.ord"
-        ).length;
-        let completionRate =
-          (uniqueCompletedOrdersCount / uniqueOrdersCount) * 100;
-        setOrdersCompletionRate(Math.round(completionRate));
-
-        // ottiene i 6 ordini più recenti
-        const sortedData = sheetData.sort((a, b) =>
-          a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
-        );
-        const tableData = sortedData.slice(0, 6);
-        setRecentOrders(tableData);
-
-        // calcola sommatorie 'Qta da ev' raggruppate per 'descfam'
-        const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
-        setSalesCategories(grouped.map((x) => x.descfam));
-        setSalesSeries(grouped.map((x) => x.count));
-
-        // Calcola e imposta il totale dei clienti unici
-        const customerNames = extractValues(
-          sheetData,
-          "Ragione sociale"
-        ).length;
-        setTotalUniqueCustomers(uniqueCustomersCount);
-
-        // calcola somma delle qta da evadere
-        const totalQta = sumByKey(sheetData, null, "Qta da ev");
-        setTotalQuantity(totalQta);
-      } catch (err) {
-        console.error("Errore caricamento Excel:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [ciccio]);
-  const chartOptions = {
-    ...Reportoptions,
-    xaxis: {
-      categories: salesCategories,
-    },
-  };
+    getData();
+  }, [getData]);
 
   const dynamicCards = Ecommercecard.map((card) => {
     // Trova la card "Total Orders"
@@ -182,9 +122,10 @@ const Ecommerce = () => {
   // La proprietà 'count' di questo oggetto è il valore formattato.
 
   return (
-    <Fragment>
-      {/* <!-- Start::page-header --> */}
+    <>
       <Preloader show={isLoading} />
+
+      {/* <!-- Start::page-header --> */}
       <Seo title="Dashboards-Ecommerce" />
 
       <Pageheader
@@ -227,7 +168,7 @@ const Ecommerce = () => {
                   <div id="sales-report">
                     <Spkapexcharts
                       chartOptions={chartOptions}
-                      chartSeries={[{ name: "Sales", data: salesSeries }]}
+                      chartSeries={chartSeries}
                       //type="line"
                       width={"100%"}
                       height={397}
@@ -312,7 +253,7 @@ const Ecommerce = () => {
         </Col>
       </Row>
       {/* <!-- End:: row-1 --> */}
-    </Fragment>
+    </>
   );
 };
 
