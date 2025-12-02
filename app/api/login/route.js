@@ -18,6 +18,7 @@ export async function POST(req) {
 
   const token = generateAccessToken({
     username: body.username,
+    tenant: body.username,
   });
 
   return new Response("ok", {

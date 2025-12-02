@@ -1,6 +1,6 @@
-import { Appsicon, Dashboardicon, Pagesicon } from "../icons";
+import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
 
-export const menuCopral = [
+export const menuDibartolo = [
   { menutitle: "MAIN" },
   {
     title: "Dashboards",
@@ -8,35 +8,37 @@ export const menuCopral = [
     type: "sub",
     children: [
       {
-        path: "/dashboard/copral/generalenew",
+        path: "/dashboard/dibartolo/generale",
         title: "Generale",
         type: "link",
         ready: true,
       },
     ],
   },
-  { menutitle: "WEB APPS" },
+  //   { menutitle: "WEB APPS" },
   {
     title: "Apps",
     icon: Appsicon,
     type: "sub",
+    ready: false,
     children: [
       {
         title: "Calendario",
-        path: "/dashboard/copral/calendario",
+        path: "/dashboard/dibartolo/calendario",
         type: "link",
-        ready: true,
+        ready: false,
       },
     ],
   },
+
   {
     title: "Pages",
     icon: Pagesicon,
     type: "sub",
     children: [
       {
-        path: "/dashboard/copral/imballatrice",
-        title: "Imballatrice",
+        path: "/dashboard/dibartolo/tostini",
+        title: "Tostini",
         type: "link",
         ready: true,
       },
@@ -44,7 +46,7 @@ export const menuCopral = [
         path: "/dashboard/copral/copral_nas",
         title: "Troncatrice (Mecal)",
         type: "link",
-        ready: true,
+        ready: false,
       },
     ],
   },

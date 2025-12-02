@@ -4,13 +4,12 @@ import LandingSwitcher from '../../../shared/layouts-components/switcher/landing
 import React, { Fragment, useEffect} from 'react'
 
 const Layout = ({ children }) => {
-
   useEffect(() => {
     document.querySelector("body")?.classList.add("landing-body");
 
     return () => {
       document.querySelector("body")?.classList.remove("landing-body");
-    }
+    };
   });
 
   return (
@@ -21,7 +20,7 @@ const Layout = ({ children }) => {
       </div>
       <Backtotop />
     </Fragment>
-  )
-}
+  );
+};
 
 export default Layout;

@@ -8,8 +8,12 @@ import { connect } from "react-redux";
 import { ThemeChanger } from "../../../shared/redux/action";
 import Backtotop from "../../../shared/layouts-components/backtotop/backtotop";
 import Loader from "../../../shared/layouts-components/loader/loader";
+import { useContext } from "react";
+import GlobalContext from "@/context/GlobalContext";
 
 const Layout = ({ children }) => {
+  const { menu } = useContext(GlobalContext);
+
   return (
     <Fragment>
       <Switcher />
@@ -22,7 +26,7 @@ const Layout = ({ children }) => {
           showNotifications={false}
         />
 
-        <Sidebar />
+        <Sidebar menu={menu} />
         <div className="main-content app-content">
           <div className="container-fluid">{children}</div>
         </div>

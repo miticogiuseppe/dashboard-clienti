@@ -4,14 +4,12 @@ import LandingSwitcher from '../../../shared/layouts-components/switcher/landing
 
 
 const Layout = ({ children }) => {
-
   return (
     <Fragment>
       <LandingSwitcher />
       {children}
     </Fragment>
-  )
-
-}
+  );
+};
 
 export default Layout;
