@@ -22,15 +22,8 @@ const page = () => {
     setError("");
   };
 
-  const RouteChange = (tenant) => {
-    switch (tenant) {
-      case "Copral":
-        router.push("/dashboard/copral/generalenew");
-        break;
-      case "Dibartolo":
-        router.push("/dashboard/dibartolo/generale");
-        break;
-    }
+  const RouteChange = () => {
+    router.push("/redirect");
   };
 
   const handleLogin = async (e) => {
@@ -39,7 +32,7 @@ const page = () => {
     // login
     try {
       await restPost("login", { username: email, password });
-      RouteChange(email);
+      RouteChange();
     } catch (e) {
       console.log(e.request.response);
       setError("Email o password non corretti.");
