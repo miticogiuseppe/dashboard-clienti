@@ -33,8 +33,8 @@ const Ecommerce = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // dati grafici
-  const [chartOptions, setChartOptions] = useState(emptyOptions());
-  const [chartSeries, setChartSeries] = useState(emptySeries());
+  const [chartOptions, setChartOptions] = useState(undefined);
+  const [chartSeries, setChartSeries] = useState(undefined);
 
   const [recentOrders, setRecentOrders] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -183,136 +183,150 @@ const Ecommerce = () => {
 
   return (
     <>
-      <Preloader show={isLoading} />
+      {isLoading ? (
+        <Preloader show={true} />
+      ) : (
+        <>
+          {/* <!-- Start::page-header --> */}
+          <Seo title="Dashboards-Ecommerce" />
 
-      {/* <!-- Start::page-header --> */}
-      <Seo title="Dashboards-Ecommerce" />
+          <Pageheader
+            title="Dashboards"
+            currentpage="Generale"
+            activepage="Generale"
+            showActions={false}
+          />
+          {/* <!-- End::page-header --> */}
 
-      <Pageheader
-        title="Dashboards"
-        currentpage="Generale"
-        activepage="Generale"
-        showActions={false}
-      />
-      {/* <!-- End::page-header --> */}
-
-      {/* <!-- Start: row-1 --> */}
-      <Row>
-        <Col xxl={12}>
+          {/* <!-- Start: row-1 --> */}
           <Row>
-            <Col xl={3} className="d-flex flex-column gap-3 force-bottom-align">
-              {cards.map((idx) => (
-                <Spkcardscomponent
-                  key={idx.id}
-                  svgIcon={idx.svgIcon}
-                  cardClass="overflow-hidden main-content-card flex-grow-1 d-flex flex-column justify-content-end text-center"
-                  headingClass="d-block fs-20 fw-semibold mb-2"
-                  mainClass="d-flex align-items-center justify-content-center flex-column "
-                  card={idx} // idx è aggiornato da cards
-                  badgeClass="md"
-                  dataClass="mb-0"
-                />
-              ))}
-            </Col>
-            <Col xl={9}>
-              <Card className="custom-card">
-                <Card.Header className="justify-content-between">
-                  <div className="card-title">Report</div>
-                  <div className="d-flex gap-2">
-                    <div className="btn btn-sm btn-outline-light">Today</div>
-                    <div className="btn btn-sm btn-outline-light">Weakly</div>
-                    <div className="btn btn-sm btn-light">Yearly</div>
-                  </div>
-                </Card.Header>
-                <Card.Body className="pb-2">
-                  <div id="sales-report">
-                    <Spkapexcharts
-                      chartOptions={chartOptions}
-                      chartSeries={chartSeries}
-                      //type="line"
-                      width={"100%"}
-                      height={397}
+            <Col xxl={12}>
+              <Row>
+                <Col
+                  xl={3}
+                  className="d-flex flex-column gap-3 force-bottom-align"
+                >
+                  {cards.map((idx) => (
+                    <Spkcardscomponent
+                      key={idx.id}
+                      svgIcon={idx.svgIcon}
+                      cardClass="overflow-hidden main-content-card flex-grow-1 d-flex flex-column justify-content-end text-center"
+                      headingClass="d-block fs-20 fw-semibold mb-2"
+                      mainClass="d-flex align-items-center justify-content-center flex-column "
+                      card={idx} // idx è aggiornato da cards
+                      badgeClass="md"
+                      dataClass="mb-0"
                     />
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col xxl={8} xl={7}>
-              <Card className="custom-card overflow-hidden">
-                <Card.Header className="justify-content-between">
-                  <div className="card-title">Ordini Recenti</div>
-                  <Link
-                    scroll={false}
-                    href="#!"
-                    className="btn btn-outline-light border d-flex align-items-center text-muted btn-sm"
-                  >
-                    View All
-                  </Link>
-                </Card.Header>
-                <div className="card-body p-0">
-                  <div className="table-responsive">
-                    <SpkTablescomponent
-                      tableClass="text-nowrap table-hover"
-                      header={[
-                        { title: "Numero Ordine" },
-                        { title: "Ragione Sociale" },
-                        { title: "Data Acquisto" },
-                      ]}
-                    >
-                      {recentOrders.map((row, index) => (
-                        <tr key={index}>
-                          <td>{row["Nr.ord"] || "N/A"}</td>
+                  ))}
+                </Col>
+                <Col xl={9}>
+                  <Card className="custom-card">
+                    <Card.Header className="justify-content-between">
+                      <div className="card-title">Report</div>
+                      <div className="d-flex gap-2">
+                        <div className="btn btn-sm btn-outline-light">
+                          Today
+                        </div>
+                        <div className="btn btn-sm btn-outline-light">
+                          Weakly
+                        </div>
+                        <div className="btn btn-sm btn-light">Yearly</div>
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="pb-2">
+                      <div id="sales-report">
+                        <Spkapexcharts
+                          chartOptions={chartOptions}
+                          chartSeries={chartSeries}
+                          //type="line"
+                          width={"100%"}
+                          height={397}
+                        />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+                <Col xxl={8} xl={7}>
+                  <Card className="custom-card overflow-hidden">
+                    <Card.Header className="justify-content-between">
+                      <div className="card-title">Ordini Recenti</div>
+                      <Link
+                        scroll={false}
+                        href="#!"
+                        className="btn btn-outline-light border d-flex align-items-center text-muted btn-sm"
+                      >
+                        View All
+                      </Link>
+                    </Card.Header>
+                    <div className="card-body p-0">
+                      <div className="table-responsive">
+                        <SpkTablescomponent
+                          tableClass="text-nowrap table-hover"
+                          header={[
+                            { title: "Numero Ordine" },
+                            { title: "Ragione Sociale" },
+                            { title: "Data Acquisto" },
+                          ]}
+                        >
+                          {recentOrders.map((row, index) => (
+                            <tr key={index}>
+                              <td>{row["Nr.ord"] || "N/A"}</td>
 
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="fw-semibold">
-                                {row["Ragione sociale"] || "Cliente Generico"}
-                              </div>
-                            </div>
-                          </td>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <div className="fw-semibold">
+                                    {row["Ragione sociale"] ||
+                                      "Cliente Generico"}
+                                  </div>
+                                </div>
+                              </td>
 
-                          <td>
-                            {row["Data ord"]
-                              ? row["Data ord"].toDate().toLocaleDateString()
-                              : "N/A"}
-                          </td>
-                        </tr>
-                      ))}
-                    </SpkTablescomponent>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-            <div className="col-xxl-4 col-xl-5">
-              <div className="card custom-card">
-                <div className="card-header justify-content-between">
-                  <div className="card-title">Totale ordini</div>
-                </div>
-                <div className="card-body">
-                  <div className="d-flex justify-content-center align-items-center text-center bg-light p-3 rounded-1 order-content">
-                    <div>
-                      <p className="mb-1">Ordini Totali Unici</p>
-                      <h4 className="text-primary mb-0">
-                        {orders.length.toLocaleString("it-IT")}
-                      </h4>
+                              <td>
+                                {row["Data ord"]
+                                  ? row["Data ord"]
+                                      .toDate()
+                                      .toLocaleDateString()
+                                  : "N/A"}
+                              </td>
+                            </tr>
+                          ))}
+                        </SpkTablescomponent>
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+                <div className="col-xxl-4 col-xl-5">
+                  <div className="card custom-card">
+                    <div className="card-header justify-content-between">
+                      <div className="card-title">Totale ordini</div>
+                    </div>
+                    <div className="card-body">
+                      <div className="d-flex justify-content-center align-items-center text-center bg-light p-3 rounded-1 order-content">
+                        <div>
+                          <p className="mb-1">Ordini Totali Unici</p>
+                          <h4 className="text-primary mb-0">
+                            {orders.length.toLocaleString("it-IT")}
+                          </h4>
+                        </div>
+                      </div>
+                      <div id="total-orders">
+                        <Spkapexcharts
+                          chartOptions={Orderoptions}
+                          chartSeries={Orderseries}
+                          type="radialBar"
+                          width={"100%"}
+                          height={300}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div id="total-orders">
-                    <Spkapexcharts
-                      chartOptions={Orderoptions}
-                      chartSeries={Orderseries}
-                      type="radialBar"
-                      width={"100%"}
-                      height={300}
-                    />
-                  </div>
                 </div>
-              </div>
-            </div>
+              </Row>
+            </Col>
           </Row>
-        </Col>
-      </Row>
-      {/* <!-- End:: row-1 --> */}
+          {/* <!-- End:: row-1 --> */}
+        </>
+      )}
     </>
   );
 };
