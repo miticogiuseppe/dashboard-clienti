@@ -13,10 +13,10 @@ import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/s
 import { Cardsdata, Recentorders } from "@/shared/data/dashboard/salesdata";
 import Seo from "@/shared/layouts-components/seo/seo";
 import {
-  extractValues,
+  extractUniques,
   filterByRange,
   filterByWeek,
-  filterSheet,
+  filterByValue,
   loadSheet,
   orderSheet,
   parseDates,
@@ -85,7 +85,7 @@ const Generale = () => {
       let jsonSheet = await loadSheet(blob, "appmerce_db");
       setSheetData(jsonSheet);
 
-      let products = extractValues(jsonSheet, "Descrizione famiglia");
+      let products = extractUniques(jsonSheet, "Descrizione famiglia");
       setProducts(products);
     })();
   }, [setSheetData]);
@@ -113,7 +113,7 @@ const Generale = () => {
 
     // Filtro per famiglia selezionata
     if (selectedProduct) {
-      jsonSheet = filterSheet(
+      jsonSheet = filterByValue(
         jsonSheet,
         "Descrizione famiglia",
         selectedProduct

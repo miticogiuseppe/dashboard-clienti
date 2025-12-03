@@ -8,7 +8,7 @@ import {
 } from "@/shared/data/dashboard/ecommercedata";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { extractValues, sumByKey, parseDates } from "@/utils/excelUtils";
+import { extractUniques, sumByKey, parseDates } from "@/utils/excelUtils";
 import {
   createSeries,
   createOptions,
@@ -54,7 +54,7 @@ const Ecommerce = () => {
     sheetData = parseDates(sheetData, ["Data ord"]);
 
     // ottiene tutti i numeri d'ordine (univoci)
-    let orders = extractValues(sheetData, "Nr.ord");
+    let orders = extractUniques(sheetData, "Nr.ord");
     setOrders(orders);
 
     // ottiene i 6 ordini più recenti
@@ -70,7 +70,7 @@ const Ecommerce = () => {
     setChartSeries(createSeries(grouped, "Sales"));
 
     // Calcola e imposta il totale dei clienti unici
-    const uniqueCustomersCount = extractValues(
+    const uniqueCustomersCount = extractUniques(
       sheetData,
       "Ragione sociale"
     ).length;

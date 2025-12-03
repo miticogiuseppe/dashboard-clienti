@@ -26,10 +26,10 @@ import {
 } from "@/shared/data/dashboard/salesdata";
 import Seo from "@/shared/layouts-components/seo/seo";
 import {
-  extractValues,
+  extractUniques,
   filterByRange,
   filterByWeek,
-  filterSheet,
+  filterByValue,
   loadSheet,
   orderSheet,
   parseDates,
@@ -96,7 +96,7 @@ const Sales = () => {
       let jsonSheet = await loadSheet(blob, "APPMERCE-000_1");
       setSheetData(jsonSheet);
 
-      let agents = extractValues(jsonSheet, "Des. Agente");
+      let agents = extractUniques(jsonSheet, "Des. Agente");
       setAgents(agents);
     })();
   }, [setSheetData]);
@@ -124,7 +124,7 @@ const Sales = () => {
 
     // Filtro per agente selezionato
     if (selectedAgent) {
-      jsonSheet = filterSheet(jsonSheet, "Des. Agente", selectedAgent);
+      jsonSheet = filterByValue(jsonSheet, "Des. Agente", selectedAgent);
     }
 
     // Somma quantità per articolo (puoi sostituire "Articolo" con "Macchina" se serve)

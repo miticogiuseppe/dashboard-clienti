@@ -161,6 +161,8 @@ const createOptions = (
   return options;
 };
 
+// Genera series e options vuoti.
+// Sono valori temporanei, in attesa che vengano calcolati quelli effettivi.
 const emptySeries = () => {
   return [];
 };
