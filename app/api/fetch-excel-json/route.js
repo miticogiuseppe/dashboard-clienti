@@ -41,10 +41,7 @@ export async function GET(req) {
         headers: { "Content-Type": "application/json" },
       });
 
-    const filePath = path.join(
-      process.env.NEXT_PUBLIC_DRIVE_PATH,
-      resource.path
-    );
+    const filePath = path.join(process.env.DRIVE_PATH, resource.path);
     const fileBuffer = await fs.readFile(filePath);
 
     const workbook = XLSX.read(fileBuffer, { type: "buffer" });

@@ -16,7 +16,8 @@ import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import PeriodSelector from "@/components/PeriodSelector";
-
+import { Portoptions, Portseries } from "@/shared/data/dashboard/stocksdata";
+import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
@@ -35,6 +36,8 @@ const Ecommerce = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [donutLabels, setDonutLabels] = useState([]);
+  const [donutSeries, setDonutSeries] = useState([]);
 
   const tenant = "Copral";
 
@@ -103,7 +106,7 @@ const Ecommerce = () => {
           });
         }
 
-        const tableData = sortedData.slice(0, 6);
+        const tableData = sortedData.slice(0, 7);
         setRecentOrders(tableData); // Raggruppa per 'descfam' e somma 'Qta da ev'
 
         const grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
@@ -148,6 +151,27 @@ const Ecommerce = () => {
 
         // 4. Imposta lo Stato (arrotondato all'intero)
         setOrdersCompletionRate(Math.round(completionRate));
+        // Imposta i dati per il grafico a torta
+        const ordersByCustomer = {};
+
+        sheetData.forEach((item) => {
+          const customer = item["Ragione sociale"] || "Senza Nome";
+          const order = item["Nr.ord"];
+
+          if (!ordersByCustomer[customer]) {
+            ordersByCustomer[customer] = new Set();
+          }
+          ordersByCustomer[customer].add(order);
+        });
+
+        // Convertiamo in array ApexCharts
+        const labels = Object.keys(ordersByCustomer);
+        const series = labels.map(
+          (customer) => ordersByCustomer[customer].size
+        );
+
+        setDonutLabels(labels);
+        setDonutSeries(series);
       } catch (err) {
         console.error("Errore caricamento Excel:", err);
       } finally {
@@ -259,7 +283,7 @@ const Ecommerce = () => {
                     <Spkapexcharts
                       chartOptions={chartOptions}
                       chartSeries={[{ name: "Sales", data: salesSeries }]}
-                      //type="line"
+                      type="bar"
                       width={"100%"}
                       height={397}
                     />
@@ -319,32 +343,62 @@ const Ecommerce = () => {
                 </div>
               </Card>
             </Col>
-            <div className="col-xxl-4 col-xl-5">
-              <div className="card custom-card">
-                <div className="card-header justify-content-between">
-                  <div className="card-title">Totale ordini</div>
-                </div>
-                <div className="card-body">
-                  <div className="d-flex justify-content-center align-items-center text-center bg-light p-3 rounded-1 order-content">
-                    <div>
-                      <p className="mb-1">Ordini Totali Unici</p>
-                      <h4 className="text-primary mb-0">
-                        {totalUniqueOrders.toLocaleString("it-IT")}
-                      </h4>
+            <Col xxl={4} xl={5}>
+              <Card className="custom-card overflow-hidden">
+                <Card.Header className="justify-content-between">
+                  <h6 className="card-title">Statistiche clienti</h6>
+                </Card.Header>
+
+                <Card.Body>
+                  {donutLabels.length > 0 && donutSeries.length > 0 ? (
+                    <div id="portfolio">
+                      <Spkapexcharts
+                        chartOptions={{
+                          ...Portoptions,
+                          labels: donutLabels,
+                        }}
+                        chartSeries={donutSeries}
+                        type="donut"
+                        width="100%"
+                        height={245}
+                      />
                     </div>
-                  </div>
-                  <div id="total-orders">
-                    <Spkapexcharts
-                      chartOptions={Orderoptions}
-                      chartSeries={Orderseries}
-                      type="radialBar"
-                      width={"100%"}
-                      height={300}
-                    />
+                  ) : (
+                    <div className="text-center text-muted p-5">
+                      Nessun dato disponibile
+                    </div>
+                  )}
+                </Card.Body>
+
+                <div className="card-footer p-3 my-2">
+                  <div className="row row-cols-12">
+                    {donutLabels.slice(0, 3).map((label, idx) => (
+                      <div className="col p-0" key={idx}>
+                        <div className="text-center">
+                          <i
+                            className={`ri-circle-fill p-1 lh-1 fs-7 rounded-2 ${
+                              idx === 0
+                                ? "bg-primary-transparent text-primary"
+                                : idx === 1
+                                ? "bg-primary1-transparent text-primary1"
+                                : "bg-primary2-transparent text-primary2"
+                            }`}
+                          ></i>
+                          <span className="text-muted fs-12 mb-1 rounded-dot d-inline-block ms-2">
+                            {label}
+                          </span>
+                          <div>
+                            <span className="fs-16 fw-medium">
+                              {donutSeries[idx]}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            </div>
+              </Card>
+            </Col>
           </Row>
         </Col>
       </Row>
