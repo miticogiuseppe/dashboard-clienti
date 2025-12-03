@@ -43,10 +43,7 @@ const loadSheetFromUrl = async (url, sheetName) => {
 };
 
 const loadSheetFromFile = (relativePath, sheetName) => {
-  const filePath = path.resolve(
-    process.env.NEXT_PUBLIC_DRIVE_PATH,
-    relativePath
-  );
+  const filePath = path.resolve(process.env.DRIVE_PATH, relativePath);
   const data = fs.readFileSync(filePath);
   const workbook = XLSX.read(data, { type: "buffer" });
   const sheet = workbook.Sheets[sheetName];
