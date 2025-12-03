@@ -176,7 +176,7 @@ export const Portoptions = {
         size: "78%",
         background: "transparent",
         labels: {
-          show: false,
+          show: true,
           name: {
             show: true,
             fontSize: "20px",
@@ -189,21 +189,49 @@ export const Portoptions = {
             color: undefined,
             offsetY: 8,
             formatter: function (val) {
-              return val + "%";
+              // Formatta in euro italiano
+              return (
+                val.toLocaleString("it-IT", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }) + " €"
+              );
             },
           },
           total: {
             show: true,
             showAlways: true,
-            label: "Total",
+            label: "Totale",
             fontSize: "22px",
             fontWeight: 600,
             color: "#495057",
+            formatter: function (w) {
+              const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+              return (
+                total.toLocaleString("it-IT", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }) + " €"
+              );
+            },
           },
         },
       },
     },
   },
+  tooltip: {
+    y: {
+      formatter: function (val) {
+        return (
+          val.toLocaleString("it-IT", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + " €"
+        );
+      },
+    },
+  },
+
   colors: ["var(--primary-color)", "rgb(227, 84, 212)", "rgb(255, 93, 159)"],
 };
 

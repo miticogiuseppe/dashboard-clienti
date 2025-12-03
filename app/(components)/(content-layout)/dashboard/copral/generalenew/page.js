@@ -152,23 +152,32 @@ const Ecommerce = () => {
         // 4. Imposta lo Stato (arrotondato all'intero)
         setOrdersCompletionRate(Math.round(completionRate));
         // Imposta i dati per il grafico a torta
+        // CLIENTI → TOTALE ORDINI
         const ordersByCustomer = {};
 
         sheetData.forEach((item) => {
           const customer = item["Ragione sociale"] || "Senza Nome";
-          const order = item["Nr.ord"];
+
+          // Se il valore totale è una stringa tipo "1.234,50" lo puliamo
+          let orderValue = item["ValoreTotale"];
+          if (typeof orderValue === "string") {
+            orderValue = orderValue.replace(".", "").replace(",", ".");
+          }
+
+          const total = parseFloat(orderValue) || 0;
 
           if (!ordersByCustomer[customer]) {
-            ordersByCustomer[customer] = new Set();
+            ordersByCustomer[customer] = 0;
           }
-          ordersByCustomer[customer].add(order);
+
+          ordersByCustomer[customer] += total;
         });
 
-        // Convertiamo in array ApexCharts
+        // 🔥 Labels = clienti
         const labels = Object.keys(ordersByCustomer);
-        const series = labels.map(
-          (customer) => ordersByCustomer[customer].size
-        );
+
+        // 🔥 Series = totale € per cliente
+        const series = Object.values(ordersByCustomer);
 
         setDonutLabels(labels);
         setDonutSeries(series);
@@ -389,7 +398,11 @@ const Ecommerce = () => {
                           </span>
                           <div>
                             <span className="fs-16 fw-medium">
-                              {donutSeries[idx]}
+                              {donutSeries[idx].toLocaleString("it-IT", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}{" "}
+                              €
                             </span>
                           </div>
                         </div>
