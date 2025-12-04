@@ -43,10 +43,10 @@ export const menuDibartolo = [
         ready: true,
       },
       {
-        path: "/dashboard/copral/copral_nas",
-        title: "Troncatrice (Mecal)",
+        path: "/dashboard/dibartolo/confezionatrice",
+        title: "Confezionatrice",
         type: "link",
-        ready: false,
+        ready: true,
       },
     ],
   },

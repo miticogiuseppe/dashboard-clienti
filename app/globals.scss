@@ -54,8 +54,12 @@
 @media (max-width: 767px) {
   .preloader {
     left: 0;
-    width: 100%;
-    top: 68px;
+      top: 68px;
     height: calc(100vh - 68px);
   }
+}
+
+.app-sidebar .main-sidebar-header .header-logo img {
+  width: 100%;
+  height: auto;
 }
