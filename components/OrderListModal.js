@@ -27,9 +27,8 @@ const OrderListModal = ({ orders, onClose }) => {
           padding: "1.5rem",
           borderRadius: "0.5rem",
           position: "relative",
-          maxWidth: "600px",
-          maxHeight: "80vh", // Limita l'altezza massima per evitare overflow
-          overflowY: "auto", // Abilita lo scroll verticale
+          maxWidth: "820px",
+          maxHeight: "80vh",
           boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
         }}
       >
@@ -43,74 +42,123 @@ const OrderListModal = ({ orders, onClose }) => {
         >
           Dettagli Ordini ({orders.length})
         </h2>
-        <table
+
+        <div
           style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            display: "block",
             maxHeight: "60vh",
             overflowY: "auto",
+            border: "1px solid #ccc",
+            borderRadius: "0.5rem",
           }}
         >
-          <thead
+          <table
             style={{
-              position: "sticky",
-              top: 0,
-              backgroundColor: "white",
-              zIndex: 10,
+              width: "100%",
+              borderCollapse: "collapse",
+              tableLayout: "fixed",
             }}
           >
-            <tr>
-              <th
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #ccc",
-                  padding: "0.5rem",
-                }}
-              >
-                Cliente
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #ccc",
-                  padding: "0.5rem",
-                }}
-              >
-                Quantità
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #ccc",
-                  padding: "0.5rem",
-                }}
-              >
-                Sezione
-              </th>
-              <th
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #ccc",
-                  padding: "0.5rem",
-                }}
-              >
-                Agente
-              </th>
-            </tr>
-          </thead>
+            <thead
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "white",
+                zIndex: 10,
+              }}
+            >
+              <tr>
+                {/* Num. Ordine - compatta */}
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "0.5rem",
+                    width: "90px",
+                  }}
+                >
+                  N. Ord
+                </th>
 
-          <tbody>
-            {orders.map((order, idx) => (
-              <tr key={idx}>
-                <td>{order.cliente}</td>
-                <td>{order.quantità}</td>
-                <td>{order.sezione}</td>
-                <td>{order.agente}</td>
+                {/* Sezione - super stretta */}
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "0.5rem",
+                    width: "45px",
+                  }}
+                >
+                  Sz
+                </th>
+
+                <th style={{ textAlign: "center", padding: "0.5rem" }}>
+                  Agente
+                </th>
+                <th style={{ textAlign: "center", padding: "0.5rem" }}>
+                  Cliente
+                </th>
+                <th style={{ textAlign: "center", padding: "0.5rem" }}>
+                  Articolo
+                </th>
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "0.5rem",
+                    width: "70px",
+                  }}
+                >
+                  Q.tà
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {orders.map((order, idx) => (
+                <tr key={idx}>
+                  <td style={{ textAlign: "center", padding: "0.5rem" }}>
+                    {order.numOrdine ?? "N/A"}
+                  </td>
+
+                  {/* Sezione stretta centrata */}
+                  <td style={{ textAlign: "center", padding: "0.5rem" }}>
+                    {order.sezione}
+                  </td>
+
+                  <td style={{ textAlign: "center", padding: "0.5rem" }}>
+                    {order.agente}
+                  </td>
+
+                  <td
+                    style={{
+                      textAlign: "left",
+                      padding: "0.5rem",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {order.cliente}
+                  </td>
+
+                  <td
+                    style={{
+                      textAlign: "left",
+                      padding: "0.5rem",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {order.articolo ?? "N/A"}
+                  </td>
+
+                  <td style={{ textAlign: "center", padding: "0.5rem" }}>
+                    {order.quantità}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <button
           type="button"
           onClick={onClose}
