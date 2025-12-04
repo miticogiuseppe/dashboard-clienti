@@ -64,9 +64,7 @@ const MacchinaDashboard = ({
               </button>
             </div>
 
-            <div className="mt-3 text-muted" style={{ fontSize: "13px" }}>
-              I file vengono scaricati direttamente dal gestionale del cliente.
-            </div>
+            <div className="mt-3 text-muted" style={{ fontSize: "13px" }}></div>
 
             {/* DATI FUTURI (già pronti se vorrai riattivarli) */}
             {/*
