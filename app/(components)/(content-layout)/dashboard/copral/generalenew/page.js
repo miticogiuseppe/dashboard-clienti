@@ -303,7 +303,7 @@ const Ecommerce = () => {
             <Col xxl={8} xl={7}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">Ordini Recenti</div>
+                  <div className="card-title">Ordini recenti</div>
                   <Link
                     scroll={false}
                     href="#!"
