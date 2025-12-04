@@ -46,6 +46,19 @@ export const menuCopral = [
         type: "link",
         ready: true,
       },
+
+      {
+        path: "#",
+        title: "Pulitrice",
+        type: "link",
+        ready: true,
+      },
+      {
+        path: "#",
+        title: "Intestatrice 90°",
+        type: "link",
+        ready: true,
+      },
     ],
   },
 ];

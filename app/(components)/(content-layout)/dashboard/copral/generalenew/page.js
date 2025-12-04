@@ -271,7 +271,9 @@ const Ecommerce = () => {
             <Col xl={9}>
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">Report</div>
+                  <div className="card-title">
+                    Report indice importi famiglie
+                  </div>
                   <div className="d-flex align-items-center">
                     <PeriodSelector
                       onChange={(range) => {
@@ -318,7 +320,7 @@ const Ecommerce = () => {
                       tableClass="text-nowrap table-hover"
                       header={[
                         { title: "Numero Ordine" },
-                        { title: "Sezione" },
+                        { title: "Sezionale" },
                         { title: "Ragione Sociale" },
                         { title: "Agente" },
                         { title: "Data ordine" },
