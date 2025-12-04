@@ -1,6 +1,6 @@
 // Filtra menu demo
 export function filterMenu(items) {
-  const isDemo = process.env.NEXT_PUBLIC_DEMO === "true";
+  const isDemo = process.env.IS_DEMO === "true";
   return items
     .map((item) => {
       const newItem = { ...item };

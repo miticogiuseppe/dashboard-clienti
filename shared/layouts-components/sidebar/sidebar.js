@@ -9,23 +9,15 @@ import SpkTooltips from "../../@spk-reusable-components/reusable-uielements/spk-
 import { ThemeChanger } from "../../redux/action";
 import store from "../../redux/store";
 import Menuloop from "./menuloop";
-import { filterMenu, menuCopral, menuDibartolo } from "./menus";
 
-const Sidebar = ({ local_varaiable, ThemeChanger }) => {
+const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
   let { basePath } = nextConfig;
-  const path = usePathname();
 
-  const [menuitems, setMenuitems] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const user = localStorage.getItem("loggedUser");
-      let menu = [];
-
-      if (user === "Copral") menu = menuCopral;
-      else if (user === "Dibartolo") menu = menuDibartolo;
-
-      setMenuitems(filterMenu(menu));
+      setMenuItems(menu);
     }
   }, []);
 
@@ -36,8 +28,8 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
         closeMenudata(item.children);
       });
     };
-    closeMenudata(menuitems);
-    setMenuitems((arr) => [...arr]);
+    closeMenudata(menuItems);
+    setMenuItems((arr) => [...arr]);
   }
 
   useEffect(() => {
@@ -374,7 +366,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
   let hasParent = false;
   let hasParentLevel = 0;
 
-  function setSubmenu(event, targetObject, MenuItems = menuitems) {
+  function setSubmenu(event, targetObject, MenuItems = menuItems) {
     const theme = store.getState();
     // if ((window.screen.availWidth <= 992 || theme.dataNavStyle != "icon-hover") && (window.screen.availWidth <= 992 || theme.dataNavStyle != "menu-hover")) {
     if (!event?.ctrlKey) {
@@ -395,7 +387,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
       }
     }
     // }
-    setMenuitems((arr) => [...arr]);
+    setMenuItems((arr) => [...arr]);
   }
 
   function getParentObject(obj, childObject) {
@@ -419,7 +411,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
   }
 
   function setMenuAncestorsActive(targetObject) {
-    const parent = getParentObject(menuitems, targetObject);
+    const parent = getParentObject(menuItems, targetObject);
     const theme = store.getState();
     if (parent) {
       if (hasParentLevel > 2) {
@@ -471,7 +463,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
         setSubmenuRecursively(item.children);
       });
     };
-    setSubmenuRecursively(menuitems);
+    setSubmenuRecursively(menuItems);
   }
   const [previousUrl, setPreviousUrl] = useState("/");
 
@@ -494,7 +486,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     }
   }, [pathname]);
 
-  function toggleSidemenu(event, targetObject, MenuItems = menuitems, state) {
+  function toggleSidemenu(event, targetObject, MenuItems = menuItems, state) {
     const theme = store.getState();
     let element = event.target;
     if (
@@ -588,7 +580,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
         }
       }
     }
-    setMenuitems((arr) => [...arr]);
+    setMenuItems((arr) => [...arr]);
   }
 
   function setAncestorsActive(MenuItems, targetObject) {
@@ -801,7 +793,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
             </div>
 
             <ul className="main-menu" onClick={() => Sideclick()}>
-              {menuitems.map((levelone, index) => (
+              {menuItems.map((levelone, index) => (
                 <Fragment key={index}>
                   <li
                     className={`${

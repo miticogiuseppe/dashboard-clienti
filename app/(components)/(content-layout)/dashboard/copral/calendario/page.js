@@ -1,6 +1,6 @@
 "use client";
 import OrderCalendar from "@/components/OrderCalendar";
-import { loadOrdersFromExcel } from "@/utils/excelUtils";
+import { loadFirstSheet } from "@/utils/excelUtils";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -9,7 +9,7 @@ export default function Home() {
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const newOrders = await loadOrdersFromExcel(file);
+      const newOrders = await loadFirstSheet(file);
       setOrders(newOrders);
     }
   };
@@ -19,7 +19,7 @@ export default function Home() {
     const fetchOrders = async () => {
       const response = await fetch("/data/APPMERCE-000.xlsx");
       const blob = await response.blob();
-      const newOrders = await loadOrdersFromExcel(blob);
+      const newOrders = await loadFirstSheet(blob);
 
       setOrders(newOrders);
     };

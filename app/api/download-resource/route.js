@@ -19,7 +19,7 @@ export async function GET(req) {
     const resource = tenantResources.find((r) => r.id === id);
     if (!resource) return new Response("Resource not found", { status: 404 });
 
-    const driveRoot = process.env.NEXT_PUBLIC_DRIVE_PATH;
+    const driveRoot = process.env.DRIVE_PATH;
     const filePath = path.join(driveRoot, resource.path);
 
     const fileBuffer = await fs.readFile(filePath);
