@@ -51,8 +51,8 @@ import {
   parseDates,
   filterByWeek,
   orderSheet,
-  extractValues,
-  filterSheet,
+  extractUniques,
+  filterByValue,
   filterByRange,
 } from "@/utils/excelUtils";
 import { createSeries, createOptions } from "@/utils/graphUtils";
@@ -88,7 +88,7 @@ const Sales = () => {
       let jsonSheet = await loadSheet(blob, "APPMERCE-000_1");
       setSheetData(jsonSheet);
 
-      let agents = extractValues(jsonSheet, "Des. Agente");
+      let agents = extractUniques(jsonSheet, "Des. Agente");
       setAgents(agents);
     })();
   }, [setSheetData]);
@@ -109,7 +109,7 @@ const Sales = () => {
     } else
       jsonSheet = filterByWeek(jsonSheet, "Data ord", moment("2025-09-20"), 2);
     if (selectedAgent)
-      jsonSheet = filterSheet(jsonSheet, "Des. Agente", selectedAgent);
+      jsonSheet = filterByValue(jsonSheet, "Des. Agente", selectedAgent);
     const counters = sheetCount(jsonSheet, ["Data ord"]);
     const series = createSeries(counters);
     const options = createOptions(

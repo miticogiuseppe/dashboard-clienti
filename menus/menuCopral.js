@@ -1,4 +1,4 @@
-import { Appsicon, Dashboardicon, Pagesicon } from "../icons";
+import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
 
 export const menuCopral = [
   { menutitle: "MAIN" },
