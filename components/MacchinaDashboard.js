@@ -27,7 +27,6 @@ const MacchinaDashboard = ({
     const a = document.createElement("a");
     a.href = tempUrl;
 
-    // nome file preso dalle response headers
     const filename =
       res.headers
         .get("Content-Disposition")
@@ -41,28 +40,37 @@ const MacchinaDashboard = ({
 
   return (
     <Row className="mb-4 align-items-stretch">
-      <Col xl={4} className="d-flex">
-        <Card className="custom-card w-100 h-100">
-          <Card.Header>
-            <Card.Title>Storico</Card.Title>
+      <Col xl={3} className="d-flex">
+        <Card className="custom-card w-100 h-100 shadow-sm rounded-3">
+          <Card.Header className="bg-transparent border-0 pb-0">
+            <Card.Title className="fw-semibold mb-1">Storico</Card.Title>
+            <small className="text-muted">Download file macchina</small>
           </Card.Header>
-          <Card.Body>
-            <p>
+
+          <Card.Body className="pt-3 d-flex flex-column justify-content-center">
+            <div className="d-flex gap-2 flex-wrap">
               <button
                 onClick={() => downloadFile(fileStorico)}
-                className="btn btn-primary btn-sm me-2"
+                className="btn btn-primary btn-sm px-3"
               >
-                Scarica STORICO
+                ⬇ Scarica STORICO
               </button>
 
               <button
                 onClick={() => downloadFile(fileAppmerce)}
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary btn-sm px-3"
               >
-                Scarica APPMERCE
+                ⬇ Scarica APPMERCE
               </button>
-            </p>
-            {/* <ul className="list-unstyled">
+            </div>
+
+            <div className="mt-3 text-muted" style={{ fontSize: "13px" }}>
+              I file vengono scaricati direttamente dal gestionale del cliente.
+            </div>
+
+            {/* DATI FUTURI (già pronti se vorrai riattivarli) */}
+            {/*
+            <ul className="list-unstyled mt-3 mb-0">
               <li>
                 <strong>Ordini ricevuti:</strong> {appmerce.ordini}
               </li>
@@ -72,7 +80,8 @@ const MacchinaDashboard = ({
               <li>
                 <strong>Ultima consegna:</strong> {appmerce.dataConsegna}
               </li>
-            </ul> */}
+            </ul>
+            */}
           </Card.Body>
         </Card>
       </Col>

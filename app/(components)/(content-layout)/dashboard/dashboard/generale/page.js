@@ -73,13 +73,13 @@ const Ecommerce = () => {
 
             {/* TABELLA ORDINI RECENTI */}
             <Col xxl={8} xl={7}>
-              <Card className="custom-card shadow-sm rounded-3 overflow-hidden">
+              <Card className="custom-card shadow-sm rounded-3">
                 <Card.Header className="d-flex justify-content-between align-items-center">
-                  <h5 className="card-title mb-0">Ordini Recenti (Base)</h5>
+                  <h5 className="card-title mb-0">Ordini Recenti</h5>
                 </Card.Header>
                 <div className="table-responsive">
                   <SpkTablescomponent
-                    tableClass="text-nowrap table-hover mb-0"
+                    tableClass="table-hover mb-0" // Già modificato per rimuovere 'text-nowrap'
                     header={[
                       { title: "Numero Ordine" },
                       { title: "Sezione" },
@@ -88,13 +88,7 @@ const Ecommerce = () => {
                       { title: "Data Ordine" },
                     ]}
                   >
-                    {recentOrders.length === 0 && (
-                      <tr>
-                        <td colSpan="5" className="text-center py-3 text-muted">
-                          Nessun ordine — tabella pronta per nuovi clienti
-                        </td>
-                      </tr>
-                    )}
+                    {/* ... Righe della tabella ... */}
                   </SpkTablescomponent>
                 </div>
               </Card>
