@@ -72,6 +72,13 @@ export default function AppmerceChartByArticolo({ startDate, endDate }) {
           "bar"
         );
 
+        // Colore verdino più evidente
+        chartOptions.colors = ["#4CAF50"];
+        chartOptions.fill = {
+          ...chartOptions.fill,
+          opacity: 1,
+        };
+
         setGraphSeries(seriesData);
         setGraphOptions(chartOptions);
       } catch (err) {

@@ -66,7 +66,9 @@ const Ecommerce = () => {
 
     // calcola sommatorie 'Qta da ev' raggruppate per 'descfam'
     const grouped = sumByKey(sheetData, "descfam", "Qta da ev", true);
-    setChartOptions(createOptions(grouped, "descfam"));
+    setChartOptions(
+      createOptions(grouped, "descfam", undefined, "bar", "#b94eed")
+    );
     setChartSeries(createSeries(grouped, "Sales"));
 
     // Calcola e imposta il totale dei clienti unici
@@ -170,7 +172,7 @@ const Ecommerce = () => {
     },
     {
       id: 2,
-      title: "Totale Clienti",
+      title: "Totale clienti",
       //inc: "Increased By",
       //percentageChange: "5.1%",
       //icon: "ti ti-trending-up",
@@ -264,13 +266,17 @@ const Ecommerce = () => {
                           tableClass="text-nowrap table-hover"
                           header={[
                             { title: "Numero Ordine" },
+                            { title: "Sezione" },
                             { title: "Ragione Sociale" },
-                            { title: "Data Acquisto" },
+                            { title: "Agente" },
+                            { title: "Data ordine" },
                           ]}
                         >
                           {recentOrders.map((row, index) => (
                             <tr key={index}>
                               <td>{row["Nr.ord"] || "N/A"}</td>
+
+                              <td>{row["Sez"] ?? "N/A"}</td>
 
                               <td>
                                 <div className="d-flex align-items-center">
@@ -280,6 +286,8 @@ const Ecommerce = () => {
                                   </div>
                                 </div>
                               </td>
+
+                              <td>{row["Des. Agente"] || "N/A"}</td>
 
                               <td>
                                 {row["Data ord"]

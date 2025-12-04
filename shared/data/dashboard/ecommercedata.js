@@ -440,8 +440,8 @@ export const Ecommercecard = [
   },
   {
     id: 2,
-    title: "Totale Clienti",
-    count: "15,432",
+    title: "Totale clienti",
+    count: "",
     //inc: "Increased By",
     //percentageChange: "5.1%",
     //icon: "ti ti-trending-up",

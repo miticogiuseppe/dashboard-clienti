@@ -1,3 +1,7 @@
+// VERSIONE OTTIMIZZATA GRAFICAMENTE — Pagina Tostini
+// Layout migliorato, spacing corretto, cards visive più moderne,
+// grafica coerente e senza stravolgimenti del codice originale.
+
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
@@ -11,6 +15,7 @@ import { Fragment, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
+// DATI
 const tostini = {
   nome: "Tostini",
   fileStorico: "/data/STORICO_TRONCATRICE.zip",
@@ -22,6 +27,7 @@ const tostini = {
   },
 };
 
+// DATE UTILITIES
 const calcolaRange = (periodo) => {
   const oggi = dayjs();
   const inizio = {
@@ -29,6 +35,7 @@ const calcolaRange = (periodo) => {
     mese: oggi.subtract(1, "month"),
     anno: oggi.startOf("year"),
   }[periodo];
+
   return {
     startDate: inizio.format("YYYY-MM-DD"),
     endDate: oggi.format("YYYY-MM-DD"),
@@ -40,12 +47,15 @@ const fmt = (d) => {
   return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 };
 
+// COMPONENTE PRINCIPALE
 export default function PaginaTostini() {
+  // Filtri TS Azienda
   const [pickerDateTS, setPickerDateTS] = useState([null, null]);
   const [periodoTS, setPeriodoTS] = useState("mese");
   const { startDate: startDateTS, endDate: endDateTS } =
     calcolaRange(periodoTS);
 
+  // Filtri Produzione Articoli
   const [pickerDateArt, setPickerDateArt] = useState([null, null]);
   const [periodoArt, setPeriodoArt] = useState("mese");
   const { startDate: startDateArt, endDate: endDateArt } =
@@ -61,21 +71,23 @@ export default function PaginaTostini() {
         showActions={false}
       />
 
-      <Row>
+      {/* DASHBOARD MACCHINA */}
+      <Row className="g-4 mb-4">
         <Col xxl={12}>
           <MacchinaDashboard {...tostini} />
         </Col>
       </Row>
 
-      {/* TS Azienda */}
-      <Row className="mt-4">
+      {/* SEZIONE GRAFICI PRINCIPALI */}
+      <Row className="g-4">
+        {/* TS AZIENDA */}
         <Col xl={6}>
-          <Card className="custom-card h-100">
-            <Card.Header className="justify-content-between">
-              <Card.Title>TS Azienda</Card.Title>
+          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+            <Card.Header className="d-flex justify-content-between align-items-center py-3">
+              <Card.Title className="mb-0 fw-semibold">TS Azienda</Card.Title>
               <SpkDropdown
                 toggleas="a"
-                Customtoggleclass="btn btn-sm btn-light text-muted"
+                Customtoggleclass="btn btn-sm btn-light text-muted border"
                 Toggletext="Periodo"
               >
                 <Dropdown.Item
@@ -104,33 +116,40 @@ export default function PaginaTostini() {
                 </Dropdown.Item>
               </SpkDropdown>
             </Card.Header>
-            <Card.Body>
+
+            <Card.Body className="pt-2">
               <SpkFlatpickr
                 options={{ mode: "range", dateFormat: "Y-m-d" }}
                 onfunChange={(date) => setPickerDateTS(date)}
                 value={pickerDateTS}
               />
-              <p className="text-muted mb-2">
+              <p className="text-muted mt-2 mb-3 small">
                 ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
                 {fmt(pickerDateTS?.[1]) || endDateTS})
               </p>
-              <AppmerceChart
-                title="TS Azienda"
-                startDate={fmt(pickerDateTS?.[0]) || startDateTS}
-                endDate={fmt(pickerDateTS?.[1]) || endDateTS}
-              />
+
+              {/* CHART */}
+              <div className="mt-3">
+                <AppmerceChart
+                  title="TS Azienda"
+                  startDate={fmt(pickerDateTS?.[0]) || startDateTS}
+                  endDate={fmt(pickerDateTS?.[1]) || endDateTS}
+                />
+              </div>
             </Card.Body>
           </Card>
         </Col>
 
-        {/* Produzione per Articolo */}
+        {/* PRODUZIONE PER ARTICOLO */}
         <Col xl={6}>
-          <Card className="custom-card h-100">
-            <Card.Header className="justify-content-between">
-              <Card.Title>Produzione per Articolo</Card.Title>
+          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+            <Card.Header className="d-flex justify-content-between align-items-center py-3">
+              <Card.Title className="mb-0 fw-semibold">
+                Produzione per Articolo
+              </Card.Title>
               <SpkDropdown
                 toggleas="a"
-                Customtoggleclass="btn btn-sm btn-light text-muted"
+                Customtoggleclass="btn btn-sm btn-light text-muted border"
                 Toggletext="Periodo"
               >
                 <Dropdown.Item
@@ -159,21 +178,26 @@ export default function PaginaTostini() {
                 </Dropdown.Item>
               </SpkDropdown>
             </Card.Header>
-            <Card.Body>
+
+            <Card.Body className="pt-2">
               <SpkFlatpickr
                 options={{ mode: "range", dateFormat: "Y-m-d" }}
                 onfunChange={(date) => setPickerDateArt(date)}
                 value={pickerDateArt}
               />
-              <p className="text-muted mb-2">
-                {periodoArt} ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
+              <p className="text-muted mt-2 mb-3 small">
+                ({fmt(pickerDateArt?.[0]) || startDateArt} →{" "}
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
-              <AppmerceChartByArticolo
-                file={tostini.fileAppmerce}
-                startDate={fmt(pickerDateArt?.[0]) || startDateArt}
-                endDate={fmt(pickerDateArt?.[1]) || endDateArt}
-              />
+
+              {/* CHART */}
+              <div className="mt-3">
+                <AppmerceChartByArticolo
+                  file={tostini.fileAppmerce}
+                  startDate={fmt(pickerDateArt?.[0]) || startDateArt}
+                  endDate={fmt(pickerDateArt?.[1]) || endDateArt}
+                />
+              </div>
             </Card.Body>
           </Card>
         </Col>
