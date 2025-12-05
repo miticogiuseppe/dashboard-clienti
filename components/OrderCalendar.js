@@ -215,11 +215,11 @@ const OrderCalendar = ({ orders }) => {
 
   return (
     <Fragment>
-      <Seo title="Calendario APPMERCE di Copral" />
+      <Seo title="Calendario consegna ordini" />
       <Pageheader
         title="Apps"
-        currentpage="Calendario Consegna Ordini"
-        activepage="Calendario Consegna Ordini"
+        currentpage="Calendario consegna ordini"
+        //activepage="Calendario consegna ordini"
       />
       <Row>
         <Col xl={12}>
@@ -240,7 +240,7 @@ const OrderCalendar = ({ orders }) => {
                   borderRadius: "8px",
                 }}
               >
-                Calendario Consegna Ordini
+                Calendario consegna ordini
               </div>
 
               {/* FILTRI ORIZZONTALI */}
