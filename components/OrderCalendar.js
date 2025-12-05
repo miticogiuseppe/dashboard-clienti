@@ -224,12 +224,23 @@ const OrderCalendar = ({ orders }) => {
       <Row>
         <Col xl={12}>
           <Card className="custom-card overflow-hidden">
-            <Card.Header className="d-flex flex-column gap-3">
+            <Card.Header
+              className="d-flex align-items-center justify-content-center"
+              style={{ minHeight: "70px" }}
+            >
               <div
                 className="card-title"
-                style={{ textAlign: "center", fontWeight: 600 }}
+                style={{
+                  textAlign: "center",
+                  fontWeight: 900,
+                  fontSize: "26px",
+                  letterSpacing: "0.6px",
+                  color: "#1f2937",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                }}
               >
-                Calendario Ordini
+                Calendario Consegna Ordini
               </div>
 
               {/* FILTRI ORIZZONTALI */}

@@ -55,7 +55,7 @@ const OrderListModal = ({ orders, onClose }) => {
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              tableLayout: "fixed",
+              //tableLayout: "fixed",
             }}
           >
             <thead
@@ -92,10 +92,10 @@ const OrderListModal = ({ orders, onClose }) => {
                 <th style={{ textAlign: "center", padding: "0.5rem" }}>
                   Agente
                 </th>
-                <th style={{ textAlign: "center", padding: "0.5rem" }}>
+                <th style={{ textAlign: "left", padding: "0.5rem" }}>
                   Cliente
                 </th>
-                <th style={{ textAlign: "center", padding: "0.5rem" }}>
+                <th style={{ textAlign: "left", padding: "0.5rem" }}>
                   Articolo
                 </th>
                 <th
