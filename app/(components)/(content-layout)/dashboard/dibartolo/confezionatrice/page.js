@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { usePathname } from "next/navigation";
 import dayjs from "dayjs";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -13,7 +14,7 @@ import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/s
 import ConfezionatriceChart from "@/components/ConfezionatriceChart";
 
 //import filedb from "@/filedb.json";
-import * as XLSX from "xlsx";
+//import * as XLSX from "xlsx";
 
 const confezionatriceData = {
   fileExcel: "/api/download-resource?id=Dibartolo_Confezionatrice", // legge il percorso dal JSON
@@ -41,7 +42,20 @@ const fmt = (d) => {
 export default function PaginaConfezionatrice() {
   const [pickerDate, setPickerDate] = useState([null, null]);
   const [periodo, setPeriodo] = useState("mese");
+  const pathname = usePathname();
   const { startDate, endDate } = calcolaRange(periodo);
+  // estrai e normalizza il tenant dalla pathname: es 'dibartolo' -> 'Dibartolo'
+  const rawTenant = pathname?.split("/")[2] || "";
+  const tenant =
+    rawTenant && rawTenant.length > 0
+      ? rawTenant.charAt(0).toUpperCase() + rawTenant.slice(1)
+      : "Dibartolo";
+  console.debug(
+    "PaginaConfezionatrice - pathname:",
+    pathname,
+    "tenant:",
+    tenant
+  );
 
   return (
     <Fragment>
@@ -53,67 +67,13 @@ export default function PaginaConfezionatrice() {
         showActions={false}
       />
 
-      {/* FILTRO DATE */}
-      <Row className="g-4 mb-4">
-        <Col xl={6}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="d-flex justify-content-between align-items-center py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Seleziona Date
-              </Card.Title>
-              <SpkDropdown
-                toggleas="a"
-                Customtoggleclass="btn btn-sm btn-light text-muted border"
-                Toggletext="Periodo"
-              >
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("settimana");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Questa settimana
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("mese");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Ultimo mese
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("anno");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Anno corrente
-                </Dropdown.Item>
-              </SpkDropdown>
-            </Card.Header>
-            <Card.Body>
-              <SpkFlatpickr
-                options={{ mode: "range", dateFormat: "Y-m-d" }}
-                onfunChange={(date) => setPickerDate(date)}
-                value={pickerDate}
-              />
-              <p className="text-muted mt-2 mb-3 small">
-                ({fmt(pickerDate?.[0]) || startDate} →{" "}
-                {fmt(pickerDate?.[1]) || endDate})
-              </p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* GRAFICI AFFIANCATI: PESO SCARICATO VS RISERVATO */}
+      {/* GRAFICO UNICO: PESO SCARICATO E RISERVATO PER BILANCIA */}
       <Row className="g-4">
-        <Col xl={6} md={12}>
+        <Col xl={12} md={12}>
           <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
             <Card.Header className="py-3">
               <Card.Title className="mb-0 fw-semibold">
-                Peso Scaricato per Bilancia
+                Peso Scaricato e Quantità Riservata per Bilancia
               </Card.Title>
             </Card.Header>
             <Card.Body>
@@ -122,34 +82,12 @@ export default function PaginaConfezionatrice() {
                 colonne={{
                   indice: "Indice",
                   dataOra: "Data e Ora",
-                  valore: "Peso Scaricato",
+                  valorePeso: "Peso Scaricato",
+                  valoreRiservato: "Riservato",
                   bilancia: "Bilancia",
                   descrizione: "Descrizione",
                 }}
-                startDate={fmt(pickerDate?.[0]) || startDate}
-                endDate={fmt(pickerDate?.[1]) || endDate}
-              />
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col xl={6} md={12}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Quantità Riservata per Bilancia
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <ConfezionatriceChart
-                file={confezionatriceData.fileExcel}
-                colonne={{
-                  indice: "Indice",
-                  dataOra: "Data e Ora",
-                  valore: "Riservato",
-                  bilancia: "Bilancia",
-                  descrizione: "Descrizione",
-                }}
+                tenant={tenant}
                 startDate={fmt(pickerDate?.[0]) || startDate}
                 endDate={fmt(pickerDate?.[1]) || endDate}
               />

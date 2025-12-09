@@ -1,167 +1,272 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
-
-// IMPORTAZIONI DEI PLUGIN DAY.JS
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
-// Estendi Day.js con i plugin
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-// Funzione mock di loadSheet (se non è già importata, usala così)
-const loadSheet = async (blob, sheetName) => {
-  const workbook = XLSX.read(await blob.arrayBuffer(), { type: "array" });
-  const sheet =
-    workbook.Sheets[sheetName] || workbook.Sheets[workbook.SheetNames[0]];
-  // !!! Essenziale: usiamo {raw: true} per ottenere i numeri seriali di Excel !!!
-  return XLSX.utils.sheet_to_json(sheet, { raw: true });
+const headerStyle = {
+  padding: "10px 6px",
+  fontWeight: 700,
+  fontSize: 14,
+  borderBottom: "1px solid #ddd",
+  background: "#f8f9fa",
+  textAlign: "center",
 };
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
+const cellStyle = {
+  padding: "8px 6px",
+  borderBottom: "1px solid #eee",
+  textAlign: "center",
+};
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+const loadSheet = async (idOrUrl, providedTenant) => {
+  const tenant = providedTenant
+    ? providedTenant
+    : typeof window !== "undefined"
+    ? window.location.pathname.split("/")[2]
+    : null;
 
-const ComponentChart = ({ file, colonne, startDate, endDate }) => {
+  const isApiPath = typeof idOrUrl === "string" && idOrUrl.startsWith("/api/");
+  const url = isApiPath
+    ? idOrUrl
+    : `/api/fetch-excel-json?id=${encodeURIComponent(idOrUrl)}`;
+
+  const headers = tenant ? { "x-tenant": tenant } : {};
+
+  const response = await fetch(url, { headers });
+  if (!response.ok) {
+    let msg;
+    try {
+      const clone = response.clone();
+      const json = await clone.json();
+      msg = json?.error ?? JSON.stringify(json);
+    } catch (_) {
+      const clone2 = response.clone();
+      msg = await clone2.text();
+    }
+    throw new Error(
+      `Impossibile trovare o leggere il file con id: ${idOrUrl} -> ${msg}`
+    );
+  }
+
+  const contentType = (
+    response.headers.get("content-type") || ""
+  ).toLowerCase();
+
+  if (contentType.includes("application/json") || isApiPath === false) {
+    return await response.json();
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(sheet, { defval: "" });
+};
+
+const ConfezionatriceChart = ({ file, colonne, tenant }) => {
   const [dataChart, setDataChart] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
+  // CARICO I DATI
   useEffect(() => {
     let isMounted = true;
 
     const fetchData = async () => {
-      if (!isMounted) return;
-
+      if (!isMounted || !file) return;
       try {
         setLoading(true);
-        setDataChart(null);
+        setErrorMsg("");
 
-        // 1. TROVARE IL FILE (Se il componente gestisce il fetch da filedb.json)
-        // NOTA: Se il prop 'file' passato è già il percorso, ignora le 5 righe seguenti.
-        const resDb = await fetch("/api/filedb");
-        const filedb = await resDb.json();
-        const fileInfo = filedb.Dibartolo.find(
-          (f) => f.id === "Dibartolo_Confezionatrice" // <-- Cerca l'ID corretto
-        );
-        const filePath = fileInfo ? fileInfo.path : file; // Usa il percorso trovato o il prop 'file'
+        const jsonSheet = await loadSheet(file, tenant);
 
-        // 2. FETCH DATI
-        const response = await fetch(filePath);
-        const blob = await response.blob();
-        let jsonSheet = await loadSheet(blob, "Foglio1");
+        const normalized = jsonSheet.map((row) => {
+          const rawDate = row[colonne.dataOra];
+          let parsed = dayjs("");
 
-        // 3. PREPARAZIONE E FILTRAGGIO ROBUSTO
-        const startFilter = dayjs(startDate).startOf("day");
-        const endFilter = dayjs(endDate).endOf("day");
-
-        const filtered = jsonSheet.filter((row) => {
-          let rawDateValue = row[colonne.dataOra];
-          let dateString;
-
-          // Conversione del seriale Excel in una stringa data/ora
-          if (typeof rawDateValue === "number" && rawDateValue > 1) {
-            dateString = XLSX.SSF.format("yyyy-mm-dd HH:mm:ss", rawDateValue);
-          } else {
-            dateString = rawDateValue;
+          try {
+            if (!rawDate) {
+              parsed = dayjs.invalid();
+            } else if (typeof rawDate === "number" && rawDate > 1) {
+              const d = XLSX.SSF.parse_date_code(rawDate);
+              parsed = dayjs(new Date(d.y, d.m - 1, d.d, d.H, d.M, d.S));
+            } else {
+              parsed = dayjs(rawDate);
+            }
+          } catch (e) {
+            parsed = dayjs.invalid();
           }
 
-          const rowDate = dayjs(dateString);
-
-          if (!rowDate.isValid()) {
-            // Se la data non è valida, scarta la riga
-            return false;
-          }
-
-          // Filtro: inclusivo all'inizio (startFilter) e alla fine (endFilter)
-          return (
-            rowDate.isSameOrAfter(startFilter) &&
-            rowDate.isSameOrBefore(endFilter)
-          );
+          return { ...row, _parsedDate: parsed };
         });
 
-        // 4. PREPARAZIONE DATI PER CHART.JS
-
-        const bilance = [...new Set(filtered.map((r) => r[colonne.bilancia]))];
-        const labels = filtered.map((r) => {
-          let rawDateValue = r[colonne.dataOra];
-          if (typeof rawDateValue === "number" && rawDateValue > 1) {
-            // Formatta il seriale Excel per l'etichetta del grafico
-            return XLSX.SSF.format("DD/MM HH:mm", rawDateValue);
-          }
-          // Altrimenti usa dayjs per formattare la stringa data/ora
-          return dayjs(rawDateValue).format("DD/MM HH:mm");
-        });
-
-        const datasets = bilance.map((b, i) => {
-          const color = `hsl(${(i * 70) % 360}, 70%, 50%)`;
-          const data = filtered
-            .filter((r) => r[colonne.bilancia] === b)
-            .map((r) => Number(r[colonne.valore]) || 0);
-
-          return {
-            label: `Bilancia ${b}`,
-            data,
-            backgroundColor: color,
-          };
-        });
-
-        if (isMounted) {
-          setDataChart({ labels, datasets });
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error("Errore lettura o elaborazione dati:", error);
-          setDataChart(null);
-        }
+        if (isMounted) setDataChart({ rows: normalized });
+      } catch (err) {
+        if (isMounted) setErrorMsg(`Errore: ${err.message}`);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchData();
+    return () => (isMounted = false);
+  }, [file, colonne, tenant]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [file, colonne, startDate, endDate]);
+  if (loading) return <div className="p-4 text-blue-600">Caricamento...</div>;
+  if (errorMsg) return <div className="p-4 text-red-600">{errorMsg}</div>;
+  if (!dataChart) return <div className="p-4">In attesa dati...</div>;
 
-  // Visualizzazione condizionale
-  if (loading) return <p>Caricamento dati...</p>;
-  if (!dataChart || dataChart.datasets.every((d) => d.data.length === 0))
-    return <p>Nessun dato disponibile per il periodo selezionato.</p>;
+  // FILTRO PER DATA
+  let filtered = dataChart.rows || [];
+  if (filterDate) {
+    const selected = dayjs(filterDate);
+    if (selected.isValid()) {
+      filtered = filtered.filter(
+        (r) => r._parsedDate?.isValid() && r._parsedDate.isSame(selected, "day")
+      );
+    }
+  }
 
-  // Opzioni del grafico
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: "bottom" },
-      tooltip: {
-        callbacks: {
-          label: (context) =>
-            `${context.dataset.label}: ${context.parsed.y} kg`,
-        },
-      },
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: "Kg" } },
-      x: { title: { display: true, text: "Data e Ora" } },
-    },
-  };
+  return (
+    <div style={{ padding: 32, width: "100%" }}>
+      {/* FILTRO A SINISTRA */}
+      <div
+        style={{
+          marginBottom: 20,
+          display: "flex",
+          justifyContent: "flex-start",
+          width: "100%",
+        }}
+      >
+        <div style={{ width: 240 }}>
+          <label
+            style={{
+              fontWeight: 600,
+              fontSize: 15,
+              marginBottom: 4,
+              display: "block",
+              color: "#333",
+            }}
+          >
+            Seleziona giorno:
+          </label>
 
-  return <Bar data={dataChart} options={options} />;
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            style={{
+              width: "100%",
+              border: "1px solid #ccc",
+              borderRadius: 6,
+              padding: "6px 8px",
+              fontSize: 15,
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setFilterDate("")}
+            style={{
+              marginTop: 8,
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: 6,
+              background: "#f3f3f3",
+              border: "1px solid #bbb",
+              fontSize: 14,
+              cursor: "pointer",
+            }}
+          >
+            Azzera filtro
+          </button>
+        </div>
+      </div>
+
+      {/* TABELLA SCROLLABILE FULL WIDTH/HEIGHT */}
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          maxHeight: 420,
+          overflowY: "auto",
+          background: "#fff",
+          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+          boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
+          padding: 0,
+        }}
+      >
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}
+        >
+          <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
+            <tr style={{ background: "#f8f9fa" }}>
+              <th style={headerStyle}>{colonne.indice}</th>
+              <th style={headerStyle}>{colonne.dataOra}</th>
+              <th style={headerStyle}>
+                {colonne.valorePeso || colonne.valore || "Valore"}
+              </th>
+              <th style={headerStyle}>{colonne.bilancia}</th>
+              <th style={headerStyle}>
+                {colonne.valoreRiservato || "Riservato"}
+              </th>
+              <th style={headerStyle}>{colonne.descrizione}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: "center", padding: 40 }}>
+                  Nessun dato disponibile
+                </td>
+              </tr>
+            ) : (
+              filtered.map((r, i) => (
+                <tr
+                  key={i}
+                  style={{
+                    background: i % 2 === 0 ? "#fff" : "#f7f7f9",
+                    fontSize: 13,
+                  }}
+                >
+                  <td style={cellStyle}>{r[colonne.indice] ?? i + 1}</td>
+                  <td style={cellStyle}>
+                    {r._parsedDate.isValid()
+                      ? r._parsedDate.format("YYYY-MM-DD HH:mm")
+                      : ""}
+                  </td>
+                  <td style={cellStyle}>
+                    {Number(r[colonne.valorePeso] ?? r[colonne.valore] ?? 0)}
+                  </td>
+                  <td style={cellStyle}>{r[colonne.bilancia]}</td>
+                  <td style={cellStyle}>{r[colonne.valoreRiservato] ?? ""}</td>
+                  <td
+                    style={{
+                      ...cellStyle,
+                      maxWidth: 300,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {r[colonne.descrizione]}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 };
 
-export default ComponentChart;
+export default ConfezionatriceChart;
