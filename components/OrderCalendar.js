@@ -4,7 +4,6 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import OrderListModal from "./OrderListModal";
-import "./OrderCalendar.css";
 import Pageheader from "../shared/layouts-components/page-header/pageheader";
 import { Card, Col, Row } from "react-bootstrap";
 import Seo from "../shared/layouts-components/seo/seo";

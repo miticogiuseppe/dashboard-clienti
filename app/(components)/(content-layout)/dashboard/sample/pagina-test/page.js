@@ -38,7 +38,7 @@ const fmt = (d) =>
   !d ? "" : typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 
 // COMPONENTE PRINCIPALE
-export default function PaginaDashboard() {
+export default function PaginaTest() {
   // dati demo per la card migliorata (sostituisci con i tuoi dati reali quando vuoi)
   const storicoDemo = {
     total: 128, // valore grande
