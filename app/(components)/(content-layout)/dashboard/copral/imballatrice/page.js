@@ -1,17 +1,18 @@
 "use client";
-import React, { Fragment, useState } from "react";
-import { Col, Row, Card } from "react-bootstrap";
-import Seo from "@/shared/layouts-components/seo/seo";
-import Pageheader from "@/shared/layouts-components/page-header/pageheader";
-import MacchinaDashboard from "@/components/MacchinaDashboard";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
+import AppmerceTable from "@/components/AppmerceTable";
+import MacchinaDashboard from "@/components/MacchinaDashboard";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import Dropdown from "react-bootstrap/Dropdown";
+import Pageheader from "@/shared/layouts-components/page-header/pageheader";
+import Seo from "@/shared/layouts-components/seo/seo";
 import dayjs from "dayjs";
+import { Fragment, useEffect, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import Dropdown from "react-bootstrap/Dropdown";
 
-const imballatricetest = {
+const imballatrice = {
   nome: "Imballatrice",
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
@@ -57,6 +58,40 @@ export default function PaginaImballatrice() {
   const { startDate: startDateArt, endDate: endDateArt } =
     calcolaRange(periodoArt);
 
+  const [recentOrders, setRecentOrders] = useState([]);
+  const parseDate = (dateValue) => {
+    if (!dateValue || dateValue === 0) return new Date(0);
+
+    if (typeof dateValue === "number" && dateValue > 40000) {
+      const excelEpoch = new Date("1899-12-30");
+      return new Date(excelEpoch.getTime() + dateValue * 86400000);
+    }
+
+    const str = String(dateValue).trim();
+    if (str.includes("-")) return new Date(str);
+
+    const parts = str.split("/");
+    if (parts.length === 3)
+      return new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
+
+    return new Date(0);
+  };
+  useEffect(() => {
+    async function fetchData() {
+      const res = await fetch(
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        { headers: { "x-tenant": imballatrice.tenant } }
+      );
+      const data = await res.json();
+      const sorted = data
+        // .filter((order) => order["Macchina"] === "Imballatrice") // opzionale se vuoi filtrare solo Imballatrice
+        .sort((a, b) => parseDate(b["Data ord"]) - parseDate(a["Data ord"]));
+      setRecentOrders(sorted.slice(0, 7));
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <Fragment>
       <Seo title="Macchina - Imballatrice" />
@@ -69,10 +104,7 @@ export default function PaginaImballatrice() {
 
       <Row>
         <Col xxl={12}>
-          <MacchinaDashboard
-            {...imballatricetest}
-            tenant={imballatricetest.tenant}
-          />
+          <MacchinaDashboard {...imballatrice} tenant={imballatrice.tenant} />
         </Col>
       </Row>
 
@@ -179,12 +211,23 @@ export default function PaginaImballatrice() {
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
               <AppmerceChartByArticolo
-                file={imballatricetest.fileAppmerce}
+                file={imballatrice.fileAppmerce}
                 startDate={fmt(pickerDateArt?.[0]) || startDateArt}
                 endDate={fmt(pickerDateArt?.[1]) || endDateArt}
               />
             </Card.Body>
           </Card>
+        </Col>
+      </Row>
+      <Row className="mt-4">
+        <Col xl={6}>
+          <AppmerceTable
+            recentOrders={recentOrders}
+            parseDate={parseDate}
+            title={`Appmerce`}
+            fileExcel={imballatrice.fileAppmerce}
+            tenant={imballatrice.tenant}
+          />
         </Col>
       </Row>
     </Fragment>
