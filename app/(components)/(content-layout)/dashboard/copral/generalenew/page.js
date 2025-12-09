@@ -56,24 +56,21 @@ const Ecommerce = () => {
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
 
-  // Logica di Fetch e Calcolo Dati unificata (basata su HEAD)
-  const fetchData = useCallback(async () => {
-    // 1. Fetch del foglio Excel
-    const res = await fetch(
-      "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-      {
-        headers: { "x-tenant": tenant },
-      }
-    );
-    let content = await res.json();
-    content = parseDates(content, ["Data ord"]); // Converte le date in oggetti Moment/Date
-    setSheetData(content);
-  }, []);
-
-  // useEffect aggiornato per eseguire getData solo al cambio di data
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData = async () => {
+      // 1. Fetch del foglio Excel
+      const res = await fetch(
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        {
+          headers: { "x-tenant": tenant },
+        }
+      );
+      let content = await res.json();
+      content = parseDates(content, ["Data ord"]); // Converte le date in oggetti Moment/Date
+      setSheetData(content);
+    };
+    fetch();
+  }, []);
 
   useEffect(() => {
     if (!sheetData) return;
@@ -91,7 +88,9 @@ const Ecommerce = () => {
     }
 
     // --- Logica per Grafico a Barre (Famiglie di prodotti - Qta da evadere) ---
-    const grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
+    let grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
+    grouped = grouped.filter((item) => item["descfam"] !== "0");
+
     setChartOptions(
       createOptions(grouped, "descfam", undefined, "bar", "#b94eed")
     );
@@ -263,42 +262,6 @@ const Ecommerce = () => {
     },
   ];
 
-  // Configurazione per il grafico a barre
-  const barChartOptions = {
-    ...Portoptions, // Usando un template generico per gli options
-    xaxis: {
-      categories: chartOptions?.xaxis?.categories || [], // Usa i dati calcolati
-    },
-    chart: {
-      ...Portoptions?.chart,
-      type: "bar",
-      height: 397,
-    },
-    colors: ["#b94eed"],
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "55%",
-        endingShape: "rounded",
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: true,
-      width: 2,
-      colors: ["transparent"],
-    },
-    tooltip: {
-      y: {
-        formatter: function (val) {
-          return val.toLocaleString("it-IT"); // Formattazione numerica
-        },
-      },
-    },
-  };
-
   return (
     <>
       {isLoading ? (
@@ -356,7 +319,7 @@ const Ecommerce = () => {
                     chartSeries.length > 0 &&
                     chartOptions?.xaxis?.categories.length > 0 ? (
                       <Spkapexcharts
-                        chartOptions={barChartOptions}
+                        chartOptions={chartOptions}
                         chartSeries={chartSeries}
                         type="bar"
                         width={"100%"}
