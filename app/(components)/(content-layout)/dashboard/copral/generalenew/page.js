@@ -57,7 +57,7 @@ const Ecommerce = () => {
   const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
 
   useEffect(() => {
-    fetchData = async () => {
+    let fetchData = async () => {
       // 1. Fetch del foglio Excel
       const res = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
@@ -69,7 +69,7 @@ const Ecommerce = () => {
       content = parseDates(content, ["Data ord"]); // Converte le date in oggetti Moment/Date
       setSheetData(content);
     };
-    fetch();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -337,7 +337,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Tabella Ordini Recenti */}
-            <Col xxl={8} xl={7}>
+            <Col xxl={8} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Ordini Recenti</div>
@@ -387,7 +387,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
-            <Col xxl={4} xl={5}>
+            <Col xxl={4} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <h6 className="card-title">Totale Ordini per Cliente (€)</h6>
