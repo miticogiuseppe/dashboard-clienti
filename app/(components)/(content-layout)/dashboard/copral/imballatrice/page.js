@@ -12,7 +12,7 @@ import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
-const imballatricetest = {
+const imballatrice = {
   nome: "Imballatrice",
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
@@ -80,7 +80,7 @@ export default function PaginaImballatrice() {
     async function fetchData() {
       const res = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-        { headers: { "x-tenant": imballatricetest.tenant } }
+        { headers: { "x-tenant": imballatrice.tenant } }
       );
       const data = await res.json();
       const sorted = data
@@ -104,10 +104,7 @@ export default function PaginaImballatrice() {
 
       <Row>
         <Col xxl={12}>
-          <MacchinaDashboard
-            {...imballatricetest}
-            tenant={imballatricetest.tenant}
-          />
+          <MacchinaDashboard {...imballatrice} tenant={imballatrice.tenant} />
         </Col>
       </Row>
 
@@ -214,7 +211,7 @@ export default function PaginaImballatrice() {
                 {fmt(pickerDateArt?.[1]) || endDateArt})
               </p>
               <AppmerceChartByArticolo
-                file={imballatricetest.fileAppmerce}
+                file={imballatrice.fileAppmerce}
                 startDate={fmt(pickerDateArt?.[0]) || startDateArt}
                 endDate={fmt(pickerDateArt?.[1]) || endDateArt}
               />
@@ -228,8 +225,8 @@ export default function PaginaImballatrice() {
             recentOrders={recentOrders}
             parseDate={parseDate}
             title={`Appmerce`}
-            fileExcel={imballatricetest.fileAppmerce}
-            tenant={imballatricetest.tenant}
+            fileExcel={imballatrice.fileAppmerce}
+            tenant={imballatrice.tenant}
           />
         </Col>
       </Row>
