@@ -1,35 +1,39 @@
 "use client";
-const Spkapexcharts = dynamic(
-  () =>
-    import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
-);
+
+import dynamic from "next/dynamic";
 import AppmerceChart from "@/components/AppmerceChart";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkBreadcrumb from "@/shared/@spk-reusable-components/reusable-uielements/spk-breadcrumb";
 import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import { Cardsdata, Recentorders } from "@/shared/data/dashboard/salesdata";
+import { Cardsdata } from "@/shared/data/dashboard/salesdata";
 import Seo from "@/shared/layouts-components/seo/seo";
+
 import {
-  extractValues,
+  extractUniques,
   filterByRange,
   filterByWeek,
-  filterSheet,
+  filterByValue,
   loadSheet,
   orderSheet,
   parseDates,
   sumByKey,
 } from "@/utils/excelUtils";
+
 import dayjs from "dayjs";
 import moment from "moment";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Dropdown, Row } from "react-bootstrap";
 
-// Utility per calcolare range date
+const Spkapexcharts = dynamic(
+  () =>
+    import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
+  { ssr: false }
+);
+
+// Utility date
 const calcolaRange = (periodo) => {
   const oggi = dayjs();
   const inizio = {
@@ -37,18 +41,17 @@ const calcolaRange = (periodo) => {
     mese: oggi.subtract(1, "month"),
     anno: oggi.startOf("year"),
   }[periodo];
+
   return {
     startDate: inizio.format("YYYY-MM-DD"),
     endDate: oggi.format("YYYY-MM-DD"),
   };
 };
 
-// Utility per formattare date
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
-};
+const fmt = (d) =>
+  !d ? "" : typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 
+// COMPONENTE
 const Generale = () => {
   const [sheetData, setSheetData] = useState(undefined);
   const [graphSeries, setGraphSeries] = useState([]);
@@ -66,17 +69,10 @@ const Generale = () => {
 
   const handleDateChange = (date) => {
     setPickerDate(date);
-    if (date && date[0] && date[1]) {
-      setStartDate({ ...date });
-    }
+    if (date?.[0] && date?.[1]) setStartDate({ ...date });
   };
 
-  const [data, allData] = useState(Recentorders);
-  const handleRemove = (id) => {
-    const list = data.filter((idx) => idx.id !== id);
-    allData(list);
-  };
-
+  // Caricamento Excel
   useEffect(() => {
     (async () => {
       const response = await fetch("/data/Analisi.xlsx");
@@ -85,22 +81,19 @@ const Generale = () => {
       let jsonSheet = await loadSheet(blob, "appmerce_db");
       setSheetData(jsonSheet);
 
-      let products = extractValues(jsonSheet, "Descrizione famiglia");
+      let products = extractUniques(jsonSheet, "Descrizione famiglia");
       setProducts(products);
     })();
-  }, [setSheetData]);
+  }, []);
 
+  //Logica filtro + grafico
   useEffect(() => {
     if (!sheetData) return;
 
-    let jsonSheet = sheetData;
-
-    // Parse delle date
-    jsonSheet = parseDates(jsonSheet, ["Data ordine"]);
+    let jsonSheet = parseDates(sheetData, ["Data ordine"]);
     jsonSheet = orderSheet(jsonSheet, ["Data ordine"], ["asc"]);
 
-    // Filtro per intervallo di date
-    if (startDate && startDate[0] && startDate[1]) {
+    if (startDate?.[0] && startDate?.[1]) {
       jsonSheet = filterByRange(
         jsonSheet,
         "Data ordine",
@@ -111,43 +104,32 @@ const Generale = () => {
       jsonSheet = filterByWeek(jsonSheet, "Data ordine", moment(), 2);
     }
 
-    // Filtro per famiglia selezionata
     if (selectedProduct) {
-      jsonSheet = filterSheet(
+      jsonSheet = filterByValue(
         jsonSheet,
         "Descrizione famiglia",
         selectedProduct
       );
     }
 
-    // Somma quantità per articolo
     const counters = sumByKey(jsonSheet, "Articolo", "Qta/kg da ev.");
+    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 15);
 
-    // Ordina e limita (top 20 articoli)
-    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 20);
-
-    // Prepara serie ApexCharts
-    const series = [
+    setGraphSeries([
       {
         name: "Quantità",
-        data: topCounters.map((c) => ({
-          x: c.Articolo,
-          y: Number(c.count),
-        })),
+        data: topCounters.map((c) => ({ x: c.Articolo, y: Number(c.count) })),
       },
-    ];
+    ]);
 
-    // Opzioni grafico
-    const options = {
+    setGraphOptions({
       chart: { type: "bar" },
       dataLabels: { enabled: true },
       xaxis: {},
-    };
-
-    setGraphSeries(series);
-    setGraphOptions(options);
+    });
   }, [sheetData, selectedProduct, startDate]);
 
+  // Conta prodotti totali
   useEffect(() => {
     if (!sheetData) return;
     const total = sheetData.reduce((acc, row) => {
@@ -159,36 +141,32 @@ const Generale = () => {
 
   return (
     <Fragment>
-      <Seo title="Dibartolo Dashboard" />
+      <Seo title="Dashboard Generale" />
 
-      {/* <!-- Start::page-header --> */}
-      <div className="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+      {/* HEADER */}
+      <div className="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
         <div>
           <SpkBreadcrumb Customclass="mb-1">
             <li className="breadcrumb-item">
-              <Link scroll={false} href="#!">
-                Dashboard
-              </Link>
+              <Link href="#">Dashboard</Link>
             </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              Generale
-            </li>
+            <li className="breadcrumb-item active">Generale</li>
           </SpkBreadcrumb>
           <h1 className="page-title fw-medium fs-18 mb-0">Generale</h1>
         </div>
-        <div className="sc-container">
-          <div className="form-group">
+
+        {/* FILTRI */}
+        <div className="d-flex gap-2 align-items-center flex-wrap">
+          <div className="form-group m-0">
             <div className="input-group">
               <div className="input-group-text bg-white border">
-                {" "}
-                <i className="ri-calendar-line" />{" "}
+                <i className="ri-calendar-line" />
               </div>
               <SpkFlatpickr
                 inputClass="form-control"
                 options={{ mode: "range", dateFormat: "Y-m-d" }}
                 onfunChange={handleDateChange}
                 value={pickerDate}
-                placeholder={["2016-10-10", "2016-10-20"]}
               />
               <button
                 type="button"
@@ -202,11 +180,8 @@ const Generale = () => {
               </button>
             </div>
           </div>
-          <SpkDropdown
-            Toggletext="Group By"
-            Togglevariant="white"
-            Customclass="inline-block"
-          >
+
+          <SpkDropdown Toggletext="Group By" Togglevariant="white">
             <Dropdown.Item onClick={() => setSelectedProduct(undefined)}>
               --- Tutti i prodotti ---
             </Dropdown.Item>
@@ -216,114 +191,92 @@ const Generale = () => {
               </Dropdown.Item>
             ))}
           </SpkDropdown>
+
           <SpkButton Buttonvariant="white">
-            <i className="ri-filter-3-line align-middle me-1 lh-1" /> Filter
+            <i className="ri-filter-3-line me-1" /> Filter
           </SpkButton>
-          <SpkButton Buttonvariant="primary" Customclass="me-0">
+
+          <SpkButton Buttonvariant="primary">
             <i className="ri-share-forward-line me-1" /> Share
           </SpkButton>
         </div>
       </div>
-      {/* <!-- End::page-header --> */}
 
-      {/* <!-- Start:: row-1 --> */}
-      <Row>
-        <Col xl={8}>
-          <Row>
-            <Col xxl={5} xl={6} key={Math.random()}>
-              <Spkcardscomponent
-                cardClass="overflow-hidden main-content-card"
-                headingClass="d-block mb-1"
-                mainClass="d-flex align-items-start justify-content-between mb-2"
-                Icon={true}
-                iconClass="ti ti-shopping-cart"
-                card={{
-                  id: 1,
-                  title: "Total Products",
-                  count: productCount,
-                  iconClass: "ti ti-shopping-cart",
-                  backgroundColor: "primary",
-                  color: "success",
-                }}
-                badgeClass="md rounded-pill"
-                dataClass="mb-0"
-              />
-            </Col>
-            {Cardsdata.filter(
-              (card) =>
-                card.title !== "Total Products" && card.title !== "Total Sales"
-            ).map((idx) => (
-              <Col xxl={3} xl={6} key={Math.random()}>
-                <Spkcardscomponent
-                  cardClass="overflow-hidden main-content-card"
-                  headingClass="d-block mb-1"
-                  mainClass="d-flex align-items-start justify-content-between mb-2"
-                  Icon={true}
-                  iconClass={idx.iconClass}
-                  card={idx}
-                  badgeClass="md rounded-pill"
-                  dataClass="mb-0"
-                />
-              </Col>
-            ))}
-            <Col xxl={8} xl={6}>
-              <Card className="custom-card h-100">
-                <Card.Header className="justify-content-between">
-                  <Card.Title>TS Azienda</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("settimana");
-                        setPickerDateTS([null, null]);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("mese");
-                        setPickerDateTS([null, null]);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("anno");
-                        setPickerDateTS([null, null]);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
-                </Card.Header>
-                <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "Y-m-d" }}
-                    onfunChange={(date) => setPickerDateTS(date)}
-                    value={pickerDateTS}
-                  />
-                  <p className="text-muted mb-2">
-                    Visualizzazione: ({fmt(pickerDateTS?.[0]) || startDateTS} →{" "}
-                    {fmt(pickerDateTS?.[1]) || endDateTS})
-                  </p>
-                  <AppmerceChart
-                    title="TS Azienda"
-                    startDate={fmt(pickerDateTS?.[0]) || startDateTS}
-                    endDate={fmt(pickerDateTS?.[1]) || endDateTS}
-                  />
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+      {/* CARDS CENTRATE E DISTANZIATE */}
+      <Row className="g-4 justify-content-center">
+        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
+          <div className="w-100 p-3 shadow-sm rounded-3 white text-center">
+            <Spkcardscomponent
+              cardClass="overflow-hidden main-content-card h-100"
+              headingClass="d-block mb-1 fw-semibold"
+              mainClass="d-flex align-items-start justify-content-between mb-2"
+              Icon={true}
+              iconClass="ti ti-shopping-cart"
+              card={{ id: 1, title: "Total Products", count: productCount }}
+              badgeClass="md rounded-pill"
+              dataClass="mb-0"
+            />
+          </div>
         </Col>
-        <Col xl={4}></Col>
+
+        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
+          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
+            <h6 className="fw-semibold">Ordini Evasi</h6>
+            <h2 className="text-success">0</h2>
+          </Card>
+        </Col>
+
+        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
+          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
+            <h6 className="fw-semibold">Clienti Attivi</h6>
+            <h2 className="text-info">0</h2>
+          </Card>
+        </Col>
       </Row>
-      {/* <!-- End:: row-1 --> */}
+
+      {/* GRAFICI AFFIANCATI */}
+      <Row className="g-4 mt-4">
+        {/* TS AZIENDA */}
+        <Col xl={8}>
+          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <Card.Title>TS Azienda</Card.Title>
+            </Card.Header>
+
+            <Card.Body>
+              <AppmerceChart
+                title="TS Azienda"
+                startDate={fmt(pickerDateTS?.[0]) || startDateTS}
+                endDate={fmt(pickerDateTS?.[1]) || endDateTS}
+              />
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/*  NUOVO GRAFICO LATERALE */}
+        <Col xl={4}>
+          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
+            <Card.Header>
+              <Card.Title>Analisi Quantità</Card.Title>
+            </Card.Header>
+
+            <Card.Body>
+              {graphSeries.length > 0 ? (
+                <Spkapexcharts
+                  chartOptions={graphOptions}
+                  chartSeries={graphSeries}
+                  type="bar"
+                  height={350}
+                />
+              ) : (
+                <p className="text-muted text-center">
+                  Nessun dato disponibile
+                </p>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
     </Fragment>
   );
 };

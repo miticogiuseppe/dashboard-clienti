@@ -2,14 +2,14 @@ import React from "react";
 
 const REACT_LOGO_PATH = "/bouncing-circles.svg";
 
-export default (props) => {
+const Preloader = (props) => {
   const { show } = props;
   // Preloader Component in attesa al caricamento dei dati
 
   return (
     <div
       className={`preloader bg-soft flex-column justify-content-center align-items-center ${
-        show ? "" : "show"
+        show ? "" : "hide"
       }`}
     >
       <img
@@ -21,3 +21,5 @@ export default (props) => {
     </div>
   );
 };
+
+export default Preloader;
