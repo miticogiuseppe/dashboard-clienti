@@ -48,6 +48,14 @@ const loadSheetFromUrl = async (url, sheetName) => {
   return XLSX.utils.sheet_to_json(sheet);
 };
 
+const loadSheetFromFile = (relativePath, sheetName) => {
+  const filePath = path.resolve(process.env.DRIVE_PATH, relativePath);
+  const data = fs.readFileSync(filePath);
+  const workbook = XLSX.read(data, { type: "buffer" });
+  const sheet = workbook.Sheets[sheetName];
+  return XLSX.utils.sheet_to_json(sheet);
+};
+
 // Specificando le colonne che contengono date, è possibile parsare tutte le date automaticamente.
 const parseDates = (jsonSheet, dateCols) => {
   let result = [];
