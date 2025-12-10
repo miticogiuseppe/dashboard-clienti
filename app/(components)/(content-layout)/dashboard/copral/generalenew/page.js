@@ -271,7 +271,7 @@ const Ecommerce = () => {
   const dynamicCards = [
     {
       id: 1,
-      title: "Totale ordini",
+      title: "Totale Ordini",
       svgIcon: svg4,
       backgroundColor: "primary3 svg-white",
       color: ordersCompletionRate > 0 ? "success" : "danger",
@@ -280,7 +280,7 @@ const Ecommerce = () => {
     },
     {
       id: 2,
-      title: "Totale clienti",
+      title: "Totale Clienti",
       svgIcon: svg5,
       backgroundColor: "primary svg-white",
       color: "success",
@@ -364,7 +364,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Tabella Ordini Recenti */}
-            <Col xxl={8} xl={7}>
+            <Col xxl={8} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Ordini Recenti</div>
@@ -381,9 +381,9 @@ const Ecommerce = () => {
                     <SpkTablescomponent
                       tableClass="text-nowrap table-hover"
                       header={[
-                        { title: "Numero Ordine" },
+                        { title: "Numero ordine" },
                         { title: "Sezionale" },
-                        { title: "Ragione Sociale" },
+                        { title: "Ragione sociale" },
                         { title: "Agente" },
                         { title: "Data ordine" },
                       ]}
@@ -414,7 +414,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
-            <Col xxl={4} xl={5}>
+            <Col xxl={4} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <h6 className="card-title">Totale Ordini per Cliente (€)</h6>
