@@ -84,6 +84,11 @@
   }
 }
 
+.sc-title {
+  font-size: 26px;
+  font-weight: 900;
+}
+
 /* SearchBox component */
 
 .search-box {
@@ -205,4 +210,7 @@
 }
 .text-right {
   text-align: right;
+}
+.spacing {
+  margin-bottom: $sep;
 }

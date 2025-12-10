@@ -154,32 +154,18 @@ const OrderCalendar = ({ data }) => {
 
   return (
     <Fragment>
-      <Seo title="Calendario consegna ordini" />
-      <Pageheader title="Apps" currentpage="Calendario consegna ordini" />
+      <Seo title="Calendario consegne" />
+      <Pageheader title="Apps" currentpage="Calendario" />
       <Row>
         <Col xl={12}>
           <Card className="custom-card overflow-hidden">
-            <Card.Header
-              className="d-flex align-items-center justify-content-center"
-              style={{ minHeight: "70px" }}
-            >
-              <div
-                className="card-title"
-                style={{
-                  textAlign: "center",
-                  fontWeight: 900,
-                  fontSize: "26px",
-                  letterSpacing: "0.6px",
-                  color: "#1f2937",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                }}
-              >
-                Calendario consegna ordini
-              </div>
-
+            <Card.Header className="vertical-center">
+              <span className="sc-title">Calendario consegne</span>
+            </Card.Header>
+            <Card.Body>
               {/* FILTRI ORIZZONTALI */}
               <div
+                className="spacing"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(4, 1fr)",
@@ -220,8 +206,7 @@ const OrderCalendar = ({ data }) => {
                   onSearch={handleArticleSearch}
                 />
               </div>
-            </Card.Header>
-            <Card.Body>
+
               <FullCalendar
                 plugins={[dayGridPlugin, listPlugin, timeGridPlugin]}
                 initialView="dayGridMonth"

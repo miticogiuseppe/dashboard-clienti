@@ -242,7 +242,7 @@ const Ecommerce = () => {
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
-                    Report quantità da evadere per famiglia
+                    Incidenza degli importi sulle famiglie
                   </div>
                   <div className="d-flex align-items-center">
                     <PeriodSelector
