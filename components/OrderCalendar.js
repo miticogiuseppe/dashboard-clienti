@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, Fragment } from "react";
+import { useState, useCallback, Fragment } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
