@@ -27,8 +27,6 @@ const Spkapexcharts = dynamic(
 );
 
 const Ecommerce = () => {
-  const tenant = "Copral";
-
   // Stati unificati e logica di filtro per data
   const [isLoading, setIsLoading] = useState(true);
   const [sheetData, setSheetData] = useState(undefined);
@@ -49,16 +47,12 @@ const Ecommerce = () => {
   const [totalUniqueOrders, setTotalUniqueOrders] = useState(0); // DENOMINATORE
   const [totalQuantity, setTotalQuantity] = useState(0); // Qta da evadere totale
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
-  const [ordersCompletionRate, setOrdersCompletionRate] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
       const res = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-        {
-          headers: { "x-tenant": tenant },
-        }
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
       let content = await res.json();
       content = parseDates(content, ["Data ord"]); // Converte le date in oggetti Moment/Date
@@ -85,7 +79,8 @@ const Ecommerce = () => {
 
     // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Qta da evadere)
 
-    const grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
+    let grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
+    grouped = grouped.filter((x) => x["descfam"] !== "0");
     setChartOptions(
       createOptions(grouped, "descfam", undefined, "bar", "#b94eed")
     );
@@ -112,32 +107,6 @@ const Ecommerce = () => {
       "Ragione sociale"
     ).length;
     setTotalUniqueCustomers(uniqueCustomersCount);
-
-    // ----------------------- Tasso di completamento degli ordini
-
-    // 1. Ordini che sono stati evasi (Qta da ev = 0, null, o vuoto)
-    console.log(filteredData);
-    const completedOrdersData = filteredData.filter(
-      (item) =>
-        parseFloat(item["Qta da ev"]) === 0 ||
-        item["Qta da ev"] === null ||
-        item["Qta da ev"] === ""
-    );
-
-    // 2. Conta gli ordini unici completati (NUMERATORE)
-    const uniqueCompletedOrdersCount = extractUniques(
-      completedOrdersData,
-      "Nr.ord"
-    ).length;
-
-    // 3. Calcola la percentuale
-    console.log(uniqueCompletedOrdersCount);
-    console.log(orderNumbers.length);
-    let completionRate = 0;
-    if (orderNumbers.length > 0) {
-      completionRate = (uniqueCompletedOrdersCount / orderNumbers.length) * 100;
-    }
-    setOrdersCompletionRate(Math.round(completionRate)); // Arrotonda all'intero
 
     // ----------------------- Logica per Grafico a torta (Ordini totali € per cliente)
 
@@ -278,7 +247,7 @@ const Ecommerce = () => {
       count: totalUniqueOrders.toLocaleString("it-IT"),
       svgIcon: svg4,
       backgroundColor: "primary3 svg-white",
-      color: ordersCompletionRate > 0 ? "success" : "danger",
+      color: "success",
     },
     {
       id: 2,

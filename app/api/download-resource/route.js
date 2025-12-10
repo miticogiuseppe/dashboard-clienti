@@ -1,10 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { getTokenData } from "@/utils/tokenData";
 
 export async function GET(req) {
   try {
     // Ottenere il tenant
-    const tenant = req.headers.get("x-tenant");
+    const token = await getTokenData();
+    const tenant = token.tenant;
     // Lettura di filedb.json) ...
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

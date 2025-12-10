@@ -15,11 +15,7 @@ export function useFetchResource() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/fetch-resource?id=${id}`, {
-        headers: {
-          "x-tenant": tenant,
-        },
-      });
+      const res = await fetch(`/api/fetch-resource?id=${id}`);
 
       if (!res.ok) {
         const text = await res.text();

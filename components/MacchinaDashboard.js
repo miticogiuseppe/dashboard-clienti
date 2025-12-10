@@ -10,11 +10,7 @@ const MacchinaDashboard = ({
   tenant,
 }) => {
   const downloadFile = async (url) => {
-    const res = await fetch(url, {
-      headers: {
-        "x-tenant": tenant,
-      },
-    });
+    const res = await fetch(url);
 
     if (!res.ok) {
       alert("Errore nel download");

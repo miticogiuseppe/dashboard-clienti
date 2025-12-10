@@ -19,8 +19,6 @@ const troncatrice = {
   fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 
-  tenant: "Copral",
-
   appmerce: {
     ordini: 90,
     produzione: 1450,
@@ -80,8 +78,7 @@ export default function PaginaCopralNas() {
   useEffect(() => {
     async function fetchData() {
       const res = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-        { headers: { "x-tenant": troncatrice.tenant } }
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
       const data = await res.json();
       const sorted = data.sort(

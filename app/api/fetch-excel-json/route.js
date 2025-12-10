@@ -1,10 +1,13 @@
 import { promises as fs } from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
+import { getTokenData } from "@/utils/tokenData";
 
 export async function GET(req) {
   try {
-    const tenant = req.headers.get("x-tenant");
+    const token = await getTokenData();
+
+    const tenant = token.tenant;
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
         status: 400,

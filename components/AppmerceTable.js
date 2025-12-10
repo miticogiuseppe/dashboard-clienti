@@ -10,9 +10,7 @@ function AppmerceTable({ recentOrders, parseDate, title, fileExcel, tenant }) {
     if (!fileExcel) return;
 
     try {
-      const res = await fetch(fileExcel, {
-        headers: { "x-tenant": tenant },
-      });
+      const res = await fetch(fileExcel);
 
       if (!res.ok) {
         alert("Errore nel download del file");

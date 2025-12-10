@@ -79,8 +79,7 @@ export default function PaginaImballatrice() {
   useEffect(() => {
     async function fetchData() {
       const res = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
-        { headers: { "x-tenant": imballatrice.tenant } }
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
       const data = await res.json();
       const sorted = data
