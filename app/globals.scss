@@ -16,11 +16,36 @@
 @import "@simonwep/pickr/dist/themes/monolith.min.css";
 @import "@simonwep/pickr/dist/themes/nano.min.css";
 
+@import "variables";
+
+/* theme modifications */
+
 .authentication .desktop-logo,
 .authentication .desktop-white {
   height: 6.2rem;
   line-height: 3.2rem;
 }
+.app-sidebar .main-sidebar-header .header-logo img {
+  width: 100%;
+  height: auto;
+}
+
+.authentication-background {
+  background-color: rgb(0, 0, 0);
+}
+
+/* calendar */
+
+.more-link-event {
+  color: #666;
+  font-style: italic;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* custom components */
+
 .sc-container {
   display: flex;
   flex-direction: row;
@@ -59,23 +84,7 @@
   }
 }
 
-.app-sidebar .main-sidebar-header .header-logo img {
-  width: 100%;
-  height: auto;
-}
-
-// Authentication background color
-.authentication-background{
-  background-color: rgb(0, 0, 0);
-}
-
-.more-link-event {
-  color: #666;
-  font-style: italic;
-  cursor: pointer;
-  background: none;
-  border: none;
-}
+/* SearchBox component */
 
 .search-box {
   display: flex;
@@ -146,4 +155,54 @@
     background: #007bff;
     color: white;
   }
+}
+
+/* utility classes */
+
+.clickable {
+  cursor: pointer;
+}
+.sc-grid {
+  display: flex;
+  flex-direction: row;
+  gap: $sep;
+}
+.sc-grow {
+  flex: 1 0 0;
+}
+.sc-shrink {
+  flex: 0 1 0;
+}
+.flex-center {
+  justify-content: center;
+}
+.flex-right {
+  justify-content: right;
+}
+.sc-margin {
+  margin-bottom: $sep;
+}
+.vertical-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.vertical-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.vertical-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
 }

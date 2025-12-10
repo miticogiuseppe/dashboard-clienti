@@ -6,10 +6,8 @@ import Preloader from "@/utils/Preloader";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import { Fragment, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import "@/lib/chart-setup";
 import { Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Ecommerce = () => {
   const [isLoading] = useState(false);
@@ -20,7 +18,7 @@ const Ecommerce = () => {
     labels: ["Completati", "In lavorazione", "Annullati"],
     datasets: [
       {
-        data: [0, 0, 0],
+        data: [25, 25, 50],
         backgroundColor: [
           "rgba(54, 162, 235, 0.6)",
           "rgba(255, 206, 86, 0.6)",

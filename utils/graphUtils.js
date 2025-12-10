@@ -132,6 +132,32 @@ const defaultOptions = {
     },
   },
 };
+const pieOptions = {
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          let value = context.raw; // valore numerico
+          return value.toLocaleString("it-IT", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        },
+      },
+    },
+    datalabels: {
+      formatter: function (value, context) {
+        return value.toLocaleString("it-IT", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      },
+    },
+    legend: {
+      display: false,
+    },
+  },
+};
 
 const createSeries = (countArray, name = "Counters") => {
   return [
@@ -170,4 +196,21 @@ const createOptions = (
 //   return options;
 // };
 
-export { createSeries, createOptions };
+function randomColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgba(${r},${g},${b},0.7)`;
+}
+
+function makeRandomColors(length) {
+  return Array.from({ length }, () => randomColor());
+}
+
+export {
+  createSeries,
+  createOptions,
+  makeRandomColors,
+  randomColor,
+  pieOptions,
+};
