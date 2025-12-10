@@ -80,7 +80,8 @@ export default function PaginaCopralNas() {
       const res = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      const data = await res.json();
+      const resp = await res.json();
+      const data = resp.data;
       const sorted = data.sort(
         (a, b) => parseDate(b["Data ord"]) - parseDate(a["Data ord"])
       );

@@ -18,6 +18,10 @@ import { Card, Col, Row } from "react-bootstrap";
 import PeriodSelector from "@/components/PeriodSelector";
 import "@/lib/chart-setup";
 import { Pie } from "react-chartjs-2";
+import { formatDate } from "@/utils/format";
+import { FaUsers } from "react-icons/fa6";
+import { PiPackage } from "react-icons/pi";
+import { IoIosCalendar } from "react-icons/io";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -43,10 +47,11 @@ const Ecommerce = () => {
 
   // Dati per la tabella e le card
   const [recentOrders, setRecentOrders] = useState([]);
-  const [orders, setOrders] = useState([]); // Tutti gli ordini unici per calcolare il tasso
   const [totalUniqueOrders, setTotalUniqueOrders] = useState(0); // DENOMINATORE
-  const [totalQuantity, setTotalQuantity] = useState(0); // Qta da evadere totale
   const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
+
+  // data del file
+  const [fileDate, setFileDate] = useState(undefined);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,9 +59,11 @@ const Ecommerce = () => {
       const res = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      let content = await res.json();
-      content = parseDates(content, ["Data ord"]); // Converte le date in oggetti Moment/Date
-      setSheetData(content);
+      let resp = await res.json();
+      let data = resp.data;
+      data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
+      setSheetData(data);
+      setFileDate(resp.lwt);
     };
     fetchData();
   }, []);
@@ -98,7 +105,6 @@ const Ecommerce = () => {
 
     // Totale ordini unici
     let orderNumbers = extractUniques(filteredData, "Nr.ord");
-    setOrders(orderNumbers); // Lista di tutti i numeri d'ordine unici nel periodo
     setTotalUniqueOrders(orderNumbers.length); // DENOMINATORE
 
     // Totale clienti unici
@@ -171,89 +177,29 @@ const Ecommerce = () => {
     setIsLoading(false);
   }, [sheetData, startDate, endDate]);
 
-  // Funzioni di rendering SVG dalla versione MAIN
-  const svg4 = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
-      fill="#000000"
-      viewBox="0 0 256 256"
-    >
-      <path d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z"></path>
-    </svg>
-  );
-  const svg5 = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
-      fill="#000000"
-      viewBox="0 0 256 256"
-    >
-      <path
-        d="M10.23,200a88,88,0,0,1,147.54,0"
-        stroke="#000000"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="16"
-        fill="none"
-      />
-      <path
-        d="M172,160a87.93,87.93,0,0,1,73.77,40"
-        stroke="#000000"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="16"
-        fill="none"
-      />
-      <circle
-        cx="84"
-        cy="108"
-        r="52"
-        stroke="#000000"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="16"
-        fill="none"
-      />
-      <path
-        d="M152.69,59.7A52,52,0,1,1,172,160"
-        stroke="#000000"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="16"
-        fill="none"
-      />
-    </svg>
-  );
-  const svg3 = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
-      fill="#000000"
-      viewBox="0 0 256 256"
-    >
-      <path d="M228,72v79.82a8,8,0,0,1-3.6,6.67L136,218.67a8,8,0,0,1-8,0L31.6,158.49A8,8,0,0,1,28,151.82V72a8,8,0,0,1,4-6.93l88-48.18a8,8,0,0,1,8,0l88,48.18A8,8,0,0,1,228,72ZM128,34.09,47.66,78.2l35.88,19.62,80.34-44.11ZM44,148.14l80,43.79V107.55l-80-43.78ZM136,107.55v84.38l80-43.79V78.2Z"></path>
-    </svg>
-  );
-
   // Cards unificate e dinamiche
   const dynamicCards = [
     {
       id: 1,
-      title: "Totale ordini",
-      count: totalUniqueOrders.toLocaleString("it-IT"),
-      svgIcon: svg4,
-      backgroundColor: "primary3 svg-white",
+      title: "Ultimo aggiornamento",
+      count: formatDate(new Date(fileDate)),
+      svgIcon: <IoIosCalendar />,
+      backgroundColor: "info svg-white",
       color: "success",
     },
     {
       id: 2,
+      title: "Totale ordini",
+      count: totalUniqueOrders.toLocaleString("it-IT"),
+      svgIcon: <PiPackage />,
+      backgroundColor: "primary3 svg-white",
+      color: "success",
+    },
+    {
+      id: 3,
       title: "Totale clienti",
       count: totalUniqueCustomers.toLocaleString("it-IT"),
-      svgIcon: svg5,
+      svgIcon: <FaUsers />,
       backgroundColor: "primary svg-white",
       color: "success",
     },
@@ -261,13 +207,12 @@ const Ecommerce = () => {
 
   return (
     <>
+      <Seo title="Copral Generale" />
+
       {isLoading ? (
         <Preloader show={true} />
       ) : (
         <>
-          {/* */}
-          <Seo title="Dashboards-Ecommerce" />
-
           <Pageheader
             title="Dashboards"
             currentpage="Generale"
@@ -277,20 +222,6 @@ const Ecommerce = () => {
 
           <Row>
             {/* Card statistiche */}
-
-            {/* {dynamicCards.map((idx) => (
-                <Spkcardscomponent
-                  key={idx.id}
-                  svgIcon={idx.svgIcon}
-                  cardClass="overflow-hidden main-content-card flex-grow-1 d-flex flex-column justify-content-end text-center"
-                  headingClass="d-block fs-20 fw-semibold mb-2"
-                  mainClass="d-flex align-items-center justify-content-center flex-column "
-                  card={idx}
-                  badgeClass="md"
-                  dataClass="mb-0"
-                />
-              ))} */}
-
             {dynamicCards.map((idx) => (
               <Col xxl={3} xl={3} lg={6} key={idx.id}>
                 <Spkcardscomponent
@@ -322,7 +253,7 @@ const Ecommerce = () => {
                     />
                   </div>
                 </Card.Header>
-                <Card.Body className="pb-2">
+                <Card.Body className="p-0">
                   <div id="sales-report">
                     {chartSeries &&
                     chartSeries.length > 0 &&
@@ -350,15 +281,8 @@ const Ecommerce = () => {
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Ordini recenti</div>
-                  <Link
-                    scroll={false}
-                    href="#!"
-                    className="btn btn-outline-light border d-flex align-items-center text-muted btn-sm"
-                  >
-                    View All
-                  </Link>
                 </Card.Header>
-                <div className="card-body p-0">
+                <Card.Body className="p-0">
                   <div className="table-responsive">
                     <SpkTablescomponent
                       tableClass="text-nowrap table-hover"
@@ -391,7 +315,7 @@ const Ecommerce = () => {
                       ))}
                     </SpkTablescomponent>
                   </div>
-                </div>
+                </Card.Body>
               </Card>
             </Col>
 
@@ -407,7 +331,7 @@ const Ecommerce = () => {
                   </div>
                 </Card.Body>
                 {/* Footer per legenda dei primi 3 clienti */}
-                <div className="card-footer p-3 my-2">
+                <Card.Footer>
                   <div className="row row-cols-12">
                     {top3.map((item, idx) => (
                       <div className="col p-0" key={idx}>
@@ -428,11 +352,10 @@ const Ecommerce = () => {
                       </div>
                     ))}
                   </div>
-                </div>
+                </Card.Footer>
               </Card>
             </Col>
           </Row>
-          {/* */}
         </>
       )}
     </>

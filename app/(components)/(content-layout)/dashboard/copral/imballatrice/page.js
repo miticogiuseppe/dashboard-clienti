@@ -81,7 +81,8 @@ export default function PaginaImballatrice() {
       const res = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      const data = await res.json();
+      const resp = await res.json();
+      const data = resp.data;
       const sorted = data
         // .filter((order) => order["Macchina"] === "Imballatrice") // opzionale se vuoi filtrare solo Imballatrice
         .sort((a, b) => parseDate(b["Data ord"]) - parseDate(a["Data ord"]));

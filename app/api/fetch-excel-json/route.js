@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
 import { getTokenData } from "@/utils/tokenData";
@@ -27,7 +27,7 @@ export async function GET(req) {
       });
 
     const dbPath = path.join(process.cwd(), "data", "filedb.json");
-    const dbContent = await fs.readFile(dbPath, "utf8");
+    const dbContent = fs.readFileSync(dbPath, "utf8");
     const db = JSON.parse(dbContent);
 
     const tenantResources = db[tenant];
@@ -45,7 +45,9 @@ export async function GET(req) {
       });
 
     const filePath = path.join(process.env.DRIVE_PATH, resource.path);
-    const fileBuffer = await fs.readFile(filePath);
+    const fileBuffer = fs.readFileSync(filePath);
+    const stats = fs.statSync(filePath);
+    const fileDate = stats.mtime;
 
     const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
@@ -58,7 +60,10 @@ export async function GET(req) {
     console.log("Sheet name used:", sheetName);
 
     const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    const jsonData = {
+      data: XLSX.utils.sheet_to_json(sheet, { defval: "" }),
+      lwt: fileDate,
+    };
 
     return new Response(JSON.stringify(jsonData), {
       status: 200,
