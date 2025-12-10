@@ -9,12 +9,7 @@ import {
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { extractUniques, sumByKey, parseDates } from "@/utils/excelUtils";
-import {
-  createSeries,
-  createOptions,
-  emptySeries,
-  emptyOptions,
-} from "@/utils/graphUtils";
+import { createSeries, createOptions } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
 import dynamic from "next/dynamic";
 import Link from "next/link";
