@@ -24,10 +24,7 @@ const OrderCalendar = ({ data }) => {
     const ordiniGiorno = filteredData.filter((order) => {
       if (!order["Data Cons."]) return false; // Ignora ordini senza data
 
-      const dataOrd =
-        typeof order["Data Cons."] === "number"
-          ? order["Data Cons."].toDate()
-          : order["Data Cons."].replace(/\//g, "-");
+      const dataOrd = order["Data Cons."].format("YYYY-MM-DD");
 
       return dataOrd === clickedDate;
     });
