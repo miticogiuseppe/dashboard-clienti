@@ -8,6 +8,7 @@ import Pageheader from "../shared/layouts-components/page-header/pageheader";
 import { Card, Col, Row } from "react-bootstrap";
 import Seo from "../shared/layouts-components/seo/seo";
 import SearchBox from "@/components/SearchBox";
+import moment from "moment";
 
 const OrderCalendar = ({ data }) => {
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -25,7 +26,7 @@ const OrderCalendar = ({ data }) => {
 
       const dataOrd =
         typeof order["Data Cons."] === "number"
-          ? excelDateToJSDate(order["Data Cons."])
+          ? order["Data Cons."].toDate()
           : order["Data Cons."].replace(/\//g, "-");
 
       return dataOrd === clickedDate;
@@ -60,12 +61,6 @@ const OrderCalendar = ({ data }) => {
     [setArticleSearch]
   );
 
-  const excelDateToJSDate = (serial) => {
-    const utc_days = Math.floor(serial - 25569);
-    const utc_value = utc_days * 86400;
-    return new Date(utc_value * 1000).toISOString().split("T")[0];
-  };
-
   // calcola ordini filtrati
   function checkRow(row, column, searchData) {
     if (searchData.selected) {
@@ -91,10 +86,7 @@ const OrderCalendar = ({ data }) => {
   filteredData.forEach((order) => {
     if (!order["Data Cons."]) return; // Esclude ordini senza Data Cons.
 
-    const data =
-      typeof order["Data Cons."] === "number"
-        ? excelDateToJSDate(order["Data Cons."])
-        : order["Data Cons."].replace(/\//g, "-");
+    const data = order["Data Cons."].toDate().toISOString().split("T")[0];
 
     if (!eventsByDate[data]) eventsByDate[data] = [];
     eventsByDate[data].push(order);

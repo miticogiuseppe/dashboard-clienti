@@ -62,7 +62,8 @@ const parseDates = (jsonSheet, dateCols) => {
   for (let row of jsonSheet)
     for (let dateCol of dateCols) {
       let newRow = _.cloneDeep(row);
-      newRow[dateCol] = excelDateToMoment(newRow[dateCol]);
+      if (typeof newRow[dateCol] === "number")
+        newRow[dateCol] = excelDateToMoment(newRow[dateCol]);
       result.push(newRow);
     }
   return result;
