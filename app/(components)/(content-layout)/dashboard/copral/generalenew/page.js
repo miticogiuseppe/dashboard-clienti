@@ -89,7 +89,7 @@ const Ecommerce = () => {
     setChartOptions(
       createOptions(grouped, "descfam", undefined, "bar", "#b94eed")
     );
-    setChartSeries(createSeries(grouped, "Quantità da Evadere"));
+    setChartSeries(createSeries(grouped, "Quantità"));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
@@ -116,6 +116,7 @@ const Ecommerce = () => {
     // ----------------------- Tasso di completamento degli ordini
 
     // 1. Ordini che sono stati evasi (Qta da ev = 0, null, o vuoto)
+    console.log(filteredData);
     const completedOrdersData = filteredData.filter(
       (item) =>
         parseFloat(item["Qta da ev"]) === 0 ||
@@ -130,6 +131,8 @@ const Ecommerce = () => {
     ).length;
 
     // 3. Calcola la percentuale
+    console.log(uniqueCompletedOrdersCount);
+    console.log(orderNumbers.length);
     let completionRate = 0;
     if (orderNumbers.length > 0) {
       completionRate = (uniqueCompletedOrdersCount / orderNumbers.length) * 100;
@@ -272,20 +275,18 @@ const Ecommerce = () => {
     {
       id: 1,
       title: "Totale ordini",
+      count: totalUniqueOrders.toLocaleString("it-IT"),
       svgIcon: svg4,
       backgroundColor: "primary3 svg-white",
       color: ordersCompletionRate > 0 ? "success" : "danger",
-      count: totalUniqueOrders.toLocaleString("it-IT"),
-      percentage: ordersCompletionRate,
     },
     {
       id: 2,
       title: "Totale clienti",
+      count: totalUniqueCustomers.toLocaleString("it-IT"),
       svgIcon: svg5,
       backgroundColor: "primary svg-white",
       color: "success",
-      count: totalUniqueCustomers.toLocaleString("it-IT"),
-      percentage: "100",
     },
   ];
 
@@ -304,13 +305,11 @@ const Ecommerce = () => {
             activepage="Generale"
             showActions={false}
           />
-          {/* */}
 
-          {/* */}
           <Row>
             {/* Card statistiche */}
-            <Col xl={3} className="d-flex flex-column gap-3 force-bottom-align">
-              {dynamicCards.map((idx) => (
+
+            {/* {dynamicCards.map((idx) => (
                 <Spkcardscomponent
                   key={idx.id}
                   svgIcon={idx.svgIcon}
@@ -321,11 +320,25 @@ const Ecommerce = () => {
                   badgeClass="md"
                   dataClass="mb-0"
                 />
-              ))}
-            </Col>
+              ))} */}
 
+            {dynamicCards.map((idx) => (
+              <Col xxl={3} xl={3} lg={6} key={idx.id}>
+                <Spkcardscomponent
+                  cardClass="overflow-hidden main-content-card"
+                  headingClass="d-block mb-1"
+                  mainClass="d-flex align-items-start justify-content-between mb-2"
+                  svgIcon={idx.svgIcon}
+                  card={idx}
+                  badgeClass="md"
+                  dataClass="mb-0"
+                />
+              </Col>
+            ))}
+          </Row>
+          <Row>
             {/* Grafico a Barre (Report indice importi famiglie) */}
-            <Col xl={9}>
+            <Col xl={12}>
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
