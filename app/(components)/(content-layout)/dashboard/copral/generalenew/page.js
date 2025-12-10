@@ -271,7 +271,7 @@ const Ecommerce = () => {
   const dynamicCards = [
     {
       id: 1,
-      title: "Totale Ordini",
+      title: "Totale ordini",
       svgIcon: svg4,
       backgroundColor: "primary3 svg-white",
       color: ordersCompletionRate > 0 ? "success" : "danger",
@@ -280,7 +280,7 @@ const Ecommerce = () => {
     },
     {
       id: 2,
-      title: "Totale Clienti",
+      title: "Totale clienti",
       svgIcon: svg5,
       backgroundColor: "primary svg-white",
       color: "success",
@@ -367,7 +367,7 @@ const Ecommerce = () => {
             <Col xxl={8} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">Ordini Recenti</div>
+                  <div className="card-title">Ordini recenti</div>
                   <Link
                     scroll={false}
                     href="#!"
@@ -417,7 +417,7 @@ const Ecommerce = () => {
             <Col xxl={4} xl={12}>
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
-                  <h6 className="card-title">Totale Ordini per Cliente (€)</h6>
+                  <h6 className="card-title">Totale ordini per cliente (€)</h6>
                 </Card.Header>
                 <Card.Body>
                   <div className="vertical-center">
