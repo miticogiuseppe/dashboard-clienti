@@ -17,12 +17,56 @@ const OrderCalendar = ({ data }) => {
   const [orderSearch, setOrderSearch] = useState({});
   const [articleSearch, setArticleSearch] = useState({});
 
+  const handleEventClick = (info) => {
+    const clickedDate = info.event.startStr;
+
+    const ordiniGiorno = filteredData.filter((order) => {
+      if (!order["Data Cons."]) return false; // Ignora ordini senza data
+
+      const dataOrd =
+        typeof order["Data Cons."] === "number"
+          ? excelDateToJSDate(order["Data Cons."])
+          : order["Data Cons."].replace(/\//g, "-");
+
+      return dataOrd === clickedDate;
+    });
+
+    setSelectedOrders(
+      ordiniGiorno.map((order) => ({
+        numOrdine: order["Nr.ord"] ?? "N/A",
+        cliente: order["Ragione sociale"] ?? "N/A",
+        articolo: order.Articolo ?? "N/A",
+        quantità: order["Qta da ev"] ?? "N/A",
+        sezione: order.Sez ?? "N/A",
+        agente: order["Des. Agente"] ?? "N/A",
+      }))
+    );
+  };
+
+  const handleAgentSearch = useCallback(
+    (data) => setAgentSearch(data),
+    [setAgentSearch]
+  );
+  const handleClientSearch = useCallback(
+    (data) => setClientSearch(data),
+    [setClientSearch]
+  );
+  const handleOrderSearch = useCallback(
+    (data) => setOrderSearch(data),
+    [setOrderSearch]
+  );
+  const handleArticleSearch = useCallback(
+    (data) => setArticleSearch(data),
+    [setArticleSearch]
+  );
+
   const excelDateToJSDate = (serial) => {
     const utc_days = Math.floor(serial - 25569);
     const utc_value = utc_days * 86400;
     return new Date(utc_value * 1000).toISOString().split("T")[0];
   };
 
+  // calcola ordini filtrati
   function checkRow(row, column, searchData) {
     if (searchData.selected) {
       return String(row[column]) === String(searchData.selected);
@@ -34,8 +78,6 @@ const OrderCalendar = ({ data }) => {
       } else return true;
     }
   }
-
-  // calcola ordini filtrati
   const filteredData = data.filter((order) => {
     const matchAgent = checkRow(order, "Des. Agente", agentSearch);
     const matchClient = checkRow(order, "Ragione sociale", clientSearch);
@@ -58,7 +100,7 @@ const OrderCalendar = ({ data }) => {
     eventsByDate[data].push(order);
   });
 
-  // produce oggetti grafici
+  // produce eventi per il calendario
   const formattedEvents = Object.entries(eventsByDate).flatMap(
     ([data, eventi]) => {
       const visibili = eventi.slice(0, 2).map((order) => ({
@@ -90,49 +132,6 @@ const OrderCalendar = ({ data }) => {
 
       return [...visibili, ...extra];
     }
-  );
-
-  const handleEventClick = (info) => {
-    const clickedDate = info.event.startStr;
-
-    const ordiniGiorno = filteredData.filter((order) => {
-      if (!order["Data Cons."]) return false; // ✅ Ignora ordini senza data
-
-      const dataOrd =
-        typeof order["Data Cons."] === "number"
-          ? excelDateToJSDate(order["Data Cons."])
-          : order["Data Cons."].replace(/\//g, "-");
-
-      return dataOrd === clickedDate;
-    });
-
-    setSelectedOrders(
-      ordiniGiorno.map((order) => ({
-        numOrdine: order["Nr.ord"] ?? "N/A",
-        cliente: order["Ragione sociale"] ?? "N/A",
-        articolo: order.Articolo ?? "N/A",
-        quantità: order["Qta da ev"] ?? "N/A",
-        sezione: order.Sez ?? "N/A",
-        agente: order["Des. Agente"] ?? "N/A",
-      }))
-    );
-  };
-
-  const onAgentSearch = useCallback(
-    (data) => setAgentSearch(data),
-    [setAgentSearch]
-  );
-  const onClientSearch = useCallback(
-    (data) => setClientSearch(data),
-    [setClientSearch]
-  );
-  const onOrderSearch = useCallback(
-    (data) => setOrderSearch(data),
-    [setOrderSearch]
-  );
-  const onArticleSearch = useCallback(
-    (data) => setArticleSearch(data),
-    [setArticleSearch]
   );
 
   const agents = Array.from(
@@ -202,7 +201,7 @@ const OrderCalendar = ({ data }) => {
                   data={filteredAgents}
                   name="Agente"
                   placeholder="Cerca agente..."
-                  onSearch={onAgentSearch}
+                  onSearch={handleAgentSearch}
                 />
 
                 {/* CLIENTE */}
@@ -210,7 +209,7 @@ const OrderCalendar = ({ data }) => {
                   data={filteredClients}
                   name="Cliente"
                   placeholder="Cerca cliente..."
-                  onSearch={onClientSearch}
+                  onSearch={handleClientSearch}
                 />
 
                 {/* NUM. ORDINE */}
@@ -218,7 +217,7 @@ const OrderCalendar = ({ data }) => {
                   data={filteredOrders}
                   name="Num. Ordine"
                   placeholder="Cerca numero ordine..."
-                  onSearch={onOrderSearch}
+                  onSearch={handleOrderSearch}
                 />
 
                 {/* ARTICOLO */}
@@ -226,7 +225,7 @@ const OrderCalendar = ({ data }) => {
                   data={filteredArticles}
                   name="Articolo"
                   placeholder="Cerca articolo..."
-                  onSearch={onArticleSearch}
+                  onSearch={handleArticleSearch}
                 />
               </div>
             </Card.Header>
