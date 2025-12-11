@@ -72,15 +72,26 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
       ...chartOptions.fill,
       opacity: 1,
     };
-    chartOptions.yaxis.labels.formatter = function (y) {
-      return moment("1900-01-01").add(moment.duration(y)).format("m:ss");
+    chartOptions.yaxis.labels.formatter = function (s) {
+      s = s / 1000;
+
+      const hours = Math.floor(s / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      const seconds = Math.floor(s % 60);
+
+      let formatted = "";
+      if (hours > 0) formatted += hours + "h ";
+      if (minutes > 0) formatted += minutes + "m ";
+      formatted += seconds + "s";
+
+      return formatted;
     };
 
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
     };
-  }, [data, startDate, endDate]);
+  }, [data, startDate, endDate, includeList]);
 
   return (
     <div className="custom-card">
