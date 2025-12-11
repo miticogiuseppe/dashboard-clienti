@@ -1,59 +1,31 @@
 "use client";
 
+import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
+import fileDownload from "@/utils/fileDownload";
+import { useMemo } from "react";
 import { Card } from "react-bootstrap";
 import { FiDownload } from "react-icons/fi"; // icona Excel/download
-import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
-import { useMemo } from "react";
+import moment from "moment";
 
-function AppmerceTable({ data, title, fileExcel, tenant }) {
-  const recentOrders = useMemo(() => {
+function AppmerceTable({ data, title, fileExcel, dateColumn, tableHeaders }) {
+  // Ordino gli ultimi 7 ordini per data
+  const filteredData = useMemo(() => {
     if (!data) return [];
-
     const sorted = [...data].sort((a, b) =>
-      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+      a[dateColumn].isBefore(b[dateColumn]) ? 1 : -1
     );
     return sorted.slice(0, 7);
-  }, [data]);
+  }, [data, dateColumn]);
 
-  // Funzione per scaricare file Excel dal server con header x-tenant
   const downloadExcel = async () => {
-    if (!fileExcel) return;
-
-    try {
-      const res = await fetch(fileExcel);
-
-      if (!res.ok) {
-        alert("Errore nel download del file");
-        return;
-      }
-
-      const blob = await res.blob();
-      const tempUrl = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = tempUrl;
-
-      // Nome file dalle response headers
-      const filename =
-        res.headers
-          .get("Content-Disposition")
-          ?.split("filename=")[1]
-          ?.replace(/"/g, "") || "download.xlsx";
-
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(tempUrl);
-    } catch (err) {
-      console.error("Errore download Excel:", err);
-      alert("Errore nel download del file Excel");
-    }
+    fileDownload(fileExcel);
   };
 
   return (
     <Card className="custom-card overflow-hidden">
       <Card.Header className="justify-content-between d-flex align-items-center">
         <div className="card-title">{title}</div>
-        {fileExcel && tenant && (
+        {fileExcel && (
           <button
             onClick={downloadExcel}
             className="btn btn-outline-light border d-flex align-items-center text-muted btn-sm"
@@ -67,31 +39,17 @@ function AppmerceTable({ data, title, fileExcel, tenant }) {
         <div className="table-responsive">
           <SpkTablescomponent
             tableClass="text-nowrap table-hover"
-            header={[
-              { title: "Num. ord." },
-              { title: "Sez." },
-              { title: "Rag. Soc." },
-              { title: "Agente" },
-              { title: "Data ord." },
-            ]}
+            header={tableHeaders.map((header) => ({ title: header.title }))}
           >
-            {recentOrders.map((row, index) => (
+            {filteredData.map((row, index) => (
               <tr key={index}>
-                <td>{row["Nr.ord"] || "N/A"}</td>
-                <td>{row["Sez"] ?? "N/A"}</td>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <div className="fw-semibold">
-                      {row["Ragione sociale"] || "Cliente Generico"}
-                    </div>
-                  </div>
-                </td>
-                <td>{row["Des. Agente"] || "N/A"}</td>
-                <td>
-                  {row["Data ord"]
-                    ? row["Data ord"].toDate().toLocaleDateString()
-                    : "N/A"}
-                </td>
+                {tableHeaders.map((header, index) => (
+                  <td className={header.bold ? "fw-semibold" : ""} key={index}>
+                    {moment.isMoment(row[header.column])
+                      ? row[header.column].toDate().toLocaleDateString()
+                      : row[header.column] || header.default || "N/A"}
+                  </td>
+                ))}
               </tr>
             ))}
           </SpkTablescomponent>
