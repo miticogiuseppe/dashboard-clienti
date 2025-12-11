@@ -18,6 +18,7 @@ const imballatrice = {
   nome: "Imballatrice",
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
+  //fileImballatrice: "/api/download-resource?id=imballatrice_a",
 
   tenant: "Copral",
   appmerce: {
@@ -234,16 +235,34 @@ export default function PaginaImballatrice() {
               <AppmerceTable
                 data={data}
                 title="Produzione"
-                fileExcel={imballatrice.fileAppmerce}
-                tenant={imballatrice.tenant}
+                fileExcel="APPMERCE-000"
+                dateColumn="Data ord"
+                tableHeaders={[
+                  { title: "Num. ord.", column: "Nr.ord" },
+                  { title: "Sez.", column: "Sez" },
+                  {
+                    title: "Rag. Soc.",
+                    column: "Ragione sociale",
+                    default: "Cliente generico",
+                    bold: true,
+                  },
+                  { title: "Agente", column: "Des. Agente" },
+                  { title: "Data ord.", column: "Data ord" },
+                ]}
               />
             </Col>
             <Col xl={6}>
               <AppmerceTable
-                data={data}
+                data={data2}
                 title="Produzione per articolo"
-                fileExcel={imballatrice.fileAppmerce}
-                tenant={imballatrice.tenant}
+                fileExcel="imballatrice_a"
+                dateColumn="Data"
+                tableHeaders={[
+                  { title: "Numero", column: "Numero" },
+                  { title: "Descrizione", column: "Descrizione" },
+                  { title: "Data", column: "Data", bold: true },
+                  { title: "Ora", column: "Ora" },
+                ]}
               />
             </Col>
           </Row>
