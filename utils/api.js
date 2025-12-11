@@ -9,4 +9,16 @@ function jsonResponse(data) {
   });
 }
 
-export { jsonResponse };
+async function check(req, cb) {
+  try {
+    return await cb();
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+export { jsonResponse, check };

@@ -1,12 +1,14 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { getTokenData } from "@/utils/tokenData";
+import { check } from "@/utils/api";
 
 export async function GET(req) {
-  try {
+  return await check(req, async () => {
     // Ottenere il tenant
     const token = await getTokenData();
     const tenant = token.tenant;
+
     // Lettura di filedb.json) ...
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
@@ -36,8 +38,5 @@ export async function GET(req) {
         )}"`,
       },
     });
-  } catch (error) {
-    console.error("Errore durante il download del file:", error);
-    return new Response("Internal server error", { status: 500 });
-  }
+  });
 }
