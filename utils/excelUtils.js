@@ -4,12 +4,40 @@ import moment from "moment";
 import path from "path";
 
 // funzioni di utilità non esportate
-const excelDateToMoment = (excelDate) => {
-  // Excel conta 1 come 1 gennaio 1900, ma ha il bug del 29/02/1900
-  const baseDate = moment("1900-01-01");
+const excelDateToMoment = (excelDateTime) => {
+  // 1. DATA (Parte Intera)
+  const excelDate = Math.floor(excelDateTime); // Parte intera = numero di giorni
+
+  // Excel conta 1 come 1 gennaio 1900
+  let baseDate = moment("1900-01-01");
+
   // Correzione bug Excel: se excelDate > 59, togliamo 1 giorno (29/02/1900 inesistente)
   const correction = excelDate > 59 ? -1 : 0;
-  return baseDate.add(excelDate + correction - 1, "days"); // -1 perché 1 gennaio = 1
+
+  // Applica i giorni (inclusa la correzione)
+  baseDate.add(excelDate + correction - 1, "days");
+
+  // 2. ORA (Parte Frazionaria)
+  const excelTimeFraction = excelDateTime - excelDate; // Parte decimale = frazione del giorno
+
+  // 3. Conversione della Frazione in Millisecondi
+  // Un giorno ha 86400 secondi (24 * 60 * 60)
+  // Un giorno ha 86400000 millisecondi (86400 * 1000)
+  const millisecondsInDay = 86400000;
+  const totalMilliseconds = excelTimeFraction * millisecondsInDay;
+
+  // Aggiunge i millisecondi calcolati all'oggetto moment
+  return baseDate.add(totalMilliseconds, "milliseconds");
+};
+const excelDateToMomentDuration = (excelDateTime) => {
+  const excelDate = Math.floor(excelDateTime);
+
+  const excelTimeFraction = excelDateTime - excelDate;
+
+  const millisecondsInDay = 86400000;
+  const totalMilliseconds = excelTimeFraction * millisecondsInDay;
+
+  return moment.duration(totalMilliseconds);
 };
 const momentToExcelDate = (momentObj) => {
   const baseDate = moment("1900-01-01");
@@ -64,6 +92,17 @@ const parseDates = (jsonSheet, dateCols) => {
     for (let dateCol of dateCols)
       if (typeof newRow[dateCol] === "number")
         newRow[dateCol] = excelDateToMoment(newRow[dateCol]);
+    result.push(newRow);
+  }
+  return result;
+};
+const parseTimes = (jsonSheet, dateCols) => {
+  let result = [];
+  for (let row of jsonSheet) {
+    let newRow = _.cloneDeep(row);
+    for (let dateCol of dateCols)
+      if (typeof newRow[dateCol] === "number")
+        newRow[dateCol] = excelDateToMomentDuration(newRow[dateCol]);
     result.push(newRow);
   }
   return result;
@@ -128,6 +167,7 @@ const filterByRange = (sheet, column, start, end) => {
   return _.filter(sheet, (row) => {
     const cellDate = row[column];
     return (
+      moment.isMoment(cellDate) &&
       cellDate.isSameOrAfter(start, "day") &&
       cellDate.isSameOrBefore(end, "day")
     );
@@ -161,10 +201,21 @@ const extractUniques = (data, col) => {
 
 // Funzione affine a una GROUP BY.
 // Raggruppa in base a groupKey, effettua la sommatoria di valueKey per ogni gruppo.
-const sumByKey = (jsonSheet, groupKey, valueKey, fixEmpty = false) => {
+const sumByKey = (
+  jsonSheet,
+  groupKey,
+  valueKey,
+  fixEmpty = false,
+  convertCb = undefined
+) => {
+  const getValue = (item) => {
+    let value = item ? (convertCb ? convertCb(item) : Number(item)) : 0;
+    return value;
+  };
+
   // 1. Caso: Calcola la somma totale (groupKey è null o undefined)
   if (!groupKey) {
-    return _.sumBy(jsonSheet, (item) => Number(item[valueKey]) || 0);
+    return _.sumBy(jsonSheet, (item) => getValue(item[valueKey]));
   }
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
@@ -176,9 +227,47 @@ const sumByKey = (jsonSheet, groupKey, valueKey, fixEmpty = false) => {
 
     return {
       [groupKey]: computedKey,
-      count: _.sumBy(items, (item) => Number(item[valueKey]) || 0),
+      count: _.sumBy(items, (item) => getValue(item[valueKey])),
     };
   });
+};
+
+/**
+ * Converte un numero decimale Excel (frazione di giorno) in formato HH:mm:ss.
+ * Esempio: 0.117118055553874 -> 02:48:40 (circa)
+ * @param {number|string} excelDuration - Il valore numerico di durata da Excel.
+ * @returns {string} Durata formattata come HH:mm:ss.
+ */
+const formatExcelTimeDuration = (excelDuration) => {
+  let value = Number(excelDuration);
+  if (isNaN(value) || value <= 0) {
+    return "00:00:00";
+  }
+
+  const SECONDS_IN_DAY = 86400; // 24 * 60 * 60
+
+  // 1. Converti la frazione di giorno in secondi totali
+  const totalSeconds = Math.round(value * SECONDS_IN_DAY);
+
+  // 2. Calcola ore, minuti e secondi
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  // 3. Formatta in stringa HH:mm:ss con padding
+  const pad = (num) => String(num).padStart(2, "0");
+
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+};
+
+/**
+ * Funzione di supporto per ottenere solo i secondi totali (utile per calcoli/grafici)
+ */
+const getSecondsFromExcelTime = (excelDuration) => {
+  let value = Number(excelDuration);
+  if (isNaN(value) || value <= 0) return null;
+  const SECONDS_IN_DAY = 86400;
+  return Math.round(value * SECONDS_IN_DAY);
 };
 
 export {
@@ -188,6 +277,7 @@ export {
   excelDateToMoment,
   momentToExcelDate,
   parseDates,
+  parseTimes,
   filterByWeek,
   orderSheet,
   extractUniques,
@@ -196,4 +286,6 @@ export {
   sumByKey,
   loadSheetFromUrl,
   parseDatesString,
+  formatExcelTimeDuration,
+  getSecondsFromExcelTime,
 };

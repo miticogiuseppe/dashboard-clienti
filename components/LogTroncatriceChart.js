@@ -1,0 +1,104 @@
+"use client";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
+import moment from "moment";
+
+// Utility Excel
+import { filterByRange, sumByKey } from "@/utils/excelUtils";
+import { createOptions } from "@/utils/graphUtils";
+
+// ApexCharts
+const Spkapexcharts = dynamic(
+  () =>
+    import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
+  { ssr: false }
+);
+
+export default function LogTroncatriceChart({ data, startDate, endDate }) {
+  const includeList = [
+    "BLADE OFF",
+    "BLADE ON",
+    "CYCLE",
+    "END",
+    "ERROR",
+    "LIST",
+    "NO ALARM",
+    "SINGLE CUT",
+    "START",
+    "STEP CUT",
+  ];
+
+  let graphData = useMemo(() => {
+    let filteredData = data;
+
+    // Filtra per intervallo date
+    if (startDate && endDate) {
+      filteredData = filterByRange(
+        filteredData,
+        "Timestamp",
+        moment(startDate),
+        moment(endDate)
+      );
+    }
+
+    // Somma quantità per Articolo
+    let counters = sumByKey(
+      filteredData,
+      "CommandName",
+      "Tempo",
+      true,
+      (value) => value.asMilliseconds()
+    );
+    // counters = counters.sort((a, b) => b.count - a.count);
+    counters = counters.filter((c) => includeList.includes(c.CommandName));
+
+    // Trasforma per ApexCharts
+    const seriesData = [
+      {
+        name: "Tempo",
+        data: counters.map((c) => ({
+          x: c.CommandName,
+          y: Number(c.count),
+        })),
+      },
+    ];
+
+    // Usa createOptions come AppmerceChart
+    const chartOptions = createOptions(counters, "CommandName", null, "bar");
+
+    // Colore verdino più evidente
+    chartOptions.colors = ["#4CAF50"];
+    chartOptions.fill = {
+      ...chartOptions.fill,
+      opacity: 1,
+    };
+    chartOptions.yaxis.labels.formatter = function (y) {
+      return moment("1900-01-01").add(moment.duration(y)).format("m:ss");
+    };
+
+    return {
+      graphSeries: seriesData,
+      graphOptions: chartOptions,
+    };
+  }, [data, startDate, endDate]);
+
+  return (
+    <div className="custom-card">
+      <div className="card-header justify-content-between"></div>
+      <div className="card-body">
+        {graphData.graphSeries.length > 0 &&
+        graphData.graphOptions.chart?.type ? (
+          <Spkapexcharts
+            chartOptions={graphData.graphOptions}
+            chartSeries={graphData.graphSeries}
+            type={graphData.graphOptions.chart.type}
+            width="100%"
+            height={350}
+          />
+        ) : (
+          <p>Nessun dato disponibile per il range selezionato.</p>
+        )}
+      </div>
+    </div>
+  );
+}

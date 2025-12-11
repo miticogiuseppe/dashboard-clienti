@@ -1,6 +1,6 @@
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
-import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
+import LogTroncatriceChart from "@/components/LogTroncatriceChart";
 import AppmerceTable from "@/components/AppmerceTable";
 import TroncatriceLogTable from "@/components/TroncatriceLogTable";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
@@ -12,7 +12,13 @@ import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-import { parseDates, parseDatesString, orderSheet } from "@/utils/excelUtils";
+import {
+  parseDates,
+  parseTimes,
+  orderSheet,
+  getSecondsFromExcelTime,
+  formatExcelTimeDuration,
+} from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 
 const troncatrice = {
@@ -79,7 +85,8 @@ export default function PaginaTroncatrice() {
       );
       const resp = await res.json();
       let data = resp.data;
-      data = parseDatesString(data, ["Timestamp"], "DD/MM/YYYY HH:mm:ss");
+      data = parseDates(data, ["Timestamp"]);
+      data = parseTimes(data, ["Tempo"]);
       data = orderSheet(data, ["Timestamp"], ["asc"]);
 
       setData2(data);
@@ -218,11 +225,11 @@ export default function PaginaTroncatrice() {
                     onfunChange={(date) => setPickerDateLog(date)}
                     value={computedDateLog}
                   />
-                  {/* <AppmerceChartByArticolo
+                  <LogTroncatriceChart
                     data={data2}
                     startDate={fmt(computedDateLog[0])}
                     endDate={fmt(computedDateLog[1])}
-                  /> */}
+                  />
                 </Card.Body>
               </Card>
             </Col>
@@ -238,7 +245,7 @@ export default function PaginaTroncatrice() {
                   { title: "Num. ord.", column: "Nr.ord" },
                   { title: "Sez.", column: "Sez" },
                   {
-                    title: "Rag. Soc.",
+                    title: "Rag. soc.",
                     column: "Ragione sociale",
                     default: "Cliente generico",
                     bold: true,
@@ -256,19 +263,27 @@ export default function PaginaTroncatrice() {
                 dateColumn="Timestamp"
                 filterDate={computedDateLog}
                 tableHeaders={[
-                  { title: "Timestamp", column: "Timestamp" },
+                  {
+                    title: "Timestamp",
+                    column: "Timestamp",
+                    showSeconds: true,
+                  },
                   { title: "Nome comando", column: "CommandName" },
                   {
-                    title: "Start or Stop",
-                    column: "Start or Stop",
+                    title: "Start or stop",
+                    column: "Col1",
                     allowEmpty: true,
                   },
                   {
                     title: "Lavorazione",
-                    column: "Lavorazione",
+                    column: "Col2",
                     allowEmpty: true,
                   },
-                  { title: "Tempo", column: "Tempo", allowEmpty: true },
+                  {
+                    title: "Tempo",
+                    column: "Tempo",
+                    allowEmpty: true,
+                  },
                 ]}
               />
             </Col>

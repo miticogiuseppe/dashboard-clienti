@@ -19,11 +19,16 @@ function AppmerceTable({
   const filteredData = useMemo(() => {
     if (!data) return [];
     let sorted = [...data].sort((a, b) =>
-      a[dateColumn].isBefore(b[dateColumn]) ? 1 : -1
+      moment.isMoment(a[dateColumn]) &&
+      moment.isMoment(b[dateColumn]) &&
+      a[dateColumn].isBefore(b[dateColumn])
+        ? 1
+        : -1
     );
     if (filterDate && filterDate.length === 2)
       sorted = sorted.filter(
         (x) =>
+          moment.isMoment(x[dateColumn]) &&
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
           x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
       );
@@ -58,8 +63,14 @@ function AppmerceTable({
               <tr key={index}>
                 {tableHeaders.map((header, index) => (
                   <td className={header.bold ? "fw-semibold" : ""} key={index}>
-                    {moment.isMoment(row[header.column])
-                      ? row[header.column].toDate().toLocaleDateString()
+                    {moment.isDuration(row[header.column])
+                      ? moment("1900-01-01")
+                          .add(row[header.column])
+                          .format("m:ss")
+                      : moment.isMoment(row[header.column])
+                      ? header.showSeconds
+                        ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
+                        : row[header.column].format("DD/MM/YYYY")
                       : row[header.column] ||
                         header.default ||
                         (header.allowEmpty ? "" : "N/A")}
