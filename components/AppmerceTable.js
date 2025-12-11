@@ -63,7 +63,7 @@ function AppmerceTable({ data, title, fileExcel, tenant }) {
         )}
       </Card.Header>
 
-      <div className="card-body p-0">
+      <Card.Body className="p-0">
         <div className="table-responsive">
           <SpkTablescomponent
             tableClass="text-nowrap table-hover"
@@ -96,7 +96,7 @@ function AppmerceTable({ data, title, fileExcel, tenant }) {
             ))}
           </SpkTablescomponent>
         </div>
-      </div>
+      </Card.Body>
     </Card>
   );
 }
