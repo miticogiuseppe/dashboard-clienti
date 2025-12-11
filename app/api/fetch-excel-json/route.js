@@ -3,12 +3,14 @@ import path from "path";
 import * as XLSX from "xlsx";
 import { getTokenData } from "@/utils/tokenData";
 import { getFileInfo } from "@/utils/fileTools";
+import { check } from "@/utils/api";
 
 export async function GET(req) {
-  try {
+  return await check(req, async () => {
+    // Ottenere il tenant
     const token = await getTokenData();
-
     const tenant = token.tenant;
+
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
         status: 400,
@@ -82,11 +84,5 @@ export async function GET(req) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  });
 }
