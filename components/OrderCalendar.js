@@ -8,7 +8,6 @@ import Pageheader from "../shared/layouts-components/page-header/pageheader";
 import { Card, Col, Row } from "react-bootstrap";
 import Seo from "../shared/layouts-components/seo/seo";
 import SearchBox from "@/components/SearchBox";
-import moment from "moment";
 
 const OrderCalendar = ({ data }) => {
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -83,7 +82,7 @@ const OrderCalendar = ({ data }) => {
   filteredData.forEach((order) => {
     if (!order["Data Cons."]) return; // Esclude ordini senza Data Cons.
 
-    const data = order["Data Cons."].toDate().toISOString().split("T")[0];
+    const data = order["Data Cons."].format("YYYY-MM-DD");
 
     if (!eventsByDate[data]) eventsByDate[data] = [];
     eventsByDate[data].push(order);

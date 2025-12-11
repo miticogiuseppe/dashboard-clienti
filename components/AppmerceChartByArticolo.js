@@ -1,16 +1,10 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import moment from "moment";
 
 // Utility Excel
-import {
-  loadSheet,
-  parseDates,
-  filterByRange,
-  sumByKey,
-  orderSheet,
-} from "@/utils/excelUtils";
+import { filterByRange, sumByKey } from "@/utils/excelUtils";
 import { createOptions } from "@/utils/graphUtils";
 
 // ApexCharts
@@ -20,88 +14,61 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-export default function AppmerceChartByArticolo({ startDate, endDate }) {
-  const [graphSeries, setGraphSeries] = useState([]);
-  const [graphOptions, setGraphOptions] = useState({});
-  const [loading, setLoading] = useState(true);
+export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
+  let graphData = useMemo(() => {
+    let filteredData = data;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
+    // Filtra per intervallo date
+    if (startDate && endDate) {
+      filteredData = filterByRange(
+        filteredData,
+        "Data",
+        moment(startDate),
+        moment(endDate)
+      );
+    }
 
-        // Carica il file Excel
-        const response = await fetch("/data/imballatrice_a.xlsx");
-        const blob = await response.blob();
-        let jsonSheet = await loadSheet(blob, "Foglio1");
+    // Somma quantità per Articolo
+    let counters = sumByKey(filteredData, "Descrizione", "Numero");
+    counters = counters.sort((a, b) => b.count - a.count);
 
-        // Prepara i dati
-        jsonSheet = parseDates(jsonSheet, ["Data"]);
-        jsonSheet = orderSheet(jsonSheet, ["Data"], ["asc"]);
+    // Trasforma per ApexCharts
+    const seriesData = [
+      {
+        name: "Quantità",
+        data: counters.map((c) => ({
+          x: c.Descrizione,
+          y: Number(c.count),
+        })),
+      },
+    ];
 
-        // Filtra per intervallo date
-        if (startDate && endDate) {
-          jsonSheet = filterByRange(
-            jsonSheet,
-            "Data",
-            moment(startDate),
-            moment(endDate)
-          );
-        }
+    // Usa createOptions come AppmerceChart
+    const chartOptions = createOptions(counters, "Descrizione", null, "bar");
 
-        // Somma quantità per Articolo
-        let counters = sumByKey(jsonSheet, "Descrizione", "Numero");
-        counters = counters.sort((a, b) => b.count - a.count);
+    // Colore verdino più evidente
+    chartOptions.colors = ["#4CAF50"];
+    chartOptions.fill = {
+      ...chartOptions.fill,
+      opacity: 1,
+    };
 
-        // Trasforma per ApexCharts
-        const seriesData = [
-          {
-            name: "Quantità",
-            data: counters.map((c) => ({
-              x: c.Descrizione,
-              y: Number(c.count),
-            })),
-          },
-        ];
-
-        // Usa createOptions come AppmerceChart
-        const chartOptions = createOptions(
-          counters,
-          "Descrizione",
-          null,
-          "bar"
-        );
-
-        // Colore verdino più evidente
-        chartOptions.colors = ["#4CAF50"];
-        chartOptions.fill = {
-          ...chartOptions.fill,
-          opacity: 1,
-        };
-
-        setGraphSeries(seriesData);
-        setGraphOptions(chartOptions);
-      } catch (err) {
-        console.error("Errore nel caricamento di Produzione Macchina:", err);
-        setGraphSeries([]);
-        setGraphOptions({});
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [startDate, endDate]);
+    return {
+      graphSeries: seriesData,
+      graphOptions: chartOptions,
+    };
+  }, [data, startDate, endDate]);
 
   return (
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {loading ? (
-          <p>Caricamento dati in corso...</p>
-        ) : graphSeries.length > 0 && graphOptions.chart?.type ? (
+        {graphData.graphSeries.length > 0 &&
+        graphData.graphOptions.chart?.type ? (
           <Spkapexcharts
-            chartOptions={graphOptions}
-            chartSeries={graphSeries}
-            type={graphOptions.chart.type}
+            chartOptions={graphData.graphOptions}
+            chartSeries={graphData.graphSeries}
+            type={graphData.graphOptions.chart.type}
             width="100%"
             height={350}
           />

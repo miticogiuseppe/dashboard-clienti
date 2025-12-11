@@ -59,13 +59,13 @@ const loadSheetFromFile = (relativePath, sheetName) => {
 // Specificando le colonne che contengono date, è possibile parsare tutte le date automaticamente.
 const parseDates = (jsonSheet, dateCols) => {
   let result = [];
-  for (let row of jsonSheet)
-    for (let dateCol of dateCols) {
-      let newRow = _.cloneDeep(row);
+  for (let row of jsonSheet) {
+    let newRow = _.cloneDeep(row);
+    for (let dateCol of dateCols)
       if (typeof newRow[dateCol] === "number")
         newRow[dateCol] = excelDateToMoment(newRow[dateCol]);
-      result.push(newRow);
-    }
+    result.push(newRow);
+  }
   return result;
 };
 

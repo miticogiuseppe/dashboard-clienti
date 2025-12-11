@@ -3,8 +3,18 @@
 import { Card } from "react-bootstrap";
 import { FiDownload } from "react-icons/fi"; // icona Excel/download
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
+import { useMemo } from "react";
 
-function AppmerceTable({ recentOrders, parseDate, title, fileExcel, tenant }) {
+function AppmerceTable({ data, title, fileExcel, tenant }) {
+  const recentOrders = useMemo(() => {
+    if (!data) return [];
+
+    const sorted = [...data].sort((a, b) =>
+      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+    );
+    return sorted.slice(0, 7);
+  }, [data]);
+
   // Funzione per scaricare file Excel dal server con header x-tenant
   const downloadExcel = async () => {
     if (!fileExcel) return;
@@ -79,7 +89,7 @@ function AppmerceTable({ recentOrders, parseDate, title, fileExcel, tenant }) {
                 <td>{row["Des. Agente"] || "N/A"}</td>
                 <td>
                   {row["Data ord"]
-                    ? parseDate(row["Data ord"]).toLocaleDateString()
+                    ? row["Data ord"].toDate().toLocaleDateString()
                     : "N/A"}
                 </td>
               </tr>
