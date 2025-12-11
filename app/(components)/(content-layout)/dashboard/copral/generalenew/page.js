@@ -98,7 +98,7 @@ const Ecommerce = () => {
     const sortedData = filteredData.sort((a, b) =>
       a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
     );
-    const tableData = sortedData.slice(0, 6); // 6 ordini più recenti filtrati
+    const tableData = sortedData.slice(0, 12); // 12 ordini più recenti filtrati
     setRecentOrders(tableData);
 
     // ----------------------- Logica per Card (Statistiche principali)
@@ -277,7 +277,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Tabella Ordini Recenti */}
-            <Col xxl={8} xl={12}>
+            <Col xxl={8} xl={12} className="h-100">
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Ordini recenti</div>
@@ -285,7 +285,7 @@ const Ecommerce = () => {
                 <Card.Body className="p-0">
                   <div className="table-responsive">
                     <SpkTablescomponent
-                      tableClass="text-nowrap table-hover"
+                      tableClass="text-nowrap table-hover customtable"
                       header={[
                         { title: "Numero ordine" },
                         { title: "Sezionale" },
@@ -320,7 +320,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
-            <Col xxl={4} xl={12}>
+            <Col xxl={4} xl={12} className="h-100">
               <Card className="custom-card overflow-hidden">
                 <Card.Header className="justify-content-between">
                   <h6 className="card-title">Totale ordini per cliente (€)</h6>
