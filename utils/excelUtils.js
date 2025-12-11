@@ -68,6 +68,16 @@ const parseDates = (jsonSheet, dateCols) => {
   }
   return result;
 };
+const parseDatesString = (jsonSheet, dateCols, formatString) => {
+  let result = [];
+  for (let row of jsonSheet) {
+    let newRow = _.cloneDeep(row);
+    for (let dateCol of dateCols)
+      newRow[dateCol] = moment(newRow[dateCol], formatString);
+    result.push(newRow);
+  }
+  return result;
+};
 
 // Permette di ordinare in base alle colonne chiave specificate.
 const orderSheet = (jsonSheet, keyCols, directions) => {
@@ -185,4 +195,5 @@ export {
   filterByRange,
   sumByKey,
   loadSheetFromUrl,
+  parseDatesString,
 };
