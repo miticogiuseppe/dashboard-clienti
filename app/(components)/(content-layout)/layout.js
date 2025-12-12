@@ -10,6 +10,9 @@ import Backtotop from "../../../shared/layouts-components/backtotop/backtotop";
 import Loader from "../../../shared/layouts-components/loader/loader";
 import { useContext } from "react";
 import GlobalContext from "@/context/GlobalContext";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Layout = ({ children }) => {
   const { menu } = useContext(GlobalContext);

@@ -1,10 +1,16 @@
-import { promises as fs } from "fs";
+import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
+import { getTokenData } from "@/utils/tokenData";
+import { getFileInfo } from "@/utils/fileTools";
+import { check } from "@/utils/api";
 
 export async function GET(req) {
-  try {
-    const tenant = req.headers.get("x-tenant");
+  return await check(req, async () => {
+    // Ottenere il tenant
+    const token = await getTokenData();
+    const tenant = token.tenant;
+
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
         status: 400,
@@ -24,7 +30,7 @@ export async function GET(req) {
       });
 
     const dbPath = path.join(process.cwd(), "data", "filedb.json");
-    const dbContent = await fs.readFile(dbPath, "utf8");
+    const dbContent = fs.readFileSync(dbPath, "utf8");
     const db = JSON.parse(dbContent);
 
     const tenantResources = db[tenant];
@@ -42,30 +48,41 @@ export async function GET(req) {
       });
 
     const filePath = path.join(process.env.DRIVE_PATH, resource.path);
-    const fileBuffer = await fs.readFile(filePath);
+    const fileInfo = await getFileInfo(filePath);
+    let jsonSheet = undefined;
+    let cacheFile = "json_cache/" + fileInfo.hash + ".json";
 
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    if (fs.existsSync(cacheFile)) {
+      let data = fs.readFileSync(cacheFile, "utf-8");
+      jsonSheet = JSON.parse(data);
+    } else {
+      const fileBuffer = fs.readFileSync(filePath);
+      const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
-    // se il foglio passato esiste, lo usiamo; altrimenti primo foglio
-    const sheetName =
-      sheetNameParam && workbook.SheetNames.includes(sheetNameParam)
-        ? sheetNameParam
-        : workbook.SheetNames[0];
+      // se il foglio passato esiste, lo usiamo; altrimenti primo foglio
+      const sheetName =
+        sheetNameParam && workbook.SheetNames.includes(sheetNameParam)
+          ? sheetNameParam
+          : workbook.SheetNames[0];
 
-    console.log("Sheet name used:", sheetName);
+      console.log("Sheet name used:", sheetName);
 
-    const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      const sheet = workbook.Sheets[sheetName];
+      jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      // crea il file di cache
+      const jsonString = JSON.stringify(jsonSheet, null, 2);
+      fs.writeFileSync(cacheFile, jsonString, "utf-8");
+    }
+
+    const jsonData = {
+      data: jsonSheet,
+      lwt: fileInfo.mtime,
+    };
 
     return new Response(JSON.stringify(jsonData), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  });
 }

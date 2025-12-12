@@ -14,7 +14,23 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
+export default function LogTroncatriceChart({ data, startDate, endDate }) {
+  const includeList = useMemo(
+    () => [
+      "BLADE OFF",
+      "BLADE ON",
+      "CYCLE",
+      "END",
+      "ERROR",
+      "LIST",
+      "NO ALARM",
+      "SINGLE CUT",
+      "START",
+      "STEP CUT",
+    ],
+    []
+  );
+
   let graphData = useMemo(() => {
     let filteredData = data;
 
@@ -22,29 +38,36 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     if (startDate && endDate) {
       filteredData = filterByRange(
         filteredData,
-        "Data",
+        "Timestamp",
         moment(startDate),
         moment(endDate)
       );
     }
 
     // Somma quantità per Articolo
-    let counters = sumByKey(filteredData, "Descrizione", "Numero");
-    counters = counters.sort((a, b) => b.count - a.count);
+    let counters = sumByKey(
+      filteredData,
+      "CommandName",
+      "Tempo",
+      true,
+      (value) => value.asMilliseconds()
+    );
+    // counters = counters.sort((a, b) => b.count - a.count);
+    counters = counters.filter((c) => includeList.includes(c.CommandName));
 
     // Trasforma per ApexCharts
     const seriesData = [
       {
-        name: "Quantità",
+        name: "Tempo",
         data: counters.map((c) => ({
-          x: c.Descrizione,
+          x: c.CommandName,
           y: Number(c.count),
         })),
       },
     ];
 
     // Usa createOptions come AppmerceChart
-    const chartOptions = createOptions(counters, "Descrizione", null, "bar");
+    const chartOptions = createOptions(counters, "CommandName", null, "bar");
 
     // Colore verdino più evidente
     chartOptions.colors = ["#4CAF50"];
@@ -52,12 +75,26 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
       ...chartOptions.fill,
       opacity: 1,
     };
+    chartOptions.yaxis.labels.formatter = function (s) {
+      s = s / 1000;
+
+      const hours = Math.floor(s / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      const seconds = Math.floor(s % 60);
+
+      let formatted = "";
+      if (hours > 0) formatted += hours + "h ";
+      if (minutes > 0) formatted += minutes + "m ";
+      formatted += seconds + "s";
+
+      return formatted;
+    };
 
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
     };
-  }, [data, startDate, endDate]);
+  }, [data, startDate, endDate, includeList]);
 
   return (
     <div className="custom-card">

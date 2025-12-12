@@ -16,11 +16,41 @@
 @import "@simonwep/pickr/dist/themes/monolith.min.css";
 @import "@simonwep/pickr/dist/themes/nano.min.css";
 
+@import "variables";
+
+/* theme modifications */
+
 .authentication .desktop-logo,
 .authentication .desktop-white {
   height: 6.2rem;
   line-height: 3.2rem;
 }
+.app-sidebar .main-sidebar-header .header-logo img {
+  width: 100%;
+  height: auto;
+}
+
+.customtable tbody tr td {
+  padding-top: 14.8px;
+  padding-bottom: 14.8px;
+}
+
+.authentication-background {
+  background-color: rgb(0, 0, 0);
+}
+
+/* calendar */
+
+.more-link-event {
+  color: #666;
+  font-style: italic;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* custom components */
+
 .sc-container {
   display: flex;
   flex-direction: row;
@@ -59,7 +89,133 @@
   }
 }
 
-.app-sidebar .main-sidebar-header .header-logo img {
+.sc-title {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+/* SearchBox component */
+
+.search-box {
+  display: flex;
+  flex-direction: column;
+  position: relative;
   width: 100%;
-  height: auto;
+
+  label {
+    font-size: 13;
+    font-weight: 500;
+    margin-bottom: 6; 
+  }
+  .search-box-search {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    border: 1px solid #007bff;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-top: 4px;
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+
+  button {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    color: black;
+    font-weight: normal;
+  }
+  button.selected {
+    color: #007bff;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+  }
+  li {
+    padding: 8px 12px;
+    cursor: pointer;
+    background: transparent;
+    color: black;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  li.selected {
+    background: #007bff;
+    color: white;
+  }
+}
+
+/* utility classes */
+
+.clickable {
+  cursor: pointer;
+}
+.sc-grid {
+  display: flex;
+  flex-direction: row;
+  gap: $sep;
+}
+.sc-grow {
+  flex: 1 0 0;
+}
+.sc-shrink {
+  flex: 0 1 0;
+}
+.flex-center {
+  justify-content: center;
+}
+.flex-right {
+  justify-content: right;
+}
+.sc-margin {
+  margin-bottom: $sep;
+}
+.vertical-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.vertical-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.vertical-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.spacing {
+  margin-bottom: $sep;
 }

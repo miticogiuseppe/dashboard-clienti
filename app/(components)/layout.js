@@ -7,7 +7,7 @@ const ServerLayout = async ({ children }) => {
   let menu = getMenu(token.tenant);
   menu = filterMenu(menu);
 
-  let globalData = { menu };
+  let globalData = { menu, tenant: token.tenant };
 
   return <ClientLayout globalData={globalData}>{children}</ClientLayout>;
 };

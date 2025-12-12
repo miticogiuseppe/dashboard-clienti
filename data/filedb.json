@@ -5,6 +5,15 @@
       "path": "Copral\\4.0\\APPMERCE-000.xlsx"
     },
     {
+      "id": "imballatrice_a",
+      "path": "Copral\\4.0\\imballatrice_a.xlsx"
+    },
+
+    {
+      "id": "TRONCATRICE_ESTESO",
+      "path": "Copral\\4.0\\troncatrice.xlsx"
+    },
+    {
       "id": "STORICO_TRONCATRICE",
       "path": "Copral\\4.0\\STORICO_TRONCATRICE.csv"
     },

@@ -6,17 +6,33 @@ import Preloader from "@/utils/Preloader";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import { Fragment, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import "@/lib/chart-setup";
+import { Pie } from "react-chartjs-2";
 
 const Ecommerce = () => {
   const [isLoading] = useState(false);
 
   // Dataset vuoto pronto per il prossimo cliente
   const recentOrders = [];
+  const pieData = {
+    labels: ["Completati", "In lavorazione", "Annullati"],
+    datasets: [
+      {
+        data: [25, 25, 50],
+        backgroundColor: [
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(255, 206, 86, 0.6)",
+          "rgba(255, 99, 132, 0.6)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
   return (
     <Fragment>
       <Preloader show={isLoading} />
-      <Seo title="Dashboard Base Ottimizzata" />
+      <Seo title="Dashboard Base" />
 
       <Pageheader
         title="Dashboard Base"
@@ -55,13 +71,13 @@ const Ecommerce = () => {
 
             {/* TABELLA ORDINI RECENTI */}
             <Col xxl={8} xl={7}>
-              <Card className="custom-card shadow-sm rounded-3 overflow-hidden">
+              <Card className="custom-card shadow-sm rounded-3">
                 <Card.Header className="d-flex justify-content-between align-items-center">
-                  <h5 className="card-title mb-0">Ordini Recenti (Base)</h5>
+                  <h5 className="card-title mb-0">Ordini Recenti</h5>
                 </Card.Header>
                 <div className="table-responsive">
                   <SpkTablescomponent
-                    tableClass="text-nowrap table-hover mb-0"
+                    tableClass="table-hover mb-0" // Già modificato per rimuovere 'text-nowrap'
                     header={[
                       { title: "Numero Ordine" },
                       { title: "Sezione" },
@@ -70,13 +86,7 @@ const Ecommerce = () => {
                       { title: "Data Ordine" },
                     ]}
                   >
-                    {recentOrders.length === 0 && (
-                      <tr>
-                        <td colSpan="5" className="text-center py-3 text-muted">
-                          Nessun ordine — tabella pronta per nuovi clienti
-                        </td>
-                      </tr>
-                    )}
+                    {/* ... Righe della tabella ... */}
                   </SpkTablescomponent>
                 </div>
               </Card>
@@ -85,8 +95,15 @@ const Ecommerce = () => {
             {/* BOX TOTALE ORDINI */}
             <Col xxl={4} xl={5}>
               <Card className="custom-card p-4 text-center shadow-sm rounded-3">
-                <h5 className="fw-semibold mb-2">Totale Ordini</h5>
-                <p className="fs-2 text-primary fw-bold mb-0">0</p>
+                <h5 className="fw-semibold mb-3">Distribuzione Ordini</h5>
+
+                <div style={{ maxWidth: "250px", margin: "0 auto" }}>
+                  <Pie data={pieData} />
+                </div>
+
+                <p className="text-muted mt-3 mb-0">
+                  Dati pronti per integrazione cliente
+                </p>
               </Card>
             </Col>
           </Row>

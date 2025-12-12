@@ -1,7 +1,3 @@
-// VERSIONE OTTIMIZZATA GRAFICAMENTE — Pagina Tostini
-// Layout migliorato, spacing corretto, cards visive più moderne,
-// grafica coerente e senza stravolgimenti del codice originale.
-
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";

@@ -1,6 +1,6 @@
 "use client";
 import OrderCalendar from "@/components/OrderCalendar";
-import { loadFirstSheet } from "@/utils/excelUtils";
+import { loadFirstSheet, parseDates } from "@/utils/excelUtils";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -19,8 +19,8 @@ export default function Home() {
     const fetchOrders = async () => {
       const response = await fetch("/data/APPMERCE-000.xlsx");
       const blob = await response.blob();
-      const newOrders = await loadFirstSheet(blob);
-
+      let newOrders = await loadFirstSheet(blob);
+      newOrders = parseDates(newOrders, ["Data Cons."]);
       setOrders(newOrders);
     };
 
@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
-      <OrderCalendar orders={orders} />
+      <OrderCalendar data={orders} />
     </div>
   );
 }

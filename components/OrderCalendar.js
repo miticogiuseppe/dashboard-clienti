@@ -1,47 +1,95 @@
-import { useState } from "react";
+import { useState, useCallback, Fragment } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import OrderListModal from "./OrderListModal";
-import "./OrderCalendar.css";
-import Pageheader from "../shared/layouts-components/page-header/pageheader";
-import { Card, CardBody, Col, Row } from "react-bootstrap";
-import React, { Fragment } from "react";
-import Seo from "../shared/layouts-components/seo/seo";
 import listPlugin from "@fullcalendar/list";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import OrderListModal from "./OrderListModal";
+import Pageheader from "../shared/layouts-components/page-header/pageheader";
+import { Card, Col, Row } from "react-bootstrap";
+import Seo from "../shared/layouts-components/seo/seo";
+import SearchBox from "@/components/SearchBox";
 
-const OrderCalendar = ({ orders }) => {
-  //console.log("Orders in OrderCalendar:", orders);
+const OrderCalendar = ({ data }) => {
   const [selectedOrders, setSelectedOrders] = useState([]);
-  const [selectedAgent, setSelectedAgent] = useState("Tutti");
-  const [selectedClient, setSelectedClient] = useState("Tutti");
 
-  const excelDateToJSDate = (serial) => {
-    const utc_days = Math.floor(serial - 25569);
-    const utc_value = utc_days * 86400;
-    return new Date(utc_value * 1000).toISOString().split("T")[0];
+  const [agentSearch, setAgentSearch] = useState({});
+  const [clientSearch, setClientSearch] = useState({});
+  const [orderSearch, setOrderSearch] = useState({});
+  const [articleSearch, setArticleSearch] = useState({});
+
+  const handleEventClick = (info) => {
+    const clickedDate = info.event.startStr;
+
+    const ordiniGiorno = filteredData.filter((order) => {
+      if (!order["Data Cons."]) return false; // Ignora ordini senza data
+
+      const dataOrd = order["Data Cons."].format("YYYY-MM-DD");
+
+      return dataOrd === clickedDate;
+    });
+
+    setSelectedOrders(
+      ordiniGiorno.map((order) => ({
+        numOrdine: order["Nr.ord"] ?? "N/A",
+        cliente: order["Ragione sociale"] ?? "N/A",
+        articolo: order.Articolo ?? "N/A",
+        quantità: order["Qta da ev"] ?? "N/A",
+        sezione: order.Sez ?? "N/A",
+        agente: order["Des. Agente"] ?? "N/A",
+      }))
+    );
   };
 
-  const filteredOrders = orders.filter((order) => {
-    const matchAgent =
-      selectedAgent === "Tutti" || order["Des. Agente"] === selectedAgent;
-    const matchClient =
-      selectedClient === "Tutti" || order["Ragione sociale"] === selectedClient;
-    return matchAgent && matchClient;
+  const handleAgentSearch = useCallback(
+    (data) => setAgentSearch(data),
+    [setAgentSearch]
+  );
+  const handleClientSearch = useCallback(
+    (data) => setClientSearch(data),
+    [setClientSearch]
+  );
+  const handleOrderSearch = useCallback(
+    (data) => setOrderSearch(data),
+    [setOrderSearch]
+  );
+  const handleArticleSearch = useCallback(
+    (data) => setArticleSearch(data),
+    [setArticleSearch]
+  );
+
+  // calcola ordini filtrati
+  function checkRow(row, column, searchData) {
+    if (searchData.selected) {
+      return String(row[column]) === String(searchData.selected);
+    } else {
+      if (row[column] && searchData.search) {
+        return String(row[column])
+          .toLowerCase()
+          .includes(String(searchData.search).toLowerCase());
+      } else return true;
+    }
+  }
+  const filteredData = data.filter((order) => {
+    const matchAgent = checkRow(order, "Des. Agente", agentSearch);
+    const matchClient = checkRow(order, "Ragione sociale", clientSearch);
+    const matchOrder = checkRow(order, "Nr.ord", orderSearch);
+    const matchArticle = checkRow(order, "Articolo", articleSearch);
+    return matchAgent && matchClient && matchOrder && matchArticle;
   });
 
-  const eventiPerData = {};
-  filteredOrders.forEach((order) => {
-    const data =
-      typeof order["Data ord"] === "number"
-        ? excelDateToJSDate(order["Data ord"])
-        : order["Data ord"].replace(/\//g, "-");
+  // raggruppa per "Data Cons.", escludendo ordini senza data
+  const eventsByDate = {};
+  filteredData.forEach((order) => {
+    if (!order["Data Cons."]) return; // Esclude ordini senza Data Cons.
 
-    if (!eventiPerData[data]) eventiPerData[data] = [];
-    eventiPerData[data].push(order);
+    const data = order["Data Cons."].format("YYYY-MM-DD");
+
+    if (!eventsByDate[data]) eventsByDate[data] = [];
+    eventsByDate[data].push(order);
   });
 
-  const formattedEvents = Object.entries(eventiPerData).flatMap(
+  // produce eventi per il calendario
+  const formattedEvents = Object.entries(eventsByDate).flatMap(
     ([data, eventi]) => {
       const visibili = eventi.slice(0, 2).map((order) => ({
         title: order.Articolo ?? "Sconosciuto",
@@ -51,6 +99,8 @@ const OrderCalendar = ({ orders }) => {
           quantità: order["Qta da ev"] ?? "N/A",
           sezione: order.Sez ?? "N/A",
           agente: order["Des. Agente"] ?? "N/A",
+          numOrdine: order["Nr.ord"] ?? "N/A",
+          articolo: order.Articolo ?? "N/A",
         },
       }));
 
@@ -72,104 +122,104 @@ const OrderCalendar = ({ orders }) => {
     }
   );
 
-  const handleEventClick = (info) => {
-    const clickedDate = info.event.startStr;
+  const agents = Array.from(
+    new Set(data.map((o) => String(o["Des. Agente"])).filter(Boolean))
+  );
+  const clients = Array.from(
+    new Set(data.map((o) => String(o["Ragione sociale"])).filter(Boolean))
+  );
+  const orders = Array.from(
+    new Set(data.map((o) => String(o["Nr.ord"])).filter(Boolean))
+  );
+  const articles = Array.from(
+    new Set(data.map((o) => String(o["Articolo"])).filter(Boolean))
+  );
 
-    const ordiniGiorno = filteredOrders.filter((order) => {
-      const dataOrdine =
-        typeof order["Data ord"] === "number"
-          ? excelDateToJSDate(order["Data ord"])
-          : order["Data ord"].replace(/\//g, "-");
-
-      return dataOrdine === clickedDate;
-    });
-
-    setSelectedOrders(
-      ordiniGiorno.map((order) => ({
-        cliente: order["Ragione sociale"] ?? "N/A",
-        quantità: order["Qta da ev"] ?? "N/A",
-        sezione: order.Sez ?? "N/A",
-        agente: order["Des. Agente"] ?? "N/A",
-      }))
-    );
-  };
-
-  const agenti = [
-    "Tutti",
-    ...Array.from(new Set(orders.map((o) => o["Des. Agente"]).filter(Boolean))),
-  ];
-  const clienti = [
-    "Tutti",
-    ...Array.from(
-      new Set(orders.map((o) => o["Ragione sociale"]).filter(Boolean))
-    ),
-  ];
+  const filteredAgents = agents.filter(
+    (c) => !c || c.toLowerCase().includes(agentSearch.search.toLowerCase())
+  );
+  const filteredClients = clients.filter(
+    (c) => !c || c.toLowerCase().includes(clientSearch.search.toLowerCase())
+  );
+  const filteredOrders = orders.filter(
+    (n) => !n || n.toLowerCase().includes(orderSearch.search.toLowerCase())
+  );
+  const filteredArticles = articles.filter(
+    (a) => !a || a.toLowerCase().includes(articleSearch.search.toLowerCase())
+  );
 
   return (
     <Fragment>
-      <Seo title="Calendario APPMERCE di Copral" />
-      <Pageheader
-        title="Apps"
-        currentpage="Calendario Ordini"
-        activepage="Calendario Ordini APPMERCE di Copral"
-      />
+      <Seo title="Calendario consegne" />
+      <Pageheader title="Apps" currentpage="Calendario" />
       <Row>
-        <Col xl={12} className="mb-0">
+        <Col xl={12}>
           <Card className="custom-card overflow-hidden">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <div className="card-title">Calendario Ordini</div>
-              <div className="d-flex gap-3 align-items-center">
-                <label className="mb-0">Agente:</label>
-                <select
-                  value={selectedAgent}
-                  onChange={(e) => setSelectedAgent(e.target.value)}
-                >
-                  {agenti.map((agente, idx) => (
-                    <option key={idx} value={agente}>
-                      {agente}
-                    </option>
-                  ))}
-                </select>
-                <label className="mb-0">Cliente:</label>
-                <select
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                >
-                  {clienti.map((cliente, idx) => (
-                    <option key={idx} value={cliente}>
-                      {cliente}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <Card.Header className="vertical-center">
+              <span className="sc-title">Calendario consegne</span>
             </Card.Header>
             <Card.Body>
-              <div id="calendar2" className="overflow-hidden">
-                <FullCalendar
-                  plugins={[dayGridPlugin, listPlugin, timeGridPlugin]}
-                  headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-                  }}
-                  initialView="dayGridMonth"
-                  events={formattedEvents}
-                  eventClick={handleEventClick}
-                  eventOrder={(a, b) => {
-                    if (a.extendedProps?.isMoreLink) return 1;
-                    if (b.extendedProps?.isMoreLink) return -1;
-                    return 0;
-                  }}
+              {/* FILTRI ORIZZONTALI */}
+              <div
+                className="spacing"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: "20px",
+                  width: "100%",
+                  alignItems: "start",
+                }}
+              >
+                {/* AGENTE */}
+                <SearchBox
+                  data={filteredAgents}
+                  name="Agente"
+                  placeholder="Cerca agente..."
+                  onSearch={handleAgentSearch}
                 />
-                <OrderListModal
-                  orders={selectedOrders}
-                  onClose={() => setSelectedOrders([])}
+
+                {/* CLIENTE */}
+                <SearchBox
+                  data={filteredClients}
+                  name="Cliente"
+                  placeholder="Cerca cliente..."
+                  onSearch={handleClientSearch}
+                />
+
+                {/* NUM. ORDINE */}
+                <SearchBox
+                  data={filteredOrders}
+                  name="Num. Ordine"
+                  placeholder="Cerca numero ordine..."
+                  onSearch={handleOrderSearch}
+                />
+
+                {/* ARTICOLO */}
+                <SearchBox
+                  data={filteredArticles}
+                  name="Articolo"
+                  placeholder="Cerca articolo..."
+                  onSearch={handleArticleSearch}
                 />
               </div>
+
+              <FullCalendar
+                plugins={[dayGridPlugin, listPlugin, timeGridPlugin]}
+                initialView="dayGridMonth"
+                events={formattedEvents}
+                eventClick={handleEventClick}
+                height="auto"
+              />
             </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      {/* Gestione del modal con chiusura funzionante */}
+      <OrderListModal
+        orders={selectedOrders}
+        onClose={() => setSelectedOrders([])} // qui la funzione di chiusura
+      />
     </Fragment>
   );
 };

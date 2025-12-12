@@ -30,7 +30,7 @@ const Pageheader = (props) => {
           </h1>
         </div>
 
-        {props.showActions !== false && (
+        {/* {props.showActions !== false && (
           <div className="btn-list">
             <SpkButton Buttonvariant="white">
               <i className="ri-filter-3-line align-middle me-1 lh-1"></i> Filter
@@ -39,7 +39,7 @@ const Pageheader = (props) => {
               <i className="ri-share-forward-line me-1"></i> Share
             </SpkButton>
           </div>
-        )}
+        )} */}
       </div>
     </Fragment>
   );
