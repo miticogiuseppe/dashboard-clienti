@@ -15,18 +15,21 @@ const Spkapexcharts = dynamic(
 );
 
 export default function LogTroncatriceChart({ data, startDate, endDate }) {
-  const includeList = [
-    "BLADE OFF",
-    "BLADE ON",
-    "CYCLE",
-    "END",
-    "ERROR",
-    "LIST",
-    "NO ALARM",
-    "SINGLE CUT",
-    "START",
-    "STEP CUT",
-  ];
+  const includeList = useMemo(
+    () => [
+      "BLADE OFF",
+      "BLADE ON",
+      "CYCLE",
+      "END",
+      "ERROR",
+      "LIST",
+      "NO ALARM",
+      "SINGLE CUT",
+      "START",
+      "STEP CUT",
+    ],
+    []
+  );
 
   let graphData = useMemo(() => {
     let filteredData = data;
