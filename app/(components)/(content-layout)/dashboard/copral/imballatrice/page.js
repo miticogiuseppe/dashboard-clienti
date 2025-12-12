@@ -1,15 +1,15 @@
 "use client";
-import React, { Fragment, useState } from "react";
-import { Col, Row, Card } from "react-bootstrap";
-import Seo from "@/shared/layouts-components/seo/seo";
-import Pageheader from "@/shared/layouts-components/page-header/pageheader";
-import MacchinaDashboard from "@/components/MacchinaDashboard";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
+import MacchinaDashboard from "@/components/MacchinaDashboard";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import Dropdown from "react-bootstrap/Dropdown";
+import Pageheader from "@/shared/layouts-components/page-header/pageheader";
+import Seo from "@/shared/layouts-components/seo/seo";
 import dayjs from "dayjs";
+import { Fragment, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import Dropdown from "react-bootstrap/Dropdown";
 
 const imballatricetest = {
   nome: "Imballatrice",
