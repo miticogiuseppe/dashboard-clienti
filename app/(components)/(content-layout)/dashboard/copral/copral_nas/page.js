@@ -264,13 +264,13 @@ export default function PaginaTroncatrice() {
                 filterDate={computedDateLog}
                 tableHeaders={[
                   {
-                    title: "Timestamp",
+                    title: "Data e ora",
                     column: "Timestamp",
                     showSeconds: true,
                   },
-                  { title: "Nome comando", column: "CommandName" },
+                  { title: "Comando", column: "CommandName" },
                   {
-                    title: "Start or stop",
+                    title: "Start/Stop",
                     column: "Col1",
                     allowEmpty: true,
                   },
