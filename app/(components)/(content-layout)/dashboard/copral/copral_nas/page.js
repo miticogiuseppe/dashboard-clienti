@@ -178,6 +178,8 @@ export default function PaginaTroncatrice() {
                     data={data}
                     startDate={fmt(computedDateTS[0])}
                     endDate={fmt(computedDateTS[1])}
+                    dateCol="Data ord"
+                    qtyCol="Qta da ev"
                   />
                 </Card.Body>
               </Card>

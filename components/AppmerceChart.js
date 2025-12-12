@@ -12,7 +12,13 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-export default function AppmerceChartByDate({ data, startDate, endDate }) {
+export default function AppmerceChartByDate({
+  data,
+  startDate,
+  endDate,
+  dateCol,
+  qtyCol,
+}) {
   const graphData = useMemo(() => {
     let filteredData = data;
 
@@ -20,23 +26,23 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
     if (startDate && endDate) {
       filteredData = filterByRange(
         filteredData,
-        "Data ord",
+        dateCol,
         moment(startDate),
         moment(endDate)
       );
     }
 
     // Somma quantità per giorno
-    let counters = sumByKey(filteredData, "Data ord", "Qta da ev");
+    let counters = sumByKey(filteredData, dateCol, qtyCol);
 
     // Ordina per data
     counters = counters.sort(
-      (a, b) => new Date(a["Data ord"]) - new Date(b["Data ord"])
+      (a, b) => new Date(a[dateCol]) - new Date(b[dateCol])
     );
 
     // Prepara categorie già formattate
     const categories = counters.map((c) =>
-      moment(c["Data ord"]).format("DD/MM/YYYY")
+      moment(c[dateCol]).format("DD/MM/YYYY")
     );
 
     // Serie dati
@@ -44,14 +50,14 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
       {
         name: "Quantità",
         data: counters.map((c) => ({
-          x: moment(c["Data ord"]).format("DD/MM/YYYY"),
+          x: moment(c[dateCol]).format("DD/MM/YYYY"),
           y: Number(c.count),
         })),
       },
     ];
 
     // Mantieni lo stile di createOptions e sostituisci le categorie
-    const baseOptions = createOptions(counters, "Data ord", null, "bar");
+    const baseOptions = createOptions(counters, dateCol, null, "bar");
     const chartOptions = {
       ...baseOptions,
       xaxis: {
@@ -69,7 +75,7 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
       graphSeries: seriesData,
       graphOptions: chartOptions,
     };
-  }, [data, startDate, endDate]);
+  }, [data, startDate, endDate, dateCol, qtyCol]);
 
   return (
     <div className="custom-card">

@@ -248,6 +248,8 @@ const Generale = () => {
                 title="TS Azienda"
                 startDate={fmt(pickerDateTS?.[0]) || startDateTS}
                 endDate={fmt(pickerDateTS?.[1]) || endDateTS}
+                dateCol="Data ordine"
+                qtyCol="Qta/kg da ev."
               />
             </Card.Body>
           </Card>
