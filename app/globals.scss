@@ -262,16 +262,15 @@ body {
 
 .sticky-header-table thead th {
   position: sticky;
-
-  top: 0;
+  top: 0px;
 
   z-index: 10;
 
-  background-color: #f8f9fa;
+  // background-color: #f8f9fa;
 
-  border-bottom: 1px solid #dee2e6;
+  // border-bottom: 1px solid #dee2e6;
 
-  border-top: 1px solid #dee2e6;
+  // border-top: 1px solid #dee2e6;
 }
 
 .sticky-header-table {

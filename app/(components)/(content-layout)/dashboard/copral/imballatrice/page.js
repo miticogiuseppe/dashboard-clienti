@@ -243,13 +243,18 @@ export default function PaginaImballatrice() {
                   { title: "N. ord.", column: "Nr.ord" },
                   { title: "Sez.", column: "Sez" },
                   {
-                    title: "Rag. Soc.",
+                    title: "Rag. soc.",
                     column: "Ragione sociale",
                     default: "Cliente generico",
                     bold: true,
                   },
                   { title: "Agente", column: "Des. Agente" },
                   { title: "Data ord.", column: "Data ord" },
+                  {
+                    title: "Articolo",
+                    className: "text-center",
+                    column: "Articolo",
+                  },
                 ]}
               />
             </Col>

@@ -57,8 +57,11 @@ function AppmerceTable({
       <Card.Body className="p-0">
         <div className="scroller-container">
           <SpkTablescomponent
-            tableClass="w-100 table-hover table-break-word sticky-header-table"
-            header={tableHeaders.map((header) => ({ title: header.title }))}
+            tableClass="w-100 table-hover table-break-word sticky-header-table customable text-center"
+            header={tableHeaders.map((header) => ({
+              title: header.title,
+              className: header.className,
+            }))}
           >
             {filteredData.map((row, index) => (
               <tr key={index}>
