@@ -253,24 +253,21 @@ const Ecommerce = () => {
                   </div>
                 </Card.Header>
                 <Card.Body className="p-0">
-                  <div id="sales-report">
-                    {chartSeries &&
-                    chartSeries.length > 0 &&
-                    chartOptions?.xaxis?.categories.length > 0 ? (
-                      <Spkapexcharts
-                        chartOptions={chartOptions}
-                        chartSeries={chartSeries}
-                        type="bar"
-                        width={"100%"}
-                        height={397}
-                      />
-                    ) : (
-                      <div className="text-center text-muted p-5">
-                        Nessun dato per il grafico a barre nel periodo
-                        selezionato
-                      </div>
-                    )}
-                  </div>
+                  {chartSeries &&
+                  chartSeries.length > 0 &&
+                  chartOptions?.xaxis?.categories.length > 0 ? (
+                    <Spkapexcharts
+                      chartOptions={chartOptions}
+                      chartSeries={chartSeries}
+                      type="bar"
+                      width={"100%"}
+                      height={397}
+                    />
+                  ) : (
+                    <div className="text-center text-muted p-5">
+                      Nessun dato per il grafico a barre nel periodo selezionato
+                    </div>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
