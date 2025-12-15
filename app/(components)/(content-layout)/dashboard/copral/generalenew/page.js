@@ -296,7 +296,7 @@ const Ecommerce = () => {
                         { title: "Agente", className: "text-center" },
                         { title: "Data ordine", className: "text-center" },
                         // L'intestazione "Articolo" ora avrà più spazio per il contenuto
-                        { title: "Articolo", className: "text-center" },
+                        { title: "Codice articolo", className: "text-center" },
                       ]}
                     >
                       {recentOrders.map((row, index) => (
