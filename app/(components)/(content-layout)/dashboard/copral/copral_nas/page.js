@@ -254,6 +254,11 @@ export default function PaginaTroncatrice() {
                   },
                   { title: "Agente", column: "Des. Agente" },
                   { title: "Data ord.", column: "Data ord" },
+                  {
+                    title: "Articolo",
+                    className: "text-center",
+                    column: "Articolo",
+                  },
                 ]}
               />
             </Col>
