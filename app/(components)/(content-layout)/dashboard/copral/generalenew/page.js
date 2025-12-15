@@ -298,7 +298,6 @@ const Ecommerce = () => {
                         { title: "Agente", className: "text-center" },
                         { title: "Data ordine", className: "text-center" },
                         // L'intestazione "Articolo" ora avrà più spazio per il contenuto
-                        { title: "Codice articolo", className: "text-center" },
                       ]}
                     >
                       {recentOrders.map((row, index) => (
@@ -315,8 +314,6 @@ const Ecommerce = () => {
                               ? row["Data ord"].toDate().toLocaleDateString()
                               : "N/A"}
                           </td>
-                          {/* La colonna "Articolo" ora non è più costretta su una singola riga */}
-                          <td>{row["Articolo"] || "-"}</td>
                         </tr>
                       ))}
                     </SpkTablescomponent>
