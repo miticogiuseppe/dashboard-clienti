@@ -14,6 +14,7 @@ function AppmerceTable({
   dateColumn,
   tableHeaders,
   filterDate,
+  maxHeight = "250px",
 }) {
   // Ordino gli ultimi 7 ordini per data
   const filteredData = useMemo(() => {
@@ -32,7 +33,7 @@ function AppmerceTable({
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
           x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
       );
-    return sorted.slice(0, 7);
+    return sorted;
   }, [data, dateColumn, filterDate]);
 
   const downloadExcel = async () => {
@@ -54,9 +55,12 @@ function AppmerceTable({
       </Card.Header>
 
       <Card.Body className="p-0">
-        <div className="table-responsive">
+        <div
+          className="table-responsive"
+          style={{ maxHeight: maxHeight, overflowY: "auto" }}
+        >
           <SpkTablescomponent
-            tableClass="text-nowrap table-hover"
+            tableClass="w-100 table-hover table-break-word sticky-header-table"
             header={tableHeaders.map((header) => ({ title: header.title }))}
           >
             {filteredData.map((row, index) => (

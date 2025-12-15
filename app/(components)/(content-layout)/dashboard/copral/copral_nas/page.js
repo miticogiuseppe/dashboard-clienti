@@ -237,14 +237,14 @@ export default function PaginaTroncatrice() {
             </Col>
           </Row>
           <Row className="mt-4">
-            <Col xl={6}>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data}
                 title="Produzione"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 tableHeaders={[
-                  { title: "Num. ord.", column: "Nr.ord" },
+                  { title: "N. ord.", column: "Nr.ord" },
                   { title: "Sez.", column: "Sez" },
                   {
                     title: "Rag. soc.",
@@ -257,7 +257,7 @@ export default function PaginaTroncatrice() {
                 ]}
               />
             </Col>
-            <Col xl={6}>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data2}
                 title="Log troncatrice esteso (dati grezzi)"

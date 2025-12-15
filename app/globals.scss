@@ -84,7 +84,7 @@
 @media (max-width: 767px) {
   .preloader {
     left: 0;
-      top: 68px;
+    top: 68px;
     height: calc(100vh - 68px);
   }
 }
@@ -105,7 +105,7 @@
   label {
     font-size: 13;
     font-weight: 500;
-    margin-bottom: 6; 
+    margin-bottom: 6;
   }
   .search-box-search {
     position: absolute;
@@ -115,7 +115,7 @@
     width: 100%;
     border: 1px solid #007bff;
     background: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-top: 4px;
     border-radius: 4px;
     padding: 8px;
@@ -218,4 +218,36 @@
 }
 .spacing {
   margin-bottom: $sep;
+}
+
+.table-break-word td,
+.table-break-word th {
+  white-space: normal;
+}
+
+.sticky-header-table thead th {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 10;
+
+  background-color: #f8f9fa;
+
+  border-bottom: 1px solid #dee2e6;
+
+  border-top: 1px solid #dee2e6;
+}
+
+.sticky-header-table {
+  border-collapse: separate;
+}
+
+/* Regola per il tuo foglio di stile */
+
+/* Aumenta la specificità e forza la riduzione del padding orizzontale */
+.sticky-header-table td,
+.sticky-header-table th {
+  padding: 0.25rem !important;
+  padding: 0.35rem !important;
 }
