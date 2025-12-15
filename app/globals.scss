@@ -263,13 +263,9 @@ body {
 .sticky-header-table thead th {
   position: sticky;
   top: 0px;
-
   z-index: 10;
-
   // background-color: #f8f9fa;
-
   // border-bottom: 1px solid #dee2e6;
-
   // border-top: 1px solid #dee2e6;
 }
 
@@ -277,9 +273,6 @@ body {
   border-collapse: separate;
 }
 
-/* Regola per il tuo foglio di stile */
-
-/* Aumenta la specificità e forza la riduzione del padding orizzontale */
 .sticky-header-table td,
 .sticky-header-table th {
   padding: 0.25rem !important;
