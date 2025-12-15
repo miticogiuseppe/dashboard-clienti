@@ -98,8 +98,7 @@ const Ecommerce = () => {
     const sortedData = filteredData.sort((a, b) =>
       a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
     );
-    const tableData = sortedData.slice(0, 12); // 12 ordini più recenti filtrati
-    setRecentOrders(tableData);
+    setRecentOrders(sortedData); // 👈 TUTTI gli ordini
 
     // ----------------------- Logica per Card (Statistiche principali)
 
@@ -275,35 +274,41 @@ const Ecommerce = () => {
                 </Card.Body>
               </Card>
             </Col>
+          </Row>
 
-            {/* Tabella Ordini Recenti */}
-            <Col xxl={8} xl={12} className="h-100">
-              <Card className="custom-card overflow-hidden">
+          <Row className="stretch-row">
+            {/* Tabella Ordini */}
+            <Col xxl={8} xl={12} className="stretch-column">
+              <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">Ordini recenti</div>
+                  <div className="card-title">Ordini</div>
                 </Card.Header>
-                <Card.Body className="p-0">
-                  <div className="table-responsive">
+
+                {/* Importante: Card.Body SENZA className="p-0" */}
+                <Card.Body>
+                  <div className="scroller-container">
                     <SpkTablescomponent
-                      tableClass="text-nowrap table-hover customtable"
+                      // 1. RIMOSSA la classe "text-nowrap" per consentire al testo di andare a capo
+                      // 2. AGGIUNTA la classe "text-center" per centrare tutte le colonne
+                      tableClass="table-hover customtable text-center"
                       header={[
-                        { title: "Numero ordine" },
-                        { title: "Sezionale" },
-                        { title: "Ragione sociale" },
-                        { title: "Agente" },
-                        { title: "Data ordine" },
+                        // Aggiunta la classe "text-center" per centrare le intestazioni
+                        { title: "Numero ordine", className: "text-center" },
+                        { title: "Sezionale", className: "text-center" },
+                        { title: "Ragione sociale", className: "text-center" },
+                        { title: "Agente", className: "text-center" },
+                        { title: "Data ordine", className: "text-center" },
+                        // L'intestazione "Articolo" ora avrà più spazio per il contenuto
+                        { title: "Articolo", className: "text-center" },
                       ]}
                     >
                       {recentOrders.map((row, index) => (
                         <tr key={index}>
+                          {/* Le classi text-center sulla tabella e sulle intestazioni dovrebbero bastare, ma puoi aggiungerle anche qui se necessario */}
                           <td>{row["Nr.ord"] || "N/A"}</td>
                           <td>{row["Sez"] ?? "N/A"}</td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="fw-semibold">
-                                {row["Ragione sociale"] || "Cliente Generico"}
-                              </div>
-                            </div>
+                          <td className="fw-semibold">
+                            {row["Ragione sociale"] || "Cliente Generico"}
                           </td>
                           <td>{row["Des. Agente"] || "N/A"}</td>
                           <td>
@@ -311,6 +316,8 @@ const Ecommerce = () => {
                               ? row["Data ord"].toDate().toLocaleDateString()
                               : "N/A"}
                           </td>
+                          {/* La colonna "Articolo" ora non è più costretta su una singola riga */}
+                          <td>{row["Articolo"] || "-"}</td>
                         </tr>
                       ))}
                     </SpkTablescomponent>
@@ -320,10 +327,12 @@ const Ecommerce = () => {
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
-            <Col xxl={4} xl={12} className="h-100">
-              <Card className="custom-card overflow-hidden">
+            <Col xxl={4} xl={12}>
+              <Card className="custom-card">
                 <Card.Header className="justify-content-between">
-                  <h6 className="card-title">Totale ordini per cliente (€)</h6>
+                  <div className="card-title">
+                    Totale ordini per cliente (€)
+                  </div>
                 </Card.Header>
                 <Card.Body>
                   <div className="vertical-center">

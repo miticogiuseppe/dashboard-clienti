@@ -236,24 +236,31 @@ export default function PaginaTroncatrice() {
           </Row>
           <Row className="mt-4">
             <Col xl={6}>
-              <AppmerceTable
-                data={data}
-                title="Produzione"
-                fileExcel="APPMERCE-000"
-                dateColumn="Data ord"
-                tableHeaders={[
-                  { title: "Num. ord.", column: "Nr.ord" },
-                  { title: "Sez.", column: "Sez" },
-                  {
-                    title: "Rag. soc.",
-                    column: "Ragione sociale",
-                    default: "Cliente generico",
-                    bold: true,
-                  },
-                  { title: "Agente", column: "Des. Agente" },
-                  { title: "Data ord.", column: "Data ord" },
-                ]}
-              />
+              <div className="table-responsive">
+                <AppmerceTable
+                  data={data}
+                  title="Produzione"
+                  fileExcel="APPMERCE-000"
+                  dateColumn="Data ord"
+                  tableHeaders={[
+                    { title: "Num. ord.", column: "Nr.ord" },
+                    { title: "Sez.", column: "Sez" },
+                    {
+                      title: "Rag. soc.",
+                      column: "Ragione sociale",
+                      default: "Cliente generico",
+                      bold: true,
+                    },
+                    { title: "Agente", column: "Des. Agente" },
+                    { title: "Data ord.", column: "Data ord" },
+                    {
+                      title: "Articolo",
+                      className: "text-center",
+                      column: "Articolo",
+                    },
+                  ]}
+                />
+              </div>
             </Col>
             <Col xl={6}>
               <AppmerceTable
