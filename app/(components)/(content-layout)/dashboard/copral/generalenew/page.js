@@ -22,6 +22,7 @@ import { formatDate } from "@/utils/format";
 import { FaUsers } from "react-icons/fa6";
 import { PiPackage } from "react-icons/pi";
 import { IoIosCalendar } from "react-icons/io";
+import _ from "lodash";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -98,7 +99,8 @@ const Ecommerce = () => {
     const sortedData = filteredData.sort((a, b) =>
       a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
     );
-    setRecentOrders(sortedData); // 👈 TUTTI gli ordini
+    const uniqData = _.uniqBy(sortedData, "Nr.ord");
+    setRecentOrders(uniqData);
 
     // ----------------------- Logica per Card (Statistiche principali)
 
