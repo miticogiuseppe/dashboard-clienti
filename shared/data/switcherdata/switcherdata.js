@@ -160,7 +160,7 @@ function closeMenu() {
       closeMenudata(item.children);
     });
   };
-  closeMenudata(MENUITEMS);
+  //closeMenudata(MENUITEMS);
 }
 
 export const IconHover = (actionfunction) => {
@@ -416,7 +416,7 @@ function closeMenu1() {
       closeMenudata(item.children);
     });
   };
-  closeMenudata(MENUITEMS);
+  //closeMenudata(MENUITEMS);
 }
 export const DoubletFn = (actionfunction) => {
   const theme = store.getState();

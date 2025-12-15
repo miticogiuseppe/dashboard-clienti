@@ -240,7 +240,7 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
                   <td style={cellStyle}>{r[colonne.indice] ?? i + 1}</td>
                   <td style={cellStyle}>
                     {r._parsedDate.isValid()
-                      ? r._parsedDate.format("YYYY-MM-DD HH:mm")
+                      ? r._parsedDate.format("DD-MM-YYYY HH:mm")
                       : ""}
                   </td>
                   <td style={cellStyle}>

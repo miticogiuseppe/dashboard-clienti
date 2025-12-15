@@ -8,8 +8,8 @@ import Dropdown from "react-bootstrap/Dropdown";
 
 import Seo from "@/shared/layouts-components/seo/seo";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import "dayjs/locale/it"; // importiamo la localizzazione italiana
+dayjs.locale("it"); // impostiamo la localizzazione italiana
 
 import ConfezionatriceChart from "@/components/ConfezionatriceChart";
 
@@ -29,16 +29,34 @@ const calcolaRange = (periodo) => {
   }[periodo];
 
   return {
-    startDate: inizio.format("YYYY-MM-DD"),
-    endDate: oggi.format("YYYY-MM-DD"),
+    startDate: inizio.format("DD/MM/YYYY"),
+    endDate: oggi.format("DD/MM/YYYY"),
   };
 };
-
 const fmt = (d) => {
   if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
-};
 
+  let dataDayjs;
+
+  if (typeof d === "string") {
+    // 1. TENTATIVO DI PARSING FORZATO con formato italiano DD/MM/YYYY (per Excel)
+    dataDayjs = dayjs(d, "DD/MM/YYYY");
+
+    // Se il primo tentativo fallisce o se la data non è valida, prova a far indovinare dayjs
+    // (potrebbe essere necessario se l'output di Excel non è una stringa standard, ma un numero seriale)
+    if (!dataDayjs.isValid()) {
+      dataDayjs = dayjs(d); // Tenta il parsing senza formato esplicito
+    }
+  } else {
+    // 2. Input non stringa (oggetto Date, dayjs, etc.)
+    dataDayjs = dayjs(d);
+  }
+
+  // 3. Restituisci la data formattata in formato italiano, solo se è valida
+  return dataDayjs.isValid()
+    ? dataDayjs.format("DD/MM/YYYY")
+    : "Data non valida";
+};
 export default function PaginaConfezionatrice() {
   const [pickerDate, setPickerDate] = useState([null, null]);
   const [periodo, setPeriodo] = useState("mese");
