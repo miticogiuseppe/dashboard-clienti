@@ -49,6 +49,7 @@
     .card-body {
       display: flex;
       flex-direction: column;
+      height: 0px;
     }
 }
 
@@ -64,10 +65,6 @@
 
 /* custom components */
 
-.scroller-container {
-  flex: 1 1 0;
-  overflow-y: scroll;  /* scroll verticale */
-}
 .sc-container {
   display: flex;
   flex-direction: row;
@@ -77,6 +74,12 @@
 .sc-title {
   font-size: 26px;
   font-weight: 900;
+}
+.scroller-container {
+  flex: 1 0 0;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: scroll;
 }
 
 /* preloader */
@@ -214,15 +217,15 @@
   align-items: center;
   justify-content: flex-start;
 }
-.vertical-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
 .vertical-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.vertical-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 .text-left {
   text-align: left;

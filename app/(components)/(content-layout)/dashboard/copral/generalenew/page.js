@@ -279,7 +279,7 @@ const Ecommerce = () => {
           <Row className="stretch-row">
             {/* Tabella Ordini */}
             <Col xxl={8} xl={12} className="stretch-column">
-              <Card className="stretch-card">
+              <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">Ordini</div>
                 </Card.Header>
@@ -328,9 +328,11 @@ const Ecommerce = () => {
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
             <Col xxl={4} xl={12}>
-              <Card>
+              <Card className="custom-card">
                 <Card.Header className="justify-content-between">
-                  <h6 className="card-title">Totale ordini per cliente (€)</h6>
+                  <div className="card-title">
+                    Totale ordini per cliente (€)
+                  </div>
                 </Card.Header>
                 <Card.Body>
                   <div className="vertical-center">
