@@ -97,6 +97,15 @@ body {
   overflow: scroll;
 }
 
+.scroller-container::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+}
+.scroller-container::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 6px;
+}
+
 /* preloader */
 
 .preloader {

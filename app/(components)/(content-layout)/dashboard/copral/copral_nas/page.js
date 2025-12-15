@@ -262,6 +262,8 @@ export default function PaginaTroncatrice() {
                     className: "text-center",
                     column: "Articolo",
                   },
+                  { title: "Qta da ev.", column: "Qta da ev" },
+                  { title: "Qta ev.", column: "QTAev II UM" },
                 ]}
               />
             </Col>
