@@ -255,7 +255,7 @@ export default function PaginaImballatrice() {
                   { title: "Agente", column: "Des. Agente" },
 
                   {
-                    title: "Articolo",
+                    title: "Cod. art.",
                     className: "text-center",
                     column: "Articolo",
                   },
