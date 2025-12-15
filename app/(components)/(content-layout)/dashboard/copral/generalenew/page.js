@@ -22,6 +22,7 @@ import { formatDate } from "@/utils/format";
 import { FaUsers } from "react-icons/fa6";
 import { PiPackage } from "react-icons/pi";
 import { IoIosCalendar } from "react-icons/io";
+import _ from "lodash";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -98,7 +99,8 @@ const Ecommerce = () => {
     const sortedData = filteredData.sort((a, b) =>
       a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
     );
-    setRecentOrders(sortedData); // 👈 TUTTI gli ordini
+    const uniqData = _.uniqBy(sortedData, "Nr.ord");
+    setRecentOrders(uniqData);
 
     // ----------------------- Logica per Card (Statistiche principali)
 
@@ -296,7 +298,6 @@ const Ecommerce = () => {
                         { title: "Agente", className: "text-center" },
                         { title: "Data ordine", className: "text-center" },
                         // L'intestazione "Articolo" ora avrà più spazio per il contenuto
-                        { title: "Codice articolo", className: "text-center" },
                       ]}
                     >
                       {recentOrders.map((row, index) => (
@@ -313,8 +314,6 @@ const Ecommerce = () => {
                               ? row["Data ord"].toDate().toLocaleDateString()
                               : "N/A"}
                           </td>
-                          {/* La colonna "Articolo" ora non è più costretta su una singola riga */}
-                          <td>{row["Articolo"] || "-"}</td>
                         </tr>
                       ))}
                     </SpkTablescomponent>
