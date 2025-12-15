@@ -244,6 +244,7 @@ export default function PaginaTroncatrice() {
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 tableHeaders={[
+                  { title: "Data ord.", column: "Data ord" },
                   {
                     title: "N. ord.",
                     column: "Nr.ord",
@@ -256,7 +257,7 @@ export default function PaginaTroncatrice() {
                     bold: true,
                   },
                   { title: "Agente", column: "Des. Agente" },
-                  { title: "Data ord.", column: "Data ord" },
+
                   {
                     title: "Articolo",
                     className: "text-center",

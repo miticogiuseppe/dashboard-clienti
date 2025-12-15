@@ -240,7 +240,11 @@ export default function PaginaImballatrice() {
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 tableHeaders={[
-                  { title: "N. ord.", column: "Nr.ord" },
+                  { title: "Data ord.", column: "Data ord" },
+                  {
+                    title: "N. ord.",
+                    column: "Nr.ord",
+                  },
                   { title: "Sez.", column: "Sez" },
                   {
                     title: "Rag. soc.",
@@ -249,7 +253,7 @@ export default function PaginaImballatrice() {
                     bold: true,
                   },
                   { title: "Agente", column: "Des. Agente" },
-                  { title: "Data ord.", column: "Data ord" },
+
                   {
                     title: "Articolo",
                     className: "text-center",
