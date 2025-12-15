@@ -41,7 +41,7 @@ function AppmerceTable({
   };
 
   return (
-    <Card className="custom-card overflow-hidden">
+    <Card className="custom-card fixed-height-card">
       <Card.Header className="justify-content-between d-flex align-items-center">
         <div className="card-title">{title}</div>
         {fileExcel && (
@@ -55,10 +55,7 @@ function AppmerceTable({
       </Card.Header>
 
       <Card.Body className="p-0">
-        <div
-          className="table-responsive"
-          style={{ maxHeight: maxHeight, overflowY: "auto" }}
-        >
+        <div className="scroller-container">
           <SpkTablescomponent
             tableClass="w-100 table-hover table-break-word sticky-header-table"
             header={tableHeaders.map((header) => ({ title: header.title }))}

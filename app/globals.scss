@@ -52,6 +52,15 @@
     height: 0px;
   }
 }
+.fixed-height-card {
+  height: 640px;
+  max-height: 640px;
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 0px;
+  }
+}
 body {
   ::-webkit-scrollbar {
     width: 0.25rem;
