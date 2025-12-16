@@ -8,6 +8,9 @@ import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
+// Aggiungi plugin per formati stretti (necessario per il fix del parsing)
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
 // Importazioni Recharts per il grafico
 import {
   BarChart,
@@ -22,6 +25,7 @@ import {
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(customParseFormat); // Estensione aggiunta per il parsing esplicito
 
 // Stili base (mantenuti)
 const headerStyle = {
@@ -102,25 +106,54 @@ const RibusChart = ({ file, colonne, tenant }) => {
 
         const jsonSheet = await loadSheet(file, tenant);
 
+        // --- INIZIO FIX PARSING DATA ---
         const normalized = jsonSheet.map((row) => {
           const rawDate = row[colonne.dataOra];
-          let parsed = dayjs("");
+          let parsed = dayjs(null); // 💡 Inizializza con null, dayjs lo interpreta come non valido se non c'è nulla di valido.
 
           try {
             if (!rawDate) {
-              parsed = dayjs.invalid();
+              parsed = dayjs(null); // 💡 Rimuovi dayjs.invalid()
             } else if (typeof rawDate === "number" && rawDate > 1) {
+              // 1. Caso 1: Numero seriale di Excel (affidabile)
               const d = XLSX.SSF.parse_date_code(rawDate);
               parsed = dayjs(new Date(d.y, d.m - 1, d.d, d.H, d.M, d.S));
+            } else if (typeof rawDate === "string") {
+              // 2. Caso 2: Stringa. Proviamo i formati comuni esplicitamente.
+
+              const formatsToTry = [
+                "YYYY-MM-DD HH:mm:ss",
+                "YYYY-MM-DD HH:mm",
+                "DD/MM/YYYY HH:mm:ss",
+                "DD/MM/YYYY HH:mm",
+                "M/D/YYYY H:mm", // Formato comune in output CSV/Excel
+                "YYYY-MM-DDTHH:mm:ss.SSSZ", // ISO standard
+              ];
+
+              for (const format of formatsToTry) {
+                const tentative = dayjs(rawDate, format, true); // true = Strict parsing
+                if (tentative.isValid()) {
+                  parsed = tentative;
+                  break;
+                }
+              }
+
+              // Se i formati espliciti falliscono, proviamo il parsing automatico come fallback
+              if (!parsed.isValid()) {
+                parsed = dayjs(rawDate);
+              }
             } else {
+              // 3. Caso 3: Altri tipi (dayjs automatico)
               parsed = dayjs(rawDate);
             }
           } catch (e) {
-            parsed = dayjs.invalid();
+            // Se fallisce in modo imprevisto
+            parsed = dayjs(null); // 💡 Rimuovi dayjs.invalid()
           }
 
           return { ...row, _parsedDate: parsed };
         });
+        // --- FINE FIX PARSING DATA ---
 
         if (isMounted) setDataChart({ rows: normalized });
       } catch (err) {
@@ -158,11 +191,10 @@ const RibusChart = ({ file, colonne, tenant }) => {
 
     filtered.forEach((r) => {
       // Usa Work ID come chiave, con fallback su Reference o ID
-      const key =
-        r[colonne.work_id] ||
-        r[colonne.reference] ||
-        r[colonne.id] ||
-        "Sconosciuto";
+      const key = r[colonne.id] || "Sconosciuto";
+      //r[colonne.work_id] ||
+      // r[colonne.reference] ||
+
       const workedBoxes = Number(r[colonne.worked_box] || 0);
       const workedPallets = Number(r[colonne.worked_pallet] || 0);
 
