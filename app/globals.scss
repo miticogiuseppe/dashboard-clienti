@@ -20,6 +20,12 @@
 
 /* theme modifications */
 
+body {
+  ::-webkit-scrollbar {
+    width: 0.25rem;
+    height: 0.25rem;
+  }
+}
 .authentication .desktop-logo,
 .authentication .desktop-white {
   height: 6.2rem;
@@ -61,11 +67,25 @@
     height: 0px;
   }
 }
-body {
-  ::-webkit-scrollbar {
-    width: 0.25rem;
-    height: 0.25rem;
-  }
+.table-break-word td,
+.table-break-word th {
+  white-space: normal;
+}
+.sticky-header-table {
+  border-collapse: separate;
+}
+.sticky-header-table thead th {
+  position: sticky;
+  top: 0px;
+  z-index: 10;
+  // background-color: #f8f9fa;
+  // border-bottom: 1px solid #dee2e6;
+  // border-top: 1px solid #dee2e6;
+}
+.sticky-header-table td,
+.sticky-header-table th {
+  padding: 0.25rem !important;
+  padding: 0.35rem !important;
 }
 
 /* calendar */
@@ -262,28 +282,4 @@ body {
 }
 .spacing {
   margin-bottom: $sep;
-}
-
-.table-break-word td,
-.table-break-word th {
-  white-space: normal;
-}
-
-.sticky-header-table thead th {
-  position: sticky;
-  top: 0px;
-  z-index: 10;
-  // background-color: #f8f9fa;
-  // border-bottom: 1px solid #dee2e6;
-  // border-top: 1px solid #dee2e6;
-}
-
-.sticky-header-table {
-  border-collapse: separate;
-}
-
-.sticky-header-table td,
-.sticky-header-table th {
-  padding: 0.25rem !important;
-  padding: 0.35rem !important;
 }
