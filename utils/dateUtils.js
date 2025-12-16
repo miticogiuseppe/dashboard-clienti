@@ -9,10 +9,7 @@ const calcolaRange = (periodo) => {
     anno: oggi.startOf("year"),
   }[periodo];
 
-  return {
-    startDate: inizio.format("YYYY-MM-DD"),
-    endDate: oggi.format("YYYY-MM-DD"),
-  };
+  return [inizio.toDate(), oggi.toDate()];
 };
 
 // Utility per formattare sempre le date
