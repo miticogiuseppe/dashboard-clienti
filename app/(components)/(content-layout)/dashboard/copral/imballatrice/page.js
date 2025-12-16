@@ -2,17 +2,17 @@
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
 import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import CustomDateComponent from "@/components/CustomDateComponent";
+import { useTranslations } from "next-intl";
 
 const resources = {
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
@@ -28,6 +28,8 @@ export default function PaginaImballatrice() {
 
   const [data, setData] = useState(undefined);
   const [data2, setData2] = useState(undefined);
+
+  const t = useTranslations("Graph");
 
   useEffect(() => {
     async function fetchData() {

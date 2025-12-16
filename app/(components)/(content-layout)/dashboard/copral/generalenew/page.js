@@ -23,6 +23,7 @@ import { Pie } from "react-chartjs-2";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
+import { useTranslations } from "next-intl";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -53,6 +54,8 @@ const Ecommerce = () => {
 
   // data del file
   const [fileDate, setFileDate] = useState(undefined);
+
+  const t = useTranslations("Graph");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -268,9 +271,7 @@ const Ecommerce = () => {
                       height={397}
                     />
                   ) : (
-                    <div className="text-center text-muted p-5">
-                      Nessun dato per il grafico a barre nel periodo selezionato
-                    </div>
+                    <div className="no-data text-muted">{t("NoData")}</div>
                   )}
                 </Card.Body>
               </Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import MuliniChart from "@/components/MuliniChart";
+import MuliniChart from "@/components/Dibartolo/MuliniChart";
 import "@/lib/chart-setup";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";

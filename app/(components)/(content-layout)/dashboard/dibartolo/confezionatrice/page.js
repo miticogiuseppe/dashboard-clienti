@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import ConfezionatriceChart from "@/components/ConfezionatriceChart";
+import ConfezionatriceChart from "@/components/Dibartolo/ConfezionatriceChart";
 import { calcolaRange, fmt } from "@/utils/dateUtils";
 import GlobalContext from "@/context/GlobalContext";
 

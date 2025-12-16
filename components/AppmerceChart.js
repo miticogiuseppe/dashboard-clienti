@@ -1,10 +1,9 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
-import moment from "moment";
-
-import { sumByKey, filterByRange } from "@/utils/excelUtils";
+import { filterByRange, sumByKey } from "@/utils/excelUtils";
 import { createOptions } from "@/utils/graphUtils";
+import moment from "moment";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -81,18 +80,13 @@ export default function AppmerceChartByDate({
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {graphData.graphSeries.length > 0 &&
-        graphData.graphOptions.chart?.type ? (
-          <Spkapexcharts
-            chartOptions={graphData.graphOptions}
-            chartSeries={graphData.graphSeries}
-            type={graphData.graphOptions.chart.type}
-            width={"100%"}
-            height={315}
-          />
-        ) : (
-          <p>Nessun dato disponibile per il range selezionato.</p>
-        )}
+        <Spkapexcharts
+          chartOptions={graphData.graphOptions}
+          chartSeries={graphData.graphSeries}
+          type={graphData.graphOptions.chart.type}
+          width={"100%"}
+          height={315}
+        />
       </div>
     </div>
   );

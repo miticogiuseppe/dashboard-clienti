@@ -63,18 +63,13 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {graphData.graphSeries.length > 0 &&
-        graphData.graphOptions.chart?.type ? (
-          <Spkapexcharts
-            chartOptions={graphData.graphOptions}
-            chartSeries={graphData.graphSeries}
-            type={graphData.graphOptions.chart.type}
-            width="100%"
-            height={350}
-          />
-        ) : (
-          <p>Nessun dato disponibile per il range selezionato.</p>
-        )}
+        <Spkapexcharts
+          chartOptions={graphData.graphOptions}
+          chartSeries={graphData.graphSeries}
+          type={graphData.graphOptions.chart.type}
+          width="100%"
+          height={350}
+        />
       </div>
     </div>
   );
