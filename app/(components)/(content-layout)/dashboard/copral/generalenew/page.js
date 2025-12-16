@@ -1,28 +1,27 @@
 "use client";
+import PeriodSelector from "@/components/PeriodSelector";
+import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { extractUniques, sumByKey, parseDates } from "@/utils/excelUtils";
+import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
+import { formatDate, formatTime } from "@/utils/format";
 import {
-  createSeries,
   createOptions,
-  randomColor,
+  createSeries,
   pieOptions,
+  randomColor,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
-import { Card, Col, Row } from "react-bootstrap";
-import PeriodSelector from "@/components/PeriodSelector";
-import "@/lib/chart-setup";
-import { Pie } from "react-chartjs-2";
-import { formatDate } from "@/utils/format";
-import { FaUsers } from "react-icons/fa6";
-import { PiPackage } from "react-icons/pi";
-import { IoIosCalendar } from "react-icons/io";
 import _ from "lodash";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import { Pie } from "react-chartjs-2";
+import { FaUsers } from "react-icons/fa6";
+import { IoIosCalendar } from "react-icons/io";
+import { PiPackage } from "react-icons/pi";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -64,7 +63,7 @@ const Ecommerce = () => {
       let data = resp.data;
       data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
-      setFileDate(resp.lwt);
+      setFileDate(new Date(resp.lwt));
     };
     fetchData();
   }, []);
@@ -183,7 +182,8 @@ const Ecommerce = () => {
     {
       id: 1,
       title: "Ultimo aggiornamento",
-      count: formatDate(new Date(fileDate)),
+      count: formatDate(fileDate),
+      inc: formatTime(fileDate),
       svgIcon: <IoIosCalendar />,
       backgroundColor: "info svg-white",
       color: "success",
