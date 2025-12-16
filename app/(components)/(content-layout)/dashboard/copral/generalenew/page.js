@@ -283,7 +283,7 @@ const Ecommerce = () => {
             {/* Tabella Ordini */}
             <Col xxl={8} xl={12} className="stretch-column">
               <AppmerceTable
-                className="stretch-card"
+                className="custom-card stretch-card"
                 data={recentOrders}
                 title="Ordini"
                 dateColumn="Data ord"
