@@ -56,7 +56,7 @@ function AppmerceTable({
         )}
       </Card.Header>
 
-      <Card.Body className="p-0">
+      <Card.Body className="p-2">
         {filteredData.length > 0 ? (
           <div className="scroller-container">
             <SpkTablescomponent
