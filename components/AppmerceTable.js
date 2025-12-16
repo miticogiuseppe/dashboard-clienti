@@ -15,6 +15,7 @@ function AppmerceTable({
   dateColumn,
   tableHeaders,
   filterDate,
+  className,
 }) {
   const t = useTranslations("Graph");
 
@@ -43,7 +44,9 @@ function AppmerceTable({
   };
 
   return (
-    <Card className="custom-card fixed-height-card">
+    <Card
+      className={"custom-card " + (className ? className : "fixed-height-card")}
+    >
       <Card.Header className="justify-content-between d-flex align-items-center">
         <div className="card-title">{title}</div>
         {fileExcel && (

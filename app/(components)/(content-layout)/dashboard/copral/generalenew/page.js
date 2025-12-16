@@ -24,6 +24,7 @@ import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
 import { useTranslations } from "next-intl";
+import AppmerceTable from "@/components/AppmerceTable";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -281,48 +282,36 @@ const Ecommerce = () => {
           <Row className="stretch-row">
             {/* Tabella Ordini */}
             <Col xxl={8} xl={12} className="stretch-column">
-              <Card className="custom-card stretch-card">
-                <Card.Header className="justify-content-between">
-                  <div className="card-title">Ordini</div>
-                </Card.Header>
-
-                {/* Importante: Card.Body SENZA className="p-0" */}
-                <Card.Body className="p-2">
-                  <div className="scroller-container">
-                    <SpkTablescomponent
-                      // 1. RIMOSSA la classe "text-nowrap" per consentire al testo di andare a capo
-                      // 2. AGGIUNTA la classe "text-center" per centrare tutte le colonne
-                      tableClass="table-hover table-break-word sticky-header-table text-center"
-                      header={[
-                        // Aggiunta la classe "text-center" per centrare le intestazioni
-                        { title: "Numero ordine", className: "text-center" },
-                        { title: "Sezionale", className: "text-center" },
-                        { title: "Ragione sociale", className: "text-center" },
-                        { title: "Agente", className: "text-center" },
-                        { title: "Data ordine", className: "text-center" },
-                        // L'intestazione "Articolo" ora avrà più spazio per il contenuto
-                      ]}
-                    >
-                      {recentOrders.map((row, index) => (
-                        <tr key={index}>
-                          {/* Le classi text-center sulla tabella e sulle intestazioni dovrebbero bastare, ma puoi aggiungerle anche qui se necessario */}
-                          <td>{row["Nr.ord"] || "N/A"}</td>
-                          <td>{row["Sez"] ?? "N/A"}</td>
-                          <td className="fw-semibold">
-                            {row["Ragione sociale"] || "Cliente Generico"}
-                          </td>
-                          <td>{row["Des. Agente"] || "N/A"}</td>
-                          <td>
-                            {row["Data ord"]
-                              ? row["Data ord"].toDate().toLocaleDateString()
-                              : "N/A"}
-                          </td>
-                        </tr>
-                      ))}
-                    </SpkTablescomponent>
-                  </div>
-                </Card.Body>
-              </Card>
+              <AppmerceTable
+                className="stretch-card"
+                data={recentOrders}
+                title="Ordini"
+                dateColumn="Data ord"
+                tableHeaders={[
+                  {
+                    title: "Numero ordine",
+                    column: "Nr.ord",
+                  },
+                  {
+                    title: "Sezionale",
+                    column: "Sez",
+                  },
+                  {
+                    title: "Ragione sociale",
+                    column: "Ragione sociale",
+                    default: "Cliente Generico",
+                    bold: true,
+                  },
+                  {
+                    title: "Agente",
+                    column: "Des. Agente",
+                  },
+                  {
+                    title: "Data ordine",
+                    column: "Data ord",
+                  },
+                ]}
+              />
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
