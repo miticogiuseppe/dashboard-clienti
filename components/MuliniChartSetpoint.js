@@ -1,24 +1,7 @@
 "use client";
 
+import "@/lib/chart-setup";
 import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend
-);
 
 export default function MuliniChartSetpoint({ file, startDate, endDate }) {
   // Simulazione dei dati (sostituire con parsing del file Excel)
