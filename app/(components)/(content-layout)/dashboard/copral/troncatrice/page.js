@@ -7,7 +7,7 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt, computeDate } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
@@ -154,8 +154,9 @@ export default function PaginaTroncatrice() {
                   {
                     title: "N. ord.",
                     column: "Nr.ord",
+                    type: "number",
                   },
-                  { title: "Sez.", column: "Sez" },
+                  { title: "Sez.", column: "Sez", type: "number" },
                   {
                     title: "Rag. soc.",
                     column: "Ragione sociale",
@@ -169,8 +170,18 @@ export default function PaginaTroncatrice() {
                     className: "text-center",
                     column: "Articolo",
                   },
-                  { title: "Qta da ev.", column: "Qta da ev" },
-                  { title: "Qta ev.", column: "QTAev II UM" },
+                  {
+                    title: "Qta da ev.",
+                    column: "Qta da ev",
+                    allowEmpty: true,
+                    type: "number",
+                  },
+                  {
+                    title: "Qta ev.",
+                    column: "QTAev II UM",
+                    allowEmpty: true,
+                    type: "number",
+                  },
                 ]}
               />
             </Col>

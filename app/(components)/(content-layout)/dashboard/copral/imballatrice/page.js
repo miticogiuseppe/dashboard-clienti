@@ -157,8 +157,9 @@ export default function PaginaImballatrice() {
                   {
                     title: "N. ord.",
                     column: "Nr.ord",
+                    type: "number",
                   },
-                  { title: "Sez.", column: "Sez" },
+                  { title: "Sez.", column: "Sez", type: "number" },
                   {
                     title: "Rag. soc.",
                     column: "Ragione sociale",
@@ -172,8 +173,13 @@ export default function PaginaImballatrice() {
                     className: "text-center",
                     column: "Articolo",
                   },
-                  { title: "Qta da ev.", column: "Qta da ev" },
-                  { title: "Qta ev.", column: "QTAev II UM" },
+                  { title: "Qta da ev.", column: "Qta da ev", type: "number" },
+                  {
+                    title: "Qta ev.",
+                    column: "QTAev II UM",
+                    type: "number",
+                    allowEmpty: true,
+                  },
                 ]}
               />
             </Col>
@@ -184,7 +190,7 @@ export default function PaginaImballatrice() {
                 fileExcel="imballatrice_a"
                 dateColumn="Data"
                 tableHeaders={[
-                  { title: "Numero", column: "Numero" },
+                  { title: "Numero", column: "Numero", type: "number" },
                   { title: "Descrizione", column: "Descrizione" },
                   { title: "Data", column: "Data", bold: true },
                   { title: "Ora", column: "Ora" },
