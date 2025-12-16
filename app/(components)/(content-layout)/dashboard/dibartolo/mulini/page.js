@@ -1,50 +1,21 @@
 "use client";
 
-import { Fragment, useState, useEffect } from "react";
-import dayjs from "dayjs";
-import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
-
-import Seo from "@/shared/layouts-components/seo/seo";
-import Pageheader from "@/shared/layouts-components/page-header/pageheader";
+import MuliniChart from "@/components/MuliniChart";
+import "@/lib/chart-setup";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-
-import MuliniChart from "@/components/MuliniChart";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import Pageheader from "@/shared/layouts-components/page-header/pageheader";
+import Seo from "@/shared/layouts-components/seo/seo";
+import { calcolaRange, fmt } from "@/utils/dateUtils";
+import dayjs from "dayjs";
+import { Fragment, useEffect, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import Dropdown from "react-bootstrap/Dropdown";
 import { Bar } from "react-chartjs-2";
 import * as XLSX from "xlsx";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-
 const muliniData = {
   fileExcel: "/api/download-resource?id=Dibartolo_Condivisione",
-};
-
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-
-  return {
-    startDate: inizio.format("YYYY-MM-DD"),
-    endDate: oggi.format("YYYY-MM-DD"),
-  };
-};
-
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 };
 
 // Grafico colonne con dati reali per un set di ingredienti

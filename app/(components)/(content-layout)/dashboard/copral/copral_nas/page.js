@@ -1,25 +1,18 @@
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
-import LogTroncatriceChart from "@/components/LogTroncatriceChart";
 import AppmerceTable from "@/components/AppmerceTable";
-import TroncatriceLogTable from "@/components/TroncatriceLogTable";
+import LogTroncatriceChart from "@/components/LogTroncatriceChart";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import dayjs from "dayjs";
+import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-import {
-  parseDates,
-  parseTimes,
-  orderSheet,
-  getSecondsFromExcelTime,
-  formatExcelTimeDuration,
-} from "@/utils/excelUtils";
-import Preloader from "@/utils/Preloader";
 
 const troncatrice = {
   nome: "Troncatrice (Mecal)",
@@ -34,22 +27,6 @@ const troncatrice = {
     produzione: 1450,
     dataConsegna: "2025-12-15",
   },
-};
-// Utility per calcolare range date da periodo
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-  return [inizio.toDate(), oggi.toDate()];
-};
-
-// Utility per formattare sempre le date
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 };
 
 export default function PaginaTroncatrice() {

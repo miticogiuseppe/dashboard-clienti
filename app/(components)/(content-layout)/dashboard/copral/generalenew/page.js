@@ -289,7 +289,7 @@ const Ecommerce = () => {
                     <SpkTablescomponent
                       // 1. RIMOSSA la classe "text-nowrap" per consentire al testo di andare a capo
                       // 2. AGGIUNTA la classe "text-center" per centrare tutte le colonne
-                      tableClass="w-100 table-hover table-break-word sticky-header-table text-center"
+                      tableClass="table-hover table-break-word sticky-header-table text-center"
                       header={[
                         // Aggiunta la classe "text-center" per centrare le intestazioni
                         { title: "Numero ordine", className: "text-center" },

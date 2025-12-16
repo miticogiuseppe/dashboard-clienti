@@ -7,12 +7,12 @@ import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import dayjs from "dayjs";
+import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { orderSheet, parseDates } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-import { parseDates, orderSheet } from "@/utils/excelUtils";
-import Preloader from "@/utils/Preloader";
 
 const imballatrice = {
   nome: "Imballatrice",
@@ -26,23 +26,6 @@ const imballatrice = {
     imballaggi: 2340,
     dataConsegna: "2025-10-27",
   },
-};
-
-// Utility per calcolare range date da periodo
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-  return [inizio.toDate(), oggi.toDate()];
-};
-
-// Utility per formattare sempre le date
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 };
 
 export default function PaginaImballatrice() {

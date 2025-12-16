@@ -1,27 +1,26 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import AppmerceChart from "@/components/AppmerceChart";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkBreadcrumb from "@/shared/@spk-reusable-components/reusable-uielements/spk-breadcrumb";
 import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import { Cardsdata } from "@/shared/data/dashboard/salesdata";
 import Seo from "@/shared/layouts-components/seo/seo";
+import { calcolaRange, fmt } from "@/utils/dateUtils";
+import dynamic from "next/dynamic";
 
 import {
   extractUniques,
   filterByRange,
-  filterByWeek,
   filterByValue,
+  filterByWeek,
   loadSheet,
   orderSheet,
   parseDates,
   sumByKey,
 } from "@/utils/excelUtils";
 
-import dayjs from "dayjs";
 import moment from "moment";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
@@ -32,24 +31,6 @@ const Spkapexcharts = dynamic(
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
   { ssr: false }
 );
-
-// Utility date
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-
-  return {
-    startDate: inizio.format("YYYY-MM-DD"),
-    endDate: oggi.format("YYYY-MM-DD"),
-  };
-};
-
-const fmt = (d) =>
-  !d ? "" : typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 
 // COMPONENTE
 const Generale = () => {
