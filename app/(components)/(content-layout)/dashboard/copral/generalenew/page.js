@@ -327,7 +327,7 @@ const Ecommerce = () => {
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
             <Col xxl={4} xl={12}>
-              <Card className="custom-card">
+              <Card className="custom-card stretch-sibling">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
                     Totale ordini per cliente (€)

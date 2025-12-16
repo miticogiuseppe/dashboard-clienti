@@ -51,12 +51,16 @@ body {
   flex-direction: column;
 }
 .stretch-card {
+  min-height: 560px;
   height: 100%;
   .card-body {
     display: flex;
     flex-direction: column;
     height: 0px;
   }
+}
+.stretch-sibling {
+  min-height: 560px;
 }
 .fixed-height-card {
   height: 640px;
