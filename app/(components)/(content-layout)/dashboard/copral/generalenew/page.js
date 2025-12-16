@@ -287,7 +287,7 @@ const Ecommerce = () => {
                 </Card.Header>
 
                 {/* Importante: Card.Body SENZA className="p-0" */}
-                <Card.Body>
+                <Card.Body className="p-2">
                   <div className="scroller-container">
                     <SpkTablescomponent
                       // 1. RIMOSSA la classe "text-nowrap" per consentire al testo di andare a capo

@@ -161,7 +161,7 @@ export default function PaginaImballatrice() {
             </Col>
           </Row>
           <Row>
-            <Col xl={6}>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data}
                 title="Produzione"
@@ -198,7 +198,7 @@ export default function PaginaImballatrice() {
                 ]}
               />
             </Col>
-            <Col xl={6}>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data2}
                 title="Produzione per articolo"

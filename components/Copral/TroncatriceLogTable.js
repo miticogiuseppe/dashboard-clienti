@@ -42,7 +42,7 @@ function TroncatriceLogTable({ data, title }) {
         <div className="card-title">{title}</div>
       </Card.Header>
 
-      <Card.Body className="p-0">
+      <Card.Body className="p-2">
         {logData.length > 0 ? (
           <div className="scroller-container">
             <SpkTablescomponent

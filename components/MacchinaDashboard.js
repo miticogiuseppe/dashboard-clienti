@@ -1,6 +1,9 @@
 "use client";
 import React from "react";
 import { Row, Col, Card } from "react-bootstrap";
+import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import { FaRectangleList } from "react-icons/fa6";
+import { FaDownload } from "react-icons/fa6";
 
 const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
   const downloadFile = async (url) => {
@@ -28,68 +31,45 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
     URL.revokeObjectURL(tempUrl);
   };
 
+  const cardData = {
+    id: 1,
+    title: "Storico",
+    count: "Download file macchina",
+    inc: (
+      <>
+        <button
+          onClick={() => downloadFile(fileStorico)}
+          className="btn btn-primary btn-sm px-3"
+        >
+          <FaDownload /> Scarica STORICO
+        </button>
+        &nbsp;&nbsp;
+        <button
+          onClick={() => downloadFile(fileAppmerce)}
+          className="btn btn-secondary btn-sm px-3"
+        >
+          <FaDownload /> Scarica APPMERCE
+        </button>
+      </>
+    ),
+    svgIcon: <FaRectangleList />,
+    backgroundColor: "primary2 svg-white",
+    color: "success",
+  };
+
   return (
-    <Row className="mb-4 align-items-stretch">
-      <Col xl={3} className="d-flex">
-        <Card className="custom-card w-100 h-100 shadow-sm rounded-3">
-          <Card.Header className="bg-transparent border-0 pb-0">
-            <Card.Title className="fw-semibold mb-1">Storico</Card.Title>
-            <small className="text-muted">Download file macchina</small>
-          </Card.Header>
-
-          <Card.Body className="pt-3 d-flex flex-column justify-content-center">
-            <div className="d-flex gap-2 flex-wrap">
-              <button
-                onClick={() => downloadFile(fileStorico)}
-                className="btn btn-primary btn-sm px-3"
-              >
-                ⬇ Scarica STORICO
-              </button>
-
-              <button
-                onClick={() => downloadFile(fileAppmerce)}
-                className="btn btn-secondary btn-sm px-3"
-              >
-                ⬇ Scarica APPMERCE
-              </button>
-            </div>
-
-            <div className="mt-3 text-muted" style={{ fontSize: "13px" }}></div>
-
-            {/* DATI FUTURI (già pronti se vorrai riattivarli) */}
-            {/*
-            <ul className="list-unstyled mt-3 mb-0">
-              <li>
-                <strong>Ordini ricevuti:</strong> {appmerce.ordini}
-              </li>
-              <li>
-                <strong>Imballaggi previsti:</strong> {appmerce.imballaggi}
-              </li>
-              <li>
-                <strong>Ultima consegna:</strong> {appmerce.dataConsegna}
-              </li>
-            </ul>
-            */}
-          </Card.Body>
-        </Card>
+    <Row>
+      <Col xl={6}>
+        <Spkcardscomponent
+          cardClass="overflow-hidden main-content-card"
+          headingClass="d-block mb-1"
+          mainClass="d-flex align-items-start justify-content-between mb-2"
+          svgIcon={cardData.svgIcon}
+          card={cardData}
+          badgeClass="md"
+          dataClass="mb-0"
+        />
       </Col>
-
-      {false && (
-        <Col xl={8}>
-          <Card className="custom-card h-100">
-            <Card.Header>
-              <Card.Title>Produzione Imballatrice</Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <p className="text-muted mb-2">
-                I grafici di produzione e TS sono gestiti dai componenti esterni
-                (AppmerceChart, AppmerceChartByArticolo) che leggono
-                direttamente i dati da Excel.
-              </p>
-            </Card.Body>
-          </Card>
-        </Col>
-      )}
     </Row>
   );
 };
