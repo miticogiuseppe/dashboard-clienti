@@ -679,7 +679,7 @@ const Header = ({
 
             <div className="header-element header-search d-md-block d-none my-auto auto-complete-search">
               {/* Start::header-link */}
-              <input
+              {/* <input
                 type="text"
                 className="header-search-bar form-control"
                 id="header-search"
@@ -732,7 +732,7 @@ const Header = ({
                 className="header-search-icon border-0"
               >
                 <i className="ri-search-line"></i>
-              </Link>
+              </Link> */}
             </div>
             {/* <!-- End::header-element --> */}
           </div>
