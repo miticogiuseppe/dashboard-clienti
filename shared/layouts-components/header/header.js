@@ -240,6 +240,7 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
     if (theme.dataThemeMode != "dark") {
       ThemeChanger({
         ...theme,
+        dataMenuStyles: "gradient",
         bodyBg: "",
         lightRgb: "",
         bodyBg2: "",
@@ -257,6 +258,9 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
       localStorage.removeItem("lightRgb");
       localStorage.removeItem("formControlBg");
       localStorage.removeItem("gray");
+
+      localStorage.setItem("xintraMenu", "gradient");
+      localStorage.removeItem("color");
     } else {
       localStorage.setItem("xintradarktheme", "dark");
       localStorage.removeItem("xintralighttheme");
