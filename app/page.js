@@ -64,7 +64,7 @@ const page = () => {
                     <img
                       src={`${
                         process.env.NODE_ENV === "production" ? basePath : ""
-                      }/assets/images/brand-logos/logo-supply-cerchio.png`}
+                      }/assets/images/brand-logos/logo-supply.png`}
                       alt="logo"
                       className="desktop-logo"
                     />

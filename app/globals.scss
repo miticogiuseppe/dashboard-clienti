@@ -31,9 +31,22 @@ body {
   height: 6.2rem;
   line-height: 3.2rem;
 }
+.header-logo {
+  height: 100%;
+}
+.horizontal-logo {
+  padding: 0rem 0rem;
+}
+.app-header .horizontal-logo .header-logo img {
+  width: 32px;
+  height: 32px;
+}
+.app-sidebar .main-sidebar-header {
+  overflow: hidden;
+}
 .app-sidebar .main-sidebar-header .header-logo img {
-  width: 100%;
-  height: auto;
+  height: 100%;
+  width: auto;
 }
 .customtable tbody tr td {
   padding-top: 14.8px;
