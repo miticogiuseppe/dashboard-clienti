@@ -15,17 +15,8 @@ import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
 const imballatrice = {
-  nome: "Imballatrice",
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
-  //fileImballatrice: "/api/download-resource?id=imballatrice_a",
-
-  tenant: "Copral",
-  appmerce: {
-    ordini: 128,
-    imballaggi: 2340,
-    dataConsegna: "2025-10-27",
-  },
 };
 
 export default function PaginaImballatrice() {
@@ -103,10 +94,7 @@ export default function PaginaImballatrice() {
 
           <Row>
             <Col>
-              <MacchinaDashboard
-                {...imballatrice}
-                tenant={imballatrice.tenant}
-              />
+              <MacchinaDashboard {...imballatrice} />
             </Col>
           </Row>
 

@@ -15,18 +15,8 @@ import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
 const troncatrice = {
-  nome: "Troncatrice (Mecal)",
-
-  // Endpoint
   fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
-
-  tenant: "Copral",
-  appmerce: {
-    ordini: 90,
-    produzione: 1450,
-    dataConsegna: "2025-12-15",
-  },
 };
 
 export default function PaginaTroncatrice() {
@@ -104,7 +94,7 @@ export default function PaginaTroncatrice() {
 
           <Row>
             <Col>
-              <MacchinaDashboard {...troncatrice} tenant={troncatrice.tenant} />
+              <MacchinaDashboard {...troncatrice} />
             </Col>
           </Row>
 
