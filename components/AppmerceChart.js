@@ -4,6 +4,7 @@ import { createOptions } from "@/utils/graphUtils";
 import moment from "moment";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -18,6 +19,8 @@ export default function AppmerceChartByDate({
   dateCol,
   qtyCol,
 }) {
+  const t = useTranslations("Graph");
+
   const graphData = useMemo(() => {
     let filteredData = data;
 
@@ -33,6 +36,7 @@ export default function AppmerceChartByDate({
 
     // Somma quantità per giorno
     let counters = sumByKey(filteredData, dateCol, qtyCol);
+    let total = counters.reduce((acc, item) => acc + item.count, 0);
 
     // Ordina per data
     counters = counters.sort(
@@ -73,6 +77,7 @@ export default function AppmerceChartByDate({
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
+      isEmpty: total === 0,
     };
   }, [data, startDate, endDate, dateCol, qtyCol]);
 
@@ -80,13 +85,17 @@ export default function AppmerceChartByDate({
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        <Spkapexcharts
-          chartOptions={graphData.graphOptions}
-          chartSeries={graphData.graphSeries}
-          type={graphData.graphOptions.chart.type}
-          width={"100%"}
-          height={315}
-        />
+        {!graphData.isEmpty ? (
+          <Spkapexcharts
+            chartOptions={graphData.graphOptions}
+            chartSeries={graphData.graphSeries}
+            type={graphData.graphOptions.chart.type}
+            width={"100%"}
+            height={315}
+          />
+        ) : (
+          <div className="no-data text-muted">{t("NoData")}</div>
+        )}
       </div>
     </div>
   );

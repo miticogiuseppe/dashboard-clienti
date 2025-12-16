@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import moment from "moment";
+import { useTranslations } from "next-intl";
 
 // Utility Excel
 import { filterByRange, sumByKey } from "@/utils/excelUtils";
@@ -15,6 +16,8 @@ const Spkapexcharts = dynamic(
 );
 
 export default function LogTroncatriceChart({ data, startDate, endDate }) {
+  const t = useTranslations("Graph");
+
   const includeList = useMemo(
     () => [
       "BLADE OFF",
@@ -54,6 +57,7 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
     );
     // counters = counters.sort((a, b) => b.count - a.count);
     counters = counters.filter((c) => includeList.includes(c.CommandName));
+    let total = counters.reduce((acc, item) => acc + item.count, 0);
 
     // Trasforma per ApexCharts
     const seriesData = [
@@ -93,6 +97,7 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
+      isEmpty: total === 0,
     };
   }, [data, startDate, endDate, includeList]);
 
@@ -100,8 +105,7 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {graphData.graphSeries.length > 0 &&
-        graphData.graphOptions.chart?.type ? (
+        {!graphData.isEmpty ? (
           <Spkapexcharts
             chartOptions={graphData.graphOptions}
             chartSeries={graphData.graphSeries}
@@ -110,7 +114,7 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
             height={350}
           />
         ) : (
-          <p>Nessun dato disponibile per il range selezionato.</p>
+          <div className="no-data text-muted">{t("NoData")}</div>
         )}
       </div>
     </div>
