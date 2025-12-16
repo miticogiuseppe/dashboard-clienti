@@ -1,3 +1,5 @@
+// File: RibusChart.js (Il Componente Core)
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -6,9 +8,22 @@ import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
+// Importazioni Recharts per il grafico
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
+// Stili base (mantenuti)
 const headerStyle = {
   padding: "10px 6px",
   fontWeight: 700,
@@ -24,6 +39,7 @@ const cellStyle = {
   textAlign: "center",
 };
 
+// Funzione per il caricamento del foglio (mantenuta)
 const loadSheet = async (idOrUrl, providedTenant) => {
   const tenant = providedTenant
     ? providedTenant
@@ -68,13 +84,13 @@ const loadSheet = async (idOrUrl, providedTenant) => {
   return XLSX.utils.sheet_to_json(sheet, { defval: "" });
 };
 
-const ConfezionatriceChart = ({ file, colonne, tenant }) => {
+const RibusChart = ({ file, colonne, tenant }) => {
   const [dataChart, setDataChart] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // CARICO I DATI
+  // CARICO E NORMALIZZO I DATI
   useEffect(() => {
     let isMounted = true;
 
@@ -116,9 +132,9 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
 
     fetchData();
     return () => (isMounted = false);
-  }, [file, colonne, tenant]);
+  }, [file, colonne.dataOra, tenant]);
 
-  // FILTRO PER DATA
+  // FILTRO PER DATA E ORDINAMENTO DECRESCENTE (per avere l'ultimo orario in cima)
   const filtered = useMemo(() => {
     let f = dataChart?.rows || [];
     if (filterDate) {
@@ -130,16 +146,53 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
         );
       }
     }
+    // Ordinamento decrescente: b - a per avere il più recente per primo
     return f.sort((a, b) => b._parsedDate.diff(a._parsedDate));
   }, [dataChart, filterDate]);
+
+  // PREPARAZIONE DATI PER IL GRAFICO (Worked Boxes/Pallets per Work ID)
+  const chartData = useMemo(() => {
+    if (!filterDate || filtered.length === 0) return [];
+
+    const aggregation = {};
+
+    filtered.forEach((r) => {
+      // Usa Work ID come chiave, con fallback su Reference o ID
+      const key =
+        r[colonne.work_id] ||
+        r[colonne.reference] ||
+        r[colonne.id] ||
+        "Sconosciuto";
+      const workedBoxes = Number(r[colonne.worked_box] || 0);
+      const workedPallets = Number(r[colonne.worked_pallet] || 0);
+
+      if (workedBoxes > 0 || workedPallets > 0) {
+        if (!aggregation[key]) {
+          aggregation[key] = {
+            name: key,
+            "Scatole Lavorate": 0,
+            "Pallet Lavorati": 0,
+          };
+        }
+
+        aggregation[key]["Scatole Lavorate"] += workedBoxes;
+        aggregation[key]["Pallet Lavorati"] += workedPallets;
+      }
+    });
+
+    return Object.values(aggregation);
+  }, [filtered, filterDate, colonne]);
 
   if (loading) return <div className="p-4 text-blue-600">Caricamento...</div>;
   if (errorMsg) return <div className="p-4 text-red-600">{errorMsg}</div>;
   if (!dataChart) return <div className="p-4">In attesa dati...</div>;
 
+  // Riferimento alle colonne
+  const RibusColumns = colonne;
+
   return (
     <div style={{ padding: 32, width: "100%" }}>
-      {/* FILTRO A SINISTRA */}
+      {/* 1. SELETTORE DATA E AZZERA FILTRO */}
       <div
         style={{
           marginBottom: 20,
@@ -193,7 +246,53 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
         </div>
       </div>
 
-      {/* TABELLA SCROLLABILE FULL WIDTH/HEIGHT */}
+      {/* 2. GRAFICO A COLONNE */}
+      <div
+        style={{
+          width: "100%",
+          height: 350,
+          marginBottom: 40,
+          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+          boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
+          padding: 10,
+        }}
+      >
+        <h3 style={{ margin: "0 0 10px 10px", color: "#555" }}>
+          Produzione Ribus - Totali per Work ID (Giorno Selezionato)
+        </h3>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="90%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={50}
+                interval={0}
+                style={{ fontSize: 11 }}
+              />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend wrapperStyle={{ paddingTop: 20 }} />
+              <Bar dataKey="Scatole Lavorate" fill="#8884d8" />
+              <Bar dataKey="Pallet Lavorati" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{ textAlign: "center", padding: 50 }}>
+            {filterDate
+              ? "Nessun dato di produzione (Worked Boxes/Pallets) valido per il giorno selezionato."
+              : "Seleziona una data per visualizzare l'aggregazione per Work ID."}
+          </div>
+        )}
+      </div>
+
+      {/* 3. TABELLA DATI RIBUS */}
       <div
         style={{
           width: "100%",
@@ -208,28 +307,31 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
         }}
       >
         <table
-          style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}
+          style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}
         >
           <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
             <tr style={{ background: "#f8f9fa" }}>
-              <th style={headerStyle}>{colonne.indice}</th>
-              <th style={headerStyle}>{colonne.dataOra}</th>
-              <th style={headerStyle}>
-                {colonne.valorePeso || colonne.valore || "Valore"}
-              </th>
-              <th style={headerStyle}>{colonne.bilancia}</th>
-              <th style={headerStyle}>
-                {colonne.valoreRiservato || "Riservato"}
-              </th>
-              <th style={headerStyle}>{colonne.descrizione}</th>
+              <th style={headerStyle}>ID</th>
+              <th style={headerStyle}>Data Inserimento</th>
+              <th style={headerStyle}>Data Pianificata</th>
+              <th style={headerStyle}>Work ID</th>
+              <th style={headerStyle}>Referenza</th>
+              <th style={headerStyle}>Lotto</th>
+              <th style={headerStyle}>Scatole Totali</th>
+              <th style={headerStyle}>Pallet Totali</th>
+              <th style={headerStyle}>Start Time</th>
+              <th style={headerStyle}>End Time</th>
+              <th style={headerStyle}>Scatole Lavorate</th>
+              <th style={headerStyle}>Pallet Lavorati</th>
+              <th style={headerStyle}>Stato</th>
             </tr>
           </thead>
 
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center", padding: 40 }}>
-                  Nessun dato disponibile
+                <td colSpan={13} style={{ textAlign: "center", padding: 40 }}>
+                  Nessun dato Ribus disponibile.
                 </td>
               </tr>
             ) : (
@@ -241,28 +343,27 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
                     fontSize: 13,
                   }}
                 >
-                  <td style={cellStyle}>{r[colonne.indice] ?? i + 1}</td>
+                  <td style={cellStyle}>{r[RibusColumns.id]}</td>
                   <td style={cellStyle}>
                     {r._parsedDate.isValid()
                       ? r._parsedDate.format("DD-MM-YYYY HH:mm")
-                      : ""}
+                      : r[RibusColumns.insert_datetime]}
                   </td>
                   <td style={cellStyle}>
-                    {Number(r[colonne.valorePeso] ?? r[colonne.valore] ?? 0)}
+                    {dayjs(r[RibusColumns.planned_date]).isValid()
+                      ? dayjs(r[RibusColumns.planned_date]).format("DD-MM-YYYY")
+                      : r[RibusColumns.planned_date]}
                   </td>
-                  <td style={cellStyle}>{r[colonne.bilancia]}</td>
-                  <td style={cellStyle}>{r[colonne.valoreRiservato] ?? ""}</td>
-                  <td
-                    style={{
-                      ...cellStyle,
-                      maxWidth: 300,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {r[colonne.descrizione]}
-                  </td>
+                  <td style={cellStyle}>{r[RibusColumns.work_id]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.reference]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.lot]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.boxes_tot]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.pallet_tot]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.start_time]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.end_time]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.worked_box]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.worked_pallet]}</td>
+                  <td style={cellStyle}>{r[RibusColumns.state]}</td>
                 </tr>
               ))
             )}
@@ -273,4 +374,4 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
   );
 };
 
-export default ConfezionatriceChart;
+export default RibusChart;

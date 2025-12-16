@@ -90,9 +90,7 @@ export default function PaginaConfezionatrice() {
         <Col xl={12} md={12}>
           <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
             <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Peso Scaricato e Quantità Riservata per Bilancia
-              </Card.Title>
+              <Card.Title className="mb-0 fw-semibold">Produzione</Card.Title>
             </Card.Header>
             <Card.Body>
               <ConfezionatriceChart
