@@ -1,10 +1,11 @@
 "use client";
-import PeriodSelector from "@/components/PeriodSelector";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
+import { computeDate } from "@/utils/dateUtils";
 import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
 import { formatDate, formatTime } from "@/utils/format";
 import {
@@ -246,10 +247,11 @@ const Ecommerce = () => {
                     Incidenza degli importi sulle famiglie
                   </div>
                   <div className="d-flex align-items-center">
-                    <PeriodSelector
-                      onChange={(range) => {
-                        setStartDate(range.startDate);
-                        setEndDate(range.endDate);
+                    <PeriodDropdown
+                      onChange={(period) => {
+                        let date = computeDate(undefined, period);
+                        setStartDate(date[0]);
+                        setEndDate(date[1]);
                       }}
                     />
                   </div>
