@@ -189,7 +189,7 @@ const OrderCalendar = ({ data }) => {
                 {/* NUM. ORDINE */}
                 <SearchBox
                   data={filteredOrders}
-                  name="Num. Ordine"
+                  name="N.Ordine"
                   placeholder="Cerca numero ordine..."
                   onSearch={handleOrderSearch}
                 />
