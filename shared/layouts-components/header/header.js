@@ -4,7 +4,7 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Dropdown, Form, ListGroup, Modal } from "react-bootstrap";
 import { ThemeChanger, removeFromCart } from "../../redux/action";
 import { connect, useDispatch, useSelector } from "react-redux";
-//import { MENUITEMS } from "../sidebar/index";
+import { MENUITEMS } from "../sidebar/nav";
 import SimpleBar from "simplebar-react";
 import { basePath } from "../../../next.config";
 import SpkButton from "../../@spk-reusable-components/reusable-uielements/spk-button";
@@ -13,14 +13,7 @@ import SpkListgroup from "../../@spk-reusable-components/reusable-uielements/spk
 import SpkBadge from "../../@spk-reusable-components/reusable-uielements/spk-badge";
 import store from "../../redux/store";
 
-const Header = ({
-  local_varaiable,
-  ThemeChanger,
-  showProfile = true,
-  showLanguages = true,
-  showCart = true,
-  showNotifications = true,
-}) => {
+const Header = ({ local_varaiable, ThemeChanger }) => {
   //full screen
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -612,7 +605,7 @@ const Header = ({
             {/* <!-- Start::header-element --> */}
             <div className="header-element">
               <div className="horizontal-logo">
-                <Link href="#!" className="header-logo">
+                <Link href="/dashboard/sales" className="header-logo">
                   <img
                     src={`${
                       process.env.NODE_ENV === "production" ? basePath : ""
@@ -679,58 +672,30 @@ const Header = ({
 
             <div className="header-element header-search d-md-block d-none my-auto auto-complete-search">
               {/* Start::header-link */}
-              {/* <input
-                type="text"
-                className="header-search-bar form-control"
-                id="header-search"
-                placeholder="Search for Results..."
-                onClick={() => {}}
+              {/* <input type="text" className="header-search-bar form-control" id="header-search" placeholder="Search for Results..." onClick={() => { }}
                 autoComplete="off"
                 ref={searchRef}
                 defaultValue={InputValue}
-                onChange={(ele) => {
-                  myfunction(ele.target.value);
-                  setInputValue(ele.target.value);
-                }}
-                autoCapitalize="off"
-              />
-              {showa ? (
+                onChange={(ele => { myfunction(ele.target.value); setInputValue(ele.target.value); })} autoCapitalize="off" />
+              {showa ?
                 <div className="card search-result position-absolute">
                   <div className="card-header">
-                    <div className="card-title mb-0 text-break">
-                      Search result of {InputValue}
-                    </div>
+                    <div className="card-title mb-0 text-break">Search result of {InputValue}</div>
                   </div>
-                  <div className="card-body overflow-auto">
-                    <SpkListgroup CustomClass="m-2">
-                      {show2 ? (
-                        NavData.map((e) => (
+                  <div className='card-body overflow-auto'>
+                    <SpkListgroup CustomClass='m-2'>
+                      {show2 ?
+                        NavData.map((e) =>
                           <ListGroup.Item key={Math.random()} className="">
-                            <Link
-                              href={`${e.path}/`}
-                              className="search-result-item"
-                              onClick={() => {
-                                setShowa(false), setInputValue("");
-                              }}
-                            >
-                              {e.title}
-                            </Link>
+                            <Link href={`${e.path}/`} className='search-result-item' onClick={() => { setShowa(false), setInputValue(""); }}>{e.title}</Link>
                           </ListGroup.Item>
-                        ))
-                      ) : (
-                        <b className={`${searchcolor} `}>{searchval}</b>
-                      )}
+                        )
+                        : <b className={`${searchcolor} `}>{searchval}</b>}
                     </SpkListgroup>
                   </div>
                 </div>
-              ) : (
-                ""
-              )}
-              <Link
-                scroll={false}
-                href="#!"
-                className="header-search-icon border-0"
-              >
+                : ""}
+              <Link scroll={false} href="#!" className="header-search-icon border-0">
                 <i className="ri-search-line"></i>
               </Link> */}
             </div>
@@ -756,155 +721,129 @@ const Header = ({
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}
-            {showLanguages && (
-              <SpkDropdown
-                Customclass="header-element country-selector"
-                autoClose="outside"
-                toggleas="a"
-                Navigate="#!"
-                Customtoggleclass="header-link dropdown-toggle no-caret"
-                Svgicon="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"
-                SvgClass="w-6 h-6 header-link-icon"
-                Svg={true}
-                Menuclass="main-header-dropdown dropdown-menu-end"
-                Align="end"
-              >
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div className="d-flex align-items-center">
-                        <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                          <img
-                            src={`${
-                              process.env.NODE_ENV === "production"
-                                ? basePath
-                                : ""
-                            }/assets/images/flags/us_flag.jpg`}
-                            alt="img"
-                          />
-                        </span>
-                        English
-                      </div>
+            {/* <SpkDropdown
+              Customclass="header-element country-selector"
+              autoClose="outside"
+              toggleas="a"
+              Navigate="#!"
+              Customtoggleclass="header-link dropdown-toggle no-caret"
+              Svgicon="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802"
+              SvgClass="w-6 h-6 header-link-icon"
+              Svg={true}
+              Menuclass="main-header-dropdown dropdown-menu-end"
+              Align="end"
+            >
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center">
+                      <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                        <img
+                          src={`${
+                            process.env.NODE_ENV === "production"
+                              ? basePath
+                              : ""
+                          }/assets/images/flags/us_flag.jpg`}
+                          alt="img"
+                        />
+                      </span>
+                      English
                     </div>
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/spain_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    español
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/french_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    français
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/uae_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    عربي
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/germany_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    Deutsch
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/china_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    中国人
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/italy_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    Italiano
-                  </Dropdown.Item>
-                </li>
-                <li>
-                  <Dropdown.Item
-                    className="d-flex align-items-center"
-                    href="#!"
-                  >
-                    <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
-                      <img
-                        src={`${
-                          process.env.NODE_ENV === "production" ? basePath : ""
-                        }/assets/images/flags/russia_flag.jpg`}
-                        alt="img"
-                      />
-                    </span>
-                    Русский
-                  </Dropdown.Item>
-                </li>
-              </SpkDropdown>
-            )}
+                  </div>
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/spain_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  español
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/french_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  français
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/uae_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  عربي
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/germany_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  Deutsch
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/china_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  中国人
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/italy_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  Italiano
+                </Dropdown.Item>
+              </li>
+              <li>
+                <Dropdown.Item className="d-flex align-items-center" href="#!">
+                  <span className="avatar avatar-rounded avatar-xs lh-1 me-2">
+                    <img
+                      src={`${
+                        process.env.NODE_ENV === "production" ? basePath : ""
+                      }/assets/images/flags/russia_flag.jpg`}
+                      alt="img"
+                    />
+                  </span>
+                  Русский
+                </Dropdown.Item>
+              </li>
+            </SpkDropdown> */}
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}
@@ -956,235 +895,231 @@ const Header = ({
               </Link>
               {/* <!-- End::header-link|layout-setting --> */}
             </li>
-            {showCart && (
-              <SpkDropdown
-                Customclass="header-element cart-dropdown"
-                toggleas="a"
-                Navigate="#!"
-                Svg={true}
-                Customtoggleclass="header-link dropdown-toggle no-caret"
-                Badgetag={true}
-                Badgeclass="header-icon-badge"
-                Menuclass="main-header-dropdown dropdown-menu-start"
-                Badgecolor="secondary"
-                Badgeid="cart-icon-badge"
-                Badgetext={remainingCount2}
-                Badgepill={true}
-                SvgClass="w-6 h-6 header-link-icon"
-                Svgicon="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-              >
-                <div className="p-3">
-                  <div className="d-flex align-items-center justify-content-between">
-                    <p className="mb-0 fs-15 fw-medium">
-                      Cart Items
-                      <SpkBadge
-                        variant="primary2"
-                        Customclass="text-fixed-white ms-1 fs-12 rounded-circle"
-                        Id="cart-data"
-                      >
-                        {remainingCount2} {remainingCount2 !== 1 ? "" : ""}
-                      </SpkBadge>
-                    </p>
-                    <div className="d-flex align-items-center gap-2">
-                      <span className="fs-12 fw-medium text-muted">
-                        Sub Total :{" "}
-                      </span>
-                      <h6 className="mb-0"> $740</h6>
-                    </div>
+
+            {/* <SpkDropdown
+              Customclass="header-element cart-dropdown"
+              toggleas="a"
+              Navigate="#!"
+              Svg={true}
+              Customtoggleclass="header-link dropdown-toggle no-caret"
+              Badgetag={true}
+              Badgeclass="header-icon-badge"
+              Menuclass="main-header-dropdown dropdown-menu-start"
+              Badgecolor="secondary"
+              Badgeid="cart-icon-badge"
+              Badgetext={remainingCount2}
+              Badgepill={true}
+              SvgClass="w-6 h-6 header-link-icon"
+              Svgicon="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+            >
+              <div className="p-3">
+                <div className="d-flex align-items-center justify-content-between">
+                  <p className="mb-0 fs-15 fw-medium">
+                    Cart Items
+                    <SpkBadge
+                      variant="primary2"
+                      Customclass="text-fixed-white ms-1 fs-12 rounded-circle"
+                      Id="cart-data"
+                    >
+                      {remainingCount2} {remainingCount2 !== 1 ? "" : ""}
+                    </SpkBadge>
+                  </p>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="fs-12 fw-medium text-muted">
+                      Sub Total :{" "}
+                    </span>
+                    <h6 className="mb-0"> $740</h6>
                   </div>
                 </div>
-                <div className="dropdown-divider"></div>
-                <SimpleBar
-                  className="list-unstyled mb-0"
-                  id="header-cart-items-scroll"
-                >
-                  {card.slice(0, maxDisplayItems).map((idx, index) => (
-                    <li className="dropdown-item" key={index}>
-                      {!card.includes(idx.id) && (
-                        <div
-                          className="d-flex align-items-center cart-dropdown-item gap-3"
-                          key={Math.random()}
-                        >
-                          <div className="lh-1">
-                            <span className="avatar avatar-xl bg-primary-transparent">
-                              <img
-                                src={`${
-                                  process.env.NODE_ENV === "production"
-                                    ? basePath
-                                    : ""
-                                }${idx.productpicture}`}
-                                alt="Wireless Headphones"
-                              />
-                            </span>
-                          </div>
-                          <div className="flex-fill">
-                            <div className="d-flex align-items-center justify-content-between mb-0">
-                              <div className="mb-0 fs-14 fw-medium">
-                                <Link href="#!">{idx.title}</Link>
-                                <div className="text-truncate">
-                                  <p className="mb-0 header-cart-text text-truncate fs-11 text-muted">
-                                    {idx.data}
-                                  </p>
-                                  <h6 className="fw-medium mb-0 mt-1">
-                                    <span className="text-success fw-normal me-1 fs-11 d-inline-block">
-                                      (Qty : 1)
-                                    </span>
-                                    {idx.price}
-                                  </h6>
-                                </div>
-                              </div>
-                              <div className="text-end">
-                                <Link
-                                  href="#!"
-                                  onClick={(event) =>
-                                    handleDelete(idx.id, event)
-                                  }
-                                  className="header-cart-remove dropdown-item-close"
-                                >
-                                  <i className="ri-close-line"></i>
-                                </Link>
-                                <h6 className="fw-medium mb-0 mt-3">
-                                  <span className="text-info op-4 fw-normal me-1 fs-11 d-inline-block">
-                                    Total :
+              </div>
+              <div className="dropdown-divider"></div>
+              <SimpleBar
+                className="list-unstyled mb-0"
+                id="header-cart-items-scroll"
+              >
+                {card.slice(0, maxDisplayItems).map((idx, index) => (
+                  <li className="dropdown-item" key={index}>
+                    {!card.includes(idx.id) && (
+                      <div
+                        className="d-flex align-items-center cart-dropdown-item gap-3"
+                        key={Math.random()}
+                      >
+                        <div className="lh-1">
+                          <span className="avatar avatar-xl bg-primary-transparent">
+                            <img
+                              src={`${
+                                process.env.NODE_ENV === "production"
+                                  ? basePath
+                                  : ""
+                              }${idx.productpicture}`}
+                              alt="Wireless Headphones"
+                            />
+                          </span>
+                        </div>
+                        <div className="flex-fill">
+                          <div className="d-flex align-items-center justify-content-between mb-0">
+                            <div className="mb-0 fs-14 fw-medium">
+                              <Link href="/apps/ecommerce/cart">
+                                {idx.title}
+                              </Link>
+                              <div className="text-truncate">
+                                <p className="mb-0 header-cart-text text-truncate fs-11 text-muted">
+                                  {idx.data}
+                                </p>
+                                <h6 className="fw-medium mb-0 mt-1">
+                                  <span className="text-success fw-normal me-1 fs-11 d-inline-block">
+                                    (Qty : 1)
                                   </span>
-                                  {idx.discount}
+                                  {idx.price}
                                 </h6>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </SimpleBar>
-                <div
-                  className={`p-3 empty-header-item border-top d-flex gap-2 align-items-center ${
-                    cartItemCount === 0 ? "d-none" : "d-block"
-                  }`}
-                >
-                  <Link
-                    href="#!"
-                    className={`btn flex-fill btn-primary btn-wave ${
-                      cartItemCount === 0 ? "d-none" : "d-block"
-                    }`}
-                  >
-                    Proceed to checkout
-                  </Link>
-                </div>
-                <div
-                  className={`p-5 empty-item ${
-                    cartItemCount === 0 ? "d-block" : "d-none"
-                  }`}
-                >
-                  <div className="text-center">
-                    <span className="avatar avatar-xl avatar-rounded bg-primary-transparent">
-                      <i className="ri-shopping-cart-2-line fs-2"></i>
-                    </span>
-                    <h6 className="fw-medium mb-1 mt-3">Your Cart is Empty</h6>
-                    <span className="mb-3 fw-normal fs-13 d-block">
-                      Add some items to make me happy :)
-                    </span>
-                    <Link
-                      href="#!"
-                      className="btn btn-primary1 btn-wave btn-sm m-1"
-                      data-abc="true"
-                    >
-                      continue shopping{" "}
-                      <i className="bi bi-arrow-right ms-1"></i>
-                    </Link>
-                  </div>
-                </div>
-                {/* <!-- End::main-header-dropdown --> */}
-              </SpkDropdown>
-            )}
-            {/* <!-- End::header-element --> */}
-
-            {/* <!-- Start::header-element --> */}
-            {showNotifications && (
-              <SpkDropdown
-                Togglevariant=""
-                Customtoggleclass="header-link no-caret"
-                Customclass="header-element notifications-dropdown d-xl-block d-none"
-                Navigate="#!"
-                Id="messageDropdown"
-                Svg={true}
-                SvgClass="w-6 h-6 header-link-icon"
-                Badgetag={true}
-                Badgecolor="primary2"
-                Badgeclass="header-icon-pulse rounded pulse pulse-secondary custom-header-icon-pulse"
-                Menuclass="main-header-dropdown dropdown-menu-start"
-                Svgicon="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
-              >
-                <div className="p-3">
-                  <div className="d-flex align-items-center justify-content-between">
-                    <p className="mb-0 fs-15 fw-medium">Notifications</p>
-                    <SpkBadge
-                      variant="secondary"
-                      Customclass="text-fixed-white"
-                      Id="notification-data"
-                    >
-                      {unreadCount} Unread
-                    </SpkBadge>
-                  </div>
-                </div>
-                <div className="dropdown-divider"></div>
-                <SimpleBar
-                  className="list-unstyled mb-0"
-                  id="header-notification-scroll"
-                >
-                  {hasNotifications ? (
-                    notifications.map((notification) => (
-                      <li className="dropdown-item" key={notification.id}>
-                        <div className="d-flex align-items-center">
-                          <div className="pe-2 lh-1">{notification.src}</div>
-                          <div className="flex-grow-1 d-flex align-items-center justify-content-between">
-                            <div>
-                              <p className="mb-0 fw-medium">
-                                <Link href="#!">{notification.heading}</Link>
-                              </p>
-                              {notification.data}
-                              <div className="fw-normal fs-10 text-muted op-8">
-                                {notification.data1}
-                              </div>
-                            </div>
-                            <div>
+                            <div className="text-end">
                               <Link
                                 href="#!"
-                                scroll={false}
-                                className="min-w-fit-content dropdown-item-close1"
-                                onClick={() => handleRemove1(notification.id)}
+                                onClick={(event) => handleDelete(idx.id, event)}
+                                className="header-cart-remove dropdown-item-close"
                               >
                                 <i className="ri-close-line"></i>
                               </Link>
+                              <h6 className="fw-medium mb-0 mt-3">
+                                <span className="text-info op-4 fw-normal me-1 fs-11 d-inline-block">
+                                  Total :
+                                </span>
+                                {idx.discount}
+                              </h6>
                             </div>
                           </div>
                         </div>
-                      </li>
-                    ))
-                  ) : (
-                    <div className="p-5 empty-item1">
-                      <div className="text-center">
-                        <span className="avatar avatar-xl avatar-rounded bg-secondary-transparent">
-                          <i className="ri-notification-off-line fs-2"></i>
-                        </span>
-                        <h6 className="fw-medium mt-3">No New Notifications</h6>
                       </div>
-                    </div>
-                  )}
-                </SimpleBar>
+                    )}
+                  </li>
+                ))}
+              </SimpleBar>
+              <div
+                className={`p-3 empty-header-item border-top d-flex gap-2 align-items-center ${
+                  cartItemCount === 0 ? "d-none" : "d-block"
+                }`}
+              >
+                <Link
+                  href="/apps/ecommerce/checkout"
+                  className={`btn flex-fill btn-primary btn-wave ${
+                    cartItemCount === 0 ? "d-none" : "d-block"
+                  }`}
+                >
+                  Proceed to checkout
+                </Link>
+              </div>
+              <div
+                className={`p-5 empty-item ${
+                  cartItemCount === 0 ? "d-block" : "d-none"
+                }`}
+              >
+                <div className="text-center">
+                  <span className="avatar avatar-xl avatar-rounded bg-primary-transparent">
+                    <i className="ri-shopping-cart-2-line fs-2"></i>
+                  </span>
+                  <h6 className="fw-medium mb-1 mt-3">Your Cart is Empty</h6>
+                  <span className="mb-3 fw-normal fs-13 d-block">
+                    Add some items to make me happy :)
+                  </span>
+                  <Link
+                    href="/apps/ecommerce/products"
+                    className="btn btn-primary1 btn-wave btn-sm m-1"
+                    data-abc="true"
+                  >
+                    continue shopping <i className="bi bi-arrow-right ms-1"></i>
+                  </Link>
+                </div>
+              </div>
+            </SpkDropdown> */}
+            {/* <!-- End::header-element --> */}
 
-                {hasNotifications && (
-                  <div className="p-3 empty-header-item1 border-top">
-                    <div className="d-grid">
-                      <Link href="#!" className="btn btn-primary btn-wave">
-                        View All
-                      </Link>
+            {/* <!-- Start::header-element --> */}
+            {/* <SpkDropdown
+              Togglevariant=""
+              Customtoggleclass="header-link no-caret"
+              Customclass="header-element notifications-dropdown d-xl-block d-none"
+              Navigate="#!"
+              Id="messageDropdown"
+              Svg={true}
+              SvgClass="w-6 h-6 header-link-icon"
+              Badgetag={true}
+              Badgecolor="primary2"
+              Badgeclass="header-icon-pulse rounded pulse pulse-secondary custom-header-icon-pulse"
+              Menuclass="main-header-dropdown dropdown-menu-start"
+              Svgicon="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
+            >
+              <div className="p-3">
+                <div className="d-flex align-items-center justify-content-between">
+                  <p className="mb-0 fs-15 fw-medium">Notifications</p>
+                  <SpkBadge
+                    variant="secondary"
+                    Customclass="text-fixed-white"
+                    Id="notification-data"
+                  >
+                    {unreadCount} Unread
+                  </SpkBadge>
+                </div>
+              </div>
+              <div className="dropdown-divider"></div>
+              <SimpleBar
+                className="list-unstyled mb-0"
+                id="header-notification-scroll"
+              >
+                {hasNotifications ? (
+                  notifications.map((notification) => (
+                    <li className="dropdown-item" key={notification.id}>
+                      <div className="d-flex align-items-center">
+                        <div className="pe-2 lh-1">{notification.src}</div>
+                        <div className="flex-grow-1 d-flex align-items-center justify-content-between">
+                          <div>
+                            <p className="mb-0 fw-medium">
+                              <Link href="/pages/chat">
+                                {notification.heading}
+                              </Link>
+                            </p>
+                            {notification.data}
+                            <div className="fw-normal fs-10 text-muted op-8">
+                              {notification.data1}
+                            </div>
+                          </div>
+                          <div>
+                            <Link
+                              href="#!"
+                              scroll={false}
+                              className="min-w-fit-content dropdown-item-close1"
+                              onClick={() => handleRemove1(notification.id)}
+                            >
+                              <i className="ri-close-line"></i>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                ) : (
+                  <div className="p-5 empty-item1">
+                    <div className="text-center">
+                      <span className="avatar avatar-xl avatar-rounded bg-secondary-transparent">
+                        <i className="ri-notification-off-line fs-2"></i>
+                      </span>
+                      <h6 className="fw-medium mt-3">No New Notifications</h6>
                     </div>
                   </div>
                 )}
-                {/* </Dropdown.Menu> */}
-              </SpkDropdown>
-            )}
+              </SimpleBar>
+
+              {hasNotifications && (
+                <div className="p-3 empty-header-item1 border-top">
+                  <div className="d-grid">
+                    <Link href="#!" className="btn btn-primary btn-wave">
+                      View All
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </SpkDropdown> */}
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}
@@ -1232,91 +1167,89 @@ const Header = ({
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}
-            {showProfile && (
-              <SpkDropdown
-                Customclass="header-element"
-                toggleas="a"
-                Navigate="#!"
-                Customtoggleclass="header-link no-caret"
-                Id="mainHeaderProfile"
-                Imagetag={true}
-                Imageclass="d-flex align-items-center avatar avatar-sm"
-                Imagesrc={`${
-                  process.env.NODE_ENV === "production" ? basePath : ""
-                }/assets/images/faces/15.jpg`}
-                Menuclass="main-header-dropdown pt-0 overflow-hidden header-profile-dropdown dropdown-menu-start"
-                Menulabel="mainHeaderProfile"
-              >
-                <Dropdown.Item className="text-center border-bottom">
-                  <div>
-                    <span>Mr.Henry</span>
-                    <span className="d-block fs-12 text-muted">
-                      UI/UX Designer
-                    </span>
-                  </div>
-                </Dropdown.Item>
-                <li>
-                  <Link
-                    className="dropdown-item d-flex align-items-center"
-                    href="#!"
+            {/* <SpkDropdown
+              Customclass="header-element"
+              toggleas="a"
+              Navigate="#!"
+              Customtoggleclass="header-link no-caret"
+              Id="mainHeaderProfile"
+              Imagetag={true}
+              Imageclass="d-flex align-items-center avatar avatar-sm"
+              Imagesrc={`${
+                process.env.NODE_ENV === "production" ? basePath : ""
+              }/assets/images/faces/15.jpg`}
+              Menuclass="main-header-dropdown pt-0 overflow-hidden header-profile-dropdown dropdown-menu-start"
+              Menulabel="mainHeaderProfile"
+            >
+              <Dropdown.Item className="text-center border-bottom">
+                <div>
+                  <span>Mr.Henry</span>
+                  <span className="d-block fs-12 text-muted">
+                    UI/UX Designer
+                  </span>
+                </div>
+              </Dropdown.Item>
+              <li>
+                <Link
+                  className="dropdown-item d-flex align-items-center"
+                  href="/pages/profile"
+                >
+                  <i className="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>
+                  Profile
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="dropdown-item d-flex align-items-center"
+                  href="/pages/email/mail-app"
+                >
+                  <i className="fe fe-mail p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>
+                  Mail Inbox
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="dropdown-item d-flex align-items-center"
+                  href="/pages/file-manager"
+                >
+                  <i className="fe fe-database p-1 rounded-circle bg-primary-transparent klist me-2 fs-16"></i>
+                  File Manger
+                  <SpkBadge
+                    variant="primary1"
+                    Customclass="text-fixed-white ms-auto fs-9"
                   >
-                    <i className="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>
-                    Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item d-flex align-items-center"
-                    href="#!"
-                  >
-                    <i className="fe fe-mail p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>
-                    Mail Inbox
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item d-flex align-items-center"
-                    href="#!"
-                  >
-                    <i className="fe fe-database p-1 rounded-circle bg-primary-transparent klist me-2 fs-16"></i>
-                    File Manger
-                    <SpkBadge
-                      variant="primary1"
-                      Customclass="text-fixed-white ms-auto fs-9"
-                    >
-                      2
-                    </SpkBadge>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item d-flex align-items-center"
-                    href="#!"
-                  >
-                    <i className="fe fe-settings p-1 rounded-circle bg-primary-transparent ings me-2 fs-16"></i>
-                    Settings
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item dropdown-item d-flex align-items-center"
-                    href="#!"
-                  >
-                    <i className="fe fe-help-circle p-1 rounded-circle bg-primary-transparent set me-2 fs-16"></i>
-                    Help
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    className="dropdown-item d-flex align-items-center"
-                    href="#!"
-                  >
-                    <i className="fe fe-lock p-1 rounded-circle bg-primary-transparent ut me-2 fs-16"></i>
-                    Log Out
-                  </Link>
-                </li>
-              </SpkDropdown>
-            )}
+                    2
+                  </SpkBadge>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="dropdown-item d-flex align-items-center"
+                  href="/pages/email/mail-settings"
+                >
+                  <i className="fe fe-settings p-1 rounded-circle bg-primary-transparent ings me-2 fs-16"></i>
+                  Settings
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="dropdown-item dropdown-item d-flex align-items-center"
+                  href="/pages/chat"
+                >
+                  <i className="fe fe-help-circle p-1 rounded-circle bg-primary-transparent set me-2 fs-16"></i>
+                  Help
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="dropdown-item d-flex align-items-center"
+                  href="/authentication/sign-in/cover"
+                >
+                  <i className="fe fe-lock p-1 rounded-circle bg-primary-transparent ut me-2 fs-16"></i>
+                  Log Out
+                </Link>
+              </li>
+            </SpkDropdown> */}
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}

@@ -1,5 +1,4 @@
 "use client";
-import GlobalContext from "@/context/GlobalContext";
 import { Fragment, useContext } from "react";
 import { connect } from "react-redux";
 import Backtotop from "../../../shared/layouts-components/backtotop/backtotop";
@@ -11,8 +10,6 @@ import Switcher from "../../../shared/layouts-components/switcher/switcher";
 import { ThemeChanger } from "../../../shared/redux/action";
 
 const Layout = ({ children }) => {
-  const { menu } = useContext(GlobalContext);
-
   return (
     <Fragment>
       <Switcher />
@@ -25,7 +22,7 @@ const Layout = ({ children }) => {
           showNotifications={false}
         />
 
-        <Sidebar menu={menu} />
+        <Sidebar />
         <div className="main-content app-content">
           <div className="container-fluid">{children}</div>
         </div>
