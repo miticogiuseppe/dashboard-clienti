@@ -20,14 +20,33 @@
 
 /* theme modifications */
 
+body {
+  ::-webkit-scrollbar {
+    width: 0.25rem;
+    height: 0.25rem;
+  }
+}
 .authentication .desktop-logo,
 .authentication .desktop-white {
   height: 6.2rem;
   line-height: 3.2rem;
 }
+.header-logo {
+  height: 100%;
+}
+.horizontal-logo {
+  padding: 5px 0rem;
+}
+.app-header .horizontal-logo .header-logo img {
+  width: 40px;
+  height: 40px;
+}
+.app-sidebar .main-sidebar-header {
+  overflow: hidden;
+}
 .app-sidebar .main-sidebar-header .header-logo img {
-  width: 100%;
-  height: auto;
+  height: 100%;
+  width: auto;
 }
 .customtable tbody tr td {
   padding-top: 14.8px;
@@ -45,18 +64,48 @@
   flex-direction: column;
 }
 .stretch-card {
-    height: 100%;
-    .card-body {
-      display: flex;
-      flex-direction: column;
-      height: 0px;
-    }
-}
-body {
-  ::-webkit-scrollbar {
-    width: 0.25rem;
-    height: 0.25rem;
+  min-height: 560px;
+  height: 100%;
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 0px;
   }
+}
+.stretch-sibling {
+  min-height: 560px;
+}
+.fixed-height-card {
+  height: 640px;
+  max-height: 640px;
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 0px;
+  }
+}
+.table-break-word td,
+.table-break-word th {
+  white-space: normal;
+}
+.sticky-header-table {
+  border-collapse: separate;
+}
+.sticky-header-table thead th {
+  position: sticky;
+  top: 0px;
+  z-index: 10;
+  // background-color: #f8f9fa;
+  // border-bottom: 1px solid #dee2e6;
+  // border-top: 1px solid #dee2e6;
+}
+.sticky-header-table td,
+.sticky-header-table th {
+  padding: 0.25rem !important;
+  padding: 0.35rem !important;
+}
+.header-link {
+  height: 40px;
 }
 
 /* calendar */
@@ -88,6 +137,19 @@ body {
   overflow: scroll;
 }
 
+.scroller-container::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 0.25rem;
+}
+.scroller-container::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 6px;
+}
+.no-data {
+  text-align: center;
+  padding: 3rem !important;
+}
+
 /* preloader */
 
 .preloader {
@@ -115,7 +177,7 @@ body {
 @media (max-width: 767px) {
   .preloader {
     left: 0;
-      top: 68px;
+    top: 68px;
     height: calc(100vh - 68px);
   }
 }
@@ -131,7 +193,7 @@ body {
   label {
     font-size: 13;
     font-weight: 500;
-    margin-bottom: 6; 
+    margin-bottom: 6;
   }
   .search-box-search {
     position: absolute;
@@ -141,7 +203,7 @@ body {
     width: 100%;
     border: 1px solid #007bff;
     background: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-top: 4px;
     border-radius: 4px;
     padding: 8px;
@@ -244,4 +306,7 @@ body {
 }
 .spacing {
   margin-bottom: $sep;
+}
+.fixed-height {
+  height: 560px;
 }

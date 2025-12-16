@@ -48,6 +48,24 @@ export const menuDibartolo = [
         type: "link",
         ready: true,
       },
+      {
+        path: "/dashboard/dibartolo/variegati",
+        title: "Variegati",
+        type: "link",
+        ready: true,
+      },
+      {
+        path: "/dashboard/dibartolo/mulini",
+        title: "Mulini",
+        type: "link",
+        ready: true,
+      },
+      {
+        path: "/dashboard/dibartolo/ribus",
+        title: "Ribus",
+        type: "link",
+        ready: true,
+      },
     ],
   },
 ];

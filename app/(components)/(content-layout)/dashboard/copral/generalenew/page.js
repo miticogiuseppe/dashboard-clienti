@@ -1,28 +1,29 @@
 "use client";
+import PeriodDropdown from "@/components/PeriodDropdown";
+import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { extractUniques, sumByKey, parseDates } from "@/utils/excelUtils";
+import { computeDate } from "@/utils/dateUtils";
+import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
+import { formatDate, formatTime } from "@/utils/format";
 import {
-  createSeries,
   createOptions,
-  randomColor,
+  createSeries,
   pieOptions,
+  randomColor,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
-import { Card, Col, Row } from "react-bootstrap";
-import PeriodSelector from "@/components/PeriodSelector";
-import "@/lib/chart-setup";
-import { Pie } from "react-chartjs-2";
-import { formatDate } from "@/utils/format";
-import { FaUsers } from "react-icons/fa6";
-import { PiPackage } from "react-icons/pi";
-import { IoIosCalendar } from "react-icons/io";
 import _ from "lodash";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
+import { Pie } from "react-chartjs-2";
+import { FaUsers } from "react-icons/fa6";
+import { IoIosCalendar } from "react-icons/io";
+import { PiPackage } from "react-icons/pi";
+import { useTranslations } from "next-intl";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -54,6 +55,8 @@ const Ecommerce = () => {
   // data del file
   const [fileDate, setFileDate] = useState(undefined);
 
+  const t = useTranslations("Graph");
+
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
@@ -64,7 +67,7 @@ const Ecommerce = () => {
       let data = resp.data;
       data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
-      setFileDate(resp.lwt);
+      setFileDate(new Date(resp.lwt));
     };
     fetchData();
   }, []);
@@ -183,7 +186,8 @@ const Ecommerce = () => {
     {
       id: 1,
       title: "Ultimo aggiornamento",
-      count: formatDate(new Date(fileDate)),
+      count: formatDate(fileDate),
+      inc: formatTime(fileDate),
       svgIcon: <IoIosCalendar />,
       backgroundColor: "info svg-white",
       color: "success",
@@ -246,10 +250,11 @@ const Ecommerce = () => {
                     Incidenza degli importi sulle famiglie
                   </div>
                   <div className="d-flex align-items-center">
-                    <PeriodSelector
-                      onChange={(range) => {
-                        setStartDate(range.startDate);
-                        setEndDate(range.endDate);
+                    <PeriodDropdown
+                      onChange={(period) => {
+                        let date = computeDate(undefined, period);
+                        setStartDate(date[0]);
+                        setEndDate(date[1]);
                       }}
                     />
                   </div>
@@ -266,9 +271,7 @@ const Ecommerce = () => {
                       height={397}
                     />
                   ) : (
-                    <div className="text-center text-muted p-5">
-                      Nessun dato per il grafico a barre nel periodo selezionato
-                    </div>
+                    <div className="no-data text-muted">{t("NoData")}</div>
                   )}
                 </Card.Body>
               </Card>
@@ -284,12 +287,12 @@ const Ecommerce = () => {
                 </Card.Header>
 
                 {/* Importante: Card.Body SENZA className="p-0" */}
-                <Card.Body>
+                <Card.Body className="p-2">
                   <div className="scroller-container">
                     <SpkTablescomponent
                       // 1. RIMOSSA la classe "text-nowrap" per consentire al testo di andare a capo
                       // 2. AGGIUNTA la classe "text-center" per centrare tutte le colonne
-                      tableClass="table-hover customtable text-center"
+                      tableClass="table-hover table-break-word sticky-header-table text-center"
                       header={[
                         // Aggiunta la classe "text-center" per centrare le intestazioni
                         { title: "Numero ordine", className: "text-center" },
@@ -324,7 +327,7 @@ const Ecommerce = () => {
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
             <Col xxl={4} xl={12}>
-              <Card className="custom-card">
+              <Card className="custom-card stretch-sibling">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
                     Totale ordini per cliente (€)

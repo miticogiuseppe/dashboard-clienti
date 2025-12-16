@@ -1,11 +1,10 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-import moment from "moment";
-
-// Utility Excel
 import { filterByRange, sumByKey } from "@/utils/excelUtils";
 import { createOptions } from "@/utils/graphUtils";
+import moment from "moment";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 // ApexCharts
 const Spkapexcharts = dynamic(
@@ -15,6 +14,8 @@ const Spkapexcharts = dynamic(
 );
 
 export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
+  const t = useTranslations("Graph");
+
   let graphData = useMemo(() => {
     let filteredData = data;
 
@@ -30,6 +31,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
 
     // Somma quantità per Articolo
     let counters = sumByKey(filteredData, "Descrizione", "Numero");
+    let total = counters.reduce((acc, item) => acc + item.count, 0);
     counters = counters.sort((a, b) => b.count - a.count);
 
     // Trasforma per ApexCharts
@@ -56,6 +58,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
+      isEmpty: total === 0,
     };
   }, [data, startDate, endDate]);
 
@@ -63,8 +66,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {graphData.graphSeries.length > 0 &&
-        graphData.graphOptions.chart?.type ? (
+        {!graphData.isEmpty ? (
           <Spkapexcharts
             chartOptions={graphData.graphOptions}
             chartSeries={graphData.graphSeries}
@@ -73,7 +75,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
             height={350}
           />
         ) : (
-          <p>Nessun dato disponibile per il range selezionato.</p>
+          <div className="no-data text-muted">{t("NoData")}</div>
         )}
       </div>
     </div>

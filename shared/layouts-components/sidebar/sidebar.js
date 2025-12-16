@@ -1,25 +1,32 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Fragment, useEffect, useState } from "react";
-import { connect } from "react-redux";
+import React, {
+  Fragment,
+  useEffect,
+  useState,
+  useContext,
+  useMemo,
+} from "react";
 import SimpleBar from "simplebar-react";
-import nextConfig from "../../../next.config";
-import SpkTooltips from "../../@spk-reusable-components/reusable-uielements/spk-tooltips";
-import { ThemeChanger } from "../../redux/action";
-import store from "../../redux/store";
 import Menuloop from "./menuloop";
+import store from "../../redux/store";
+import { ThemeChanger } from "../../redux/action";
+import { usePathname } from "next/navigation";
+import { connect } from "react-redux";
+import SpkTooltips from "../../@spk-reusable-components/reusable-uielements/spk-tooltips";
+import nextConfig from "../../../next.config";
+import GlobalContext from "@/context/GlobalContext";
 
-const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
+const Sidebar = ({ local_varaiable, ThemeChanger }) => {
+  const { menu } = useContext(GlobalContext);
+
+  const MENUITEMS = useMemo(() => menu, [menu]);
+
   let { basePath } = nextConfig;
 
-  const [menuItems, setMenuItems] = useState([]);
+  const [menuitems, setMenuitems] = useState(MENUITEMS);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setMenuItems(menu);
-    }
-  }, []);
+  const path = usePathname();
 
   function closeMenu() {
     const closeMenudata = (items) => {
@@ -28,8 +35,8 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
         closeMenudata(item.children);
       });
     };
-    closeMenudata(menuItems);
-    setMenuItems((arr) => [...arr]);
+    closeMenudata(menuitems);
+    setMenuitems((arr) => [...arr]);
   }
 
   useEffect(() => {
@@ -366,7 +373,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
   let hasParent = false;
   let hasParentLevel = 0;
 
-  function setSubmenu(event, targetObject, MenuItems = menuItems) {
+  function setSubmenu(event, targetObject, MenuItems = menuitems) {
     const theme = store.getState();
     // if ((window.screen.availWidth <= 992 || theme.dataNavStyle != "icon-hover") && (window.screen.availWidth <= 992 || theme.dataNavStyle != "menu-hover")) {
     if (!event?.ctrlKey) {
@@ -387,7 +394,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
       }
     }
     // }
-    setMenuItems((arr) => [...arr]);
+    setMenuitems((arr) => [...arr]);
   }
 
   function getParentObject(obj, childObject) {
@@ -411,7 +418,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
   }
 
   function setMenuAncestorsActive(targetObject) {
-    const parent = getParentObject(menuItems, targetObject);
+    const parent = getParentObject(menuitems, targetObject);
     const theme = store.getState();
     if (parent) {
       if (hasParentLevel > 2) {
@@ -463,7 +470,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
         setSubmenuRecursively(item.children);
       });
     };
-    setSubmenuRecursively(menuItems);
+    setSubmenuRecursively(menuitems);
   }
   const [previousUrl, setPreviousUrl] = useState("/");
 
@@ -486,7 +493,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
     }
   }, [pathname]);
 
-  function toggleSidemenu(event, targetObject, MenuItems = menuItems, state) {
+  function toggleSidemenu(event, targetObject, MenuItems = menuitems, state) {
     const theme = store.getState();
     let element = event.target;
     if (
@@ -580,7 +587,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
         }
       }
     }
-    setMenuItems((arr) => [...arr]);
+    setMenuitems((arr) => [...arr]);
   }
 
   function setAncestorsActive(MenuItems, targetObject) {
@@ -709,7 +716,9 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
     }
   }
   const handleClick = (event) => {
-    event.preventDefault();
+    // Your logic here
+    event.preventDefault(); // Prevents the default anchor behavior (navigation)
+    // ... other logic you want to perform on click
   };
   return (
     <Fragment>
@@ -725,7 +734,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
         onMouseLeave={() => Outhover()}
       >
         <div className="main-sidebar-header">
-          <Link href="https://www.alfredsupply.it/" className="header-logo">
+          <Link href="/dashboard/sales" className="header-logo">
             <img
               src={`${
                 process.env.NODE_ENV === "production" ? basePath : ""
@@ -793,7 +802,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger, menu }) => {
             </div>
 
             <ul className="main-menu" onClick={() => Sideclick()}>
-              {menuItems.map((levelone, index) => (
+              {MENUITEMS.map((levelone, index) => (
                 <Fragment key={index}>
                   <li
                     className={`${

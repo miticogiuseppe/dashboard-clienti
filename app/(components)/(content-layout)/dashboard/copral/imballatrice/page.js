@@ -2,47 +2,20 @@
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
 import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import dayjs from "dayjs";
+import { computeDate, fmt } from "@/utils/dateUtils";
+import { orderSheet, parseDates } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
-import { parseDates, orderSheet } from "@/utils/excelUtils";
-import Preloader from "@/utils/Preloader";
 
-const imballatrice = {
-  nome: "Imballatrice",
+const resources = {
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
-  //fileImballatrice: "/api/download-resource?id=imballatrice_a",
-
-  tenant: "Copral",
-  appmerce: {
-    ordini: 128,
-    imballaggi: 2340,
-    dataConsegna: "2025-10-27",
-  },
-};
-
-// Utility per calcolare range date da periodo
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-  return [inizio.toDate(), oggi.toDate()];
-};
-
-// Utility per formattare sempre le date
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 };
 
 export default function PaginaImballatrice() {
@@ -62,6 +35,24 @@ export default function PaginaImballatrice() {
       );
       const resp = await res.json();
       let data = resp.data;
+
+      data = data.map((item) => {
+        const qtaEv = item["QTAev II UM"];
+        const sanitizedQtaEv =
+          qtaEv === null || qtaEv === undefined || qtaEv === "" ? 0 : qtaEv;
+
+        const qtaDaEv = item["Qta da ev"];
+        const sanitizedQtaDaEv =
+          qtaDaEv === null || qtaDaEv === undefined || qtaDaEv === ""
+            ? 0
+            : qtaDaEv;
+        return {
+          ...item,
+          "QTAev II UM": sanitizedQtaEv,
+          "Qta da ev": sanitizedQtaDaEv,
+        };
+      });
+
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
 
@@ -91,18 +82,6 @@ export default function PaginaImballatrice() {
     return !data || !data2;
   }, [data, data2]);
 
-  // Stato per TS Azienda
-  const computedDateTS = useMemo(() => {
-    if (pickerDateTS) return pickerDateTS;
-    return calcolaRange(periodoTS);
-  }, [pickerDateTS, periodoTS]);
-
-  // Stato per Produzione per Articolo
-  const computedDateArt = useMemo(() => {
-    if (pickerDateArt) return pickerDateArt;
-    return calcolaRange(periodoArt);
-  }, [pickerDateArt, periodoArt]);
-
   return (
     <>
       <Seo title="Macchina - Imballatrice" />
@@ -120,145 +99,114 @@ export default function PaginaImballatrice() {
 
           <Row>
             <Col>
-              <MacchinaDashboard
-                {...imballatrice}
-                tenant={imballatrice.tenant}
-              />
+              <MacchinaDashboard {...resources} />
             </Col>
           </Row>
 
           {/* Card TS Azienda */}
-          <Row className="mt-4">
-            <Col xl={6}>
-              <Card className="custom-card h-100">
+          <Row>
+            <Col xxl={6}>
+              <Card className="custom-card fixed-height">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("settimana");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("mese");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("anno");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateTS(date)}
-                    value={computedDateTS}
+                    value={pickerDateTS}
+                    period={periodoTS}
                   />
                   <AppmerceChart
                     data={data}
-                    startDate={fmt(computedDateTS[0])}
-                    endDate={fmt(computedDateTS[1])}
+                    startDate={fmt(pickerDateTS, periodoTS, 0)}
+                    endDate={fmt(pickerDateTS, periodoTS, 1)}
+                    dateCol="Data ord"
+                    qtyCol="Qta da ev"
                   />
                 </Card.Body>
               </Card>
             </Col>
 
             {/* Card Produzione per Articolo */}
-            <Col xl={6}>
-              <Card className="custom-card h-100">
+            <Col xxl={6}>
+              <Card className="custom-card fixed-height">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione per articolo</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("settimana");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("mese");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("anno");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoArt(period);
+                      setPickerDateArt(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateArt(date)}
-                    value={computedDateArt}
+                    value={pickerDateArt}
+                    period={periodoArt}
                   />
                   <AppmerceChartByArticolo
                     data={data2}
-                    startDate={fmt(computedDateArt[0])}
-                    endDate={fmt(computedDateArt[1])}
+                    startDate={fmt(pickerDateArt, periodoArt, 0)}
+                    endDate={fmt(pickerDateArt, periodoArt, 1)}
                   />
                 </Card.Body>
               </Card>
             </Col>
           </Row>
-          <Row className="mt-4">
-            <Col xl={6}>
+          <Row>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data}
                 title="Produzione"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
-                  { title: "Num. ord.", column: "Nr.ord" },
-                  { title: "Sez.", column: "Sez" },
+                  { title: "Data ord.", column: "Data ord" },
                   {
-                    title: "Rag. Soc.",
+                    title: "N. ord.",
+                    column: "Nr.ord",
+                    type: "number",
+                  },
+                  { title: "Sez.", column: "Sez", type: "number" },
+                  {
+                    title: "Rag. soc.",
                     column: "Ragione sociale",
                     default: "Cliente generico",
                     bold: true,
                   },
                   { title: "Agente", column: "Des. Agente" },
-                  { title: "Data ord.", column: "Data ord" },
+
+                  {
+                    title: "Cod. art.",
+                    className: "text-center",
+                    column: "Articolo",
+                  },
+                  { title: "Qta da ev.", column: "Qta da ev", type: "number" },
+                  {
+                    title: "Qta ev.",
+                    column: "QTAev II UM",
+                    type: "number",
+                  },
                 ]}
               />
             </Col>
-            <Col xl={6}>
+            <Col xxl={6}>
               <AppmerceTable
                 data={data2}
                 title="Produzione per articolo"
                 fileExcel="imballatrice_a"
                 dateColumn="Data"
+                filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
-                  { title: "Numero", column: "Numero" },
+                  { title: "Numero", column: "Numero", type: "number" },
                   { title: "Descrizione", column: "Descrizione" },
                   { title: "Data", column: "Data", bold: true },
                   { title: "Ora", column: "Ora" },

@@ -1,10 +1,10 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
-import moment from "moment";
-
-import { sumByKey, filterByRange } from "@/utils/excelUtils";
+import { filterByRange, sumByKey } from "@/utils/excelUtils";
 import { createOptions } from "@/utils/graphUtils";
+import moment from "moment";
+import dynamic from "next/dynamic";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -12,7 +12,15 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-export default function AppmerceChartByDate({ data, startDate, endDate }) {
+export default function AppmerceChartByDate({
+  data,
+  startDate,
+  endDate,
+  dateCol,
+  qtyCol,
+}) {
+  const t = useTranslations("Graph");
+
   const graphData = useMemo(() => {
     let filteredData = data;
 
@@ -20,23 +28,24 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
     if (startDate && endDate) {
       filteredData = filterByRange(
         filteredData,
-        "Data ord",
+        dateCol,
         moment(startDate),
         moment(endDate)
       );
     }
 
     // Somma quantità per giorno
-    let counters = sumByKey(filteredData, "Data ord", "Qta da ev");
+    let counters = sumByKey(filteredData, dateCol, qtyCol);
+    let total = counters.reduce((acc, item) => acc + item.count, 0);
 
     // Ordina per data
     counters = counters.sort(
-      (a, b) => new Date(a["Data ord"]) - new Date(b["Data ord"])
+      (a, b) => new Date(a[dateCol]) - new Date(b[dateCol])
     );
 
     // Prepara categorie già formattate
     const categories = counters.map((c) =>
-      moment(c["Data ord"]).format("DD/MM/YYYY")
+      moment(c[dateCol]).format("DD/MM/YYYY")
     );
 
     // Serie dati
@@ -44,14 +53,14 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
       {
         name: "Quantità",
         data: counters.map((c) => ({
-          x: moment(c["Data ord"]).format("DD/MM/YYYY"),
+          x: moment(c[dateCol]).format("DD/MM/YYYY"),
           y: Number(c.count),
         })),
       },
     ];
 
     // Mantieni lo stile di createOptions e sostituisci le categorie
-    const baseOptions = createOptions(counters, "Data ord", null, "bar");
+    const baseOptions = createOptions(counters, dateCol, null, "bar");
     const chartOptions = {
       ...baseOptions,
       xaxis: {
@@ -68,15 +77,15 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
     return {
       graphSeries: seriesData,
       graphOptions: chartOptions,
+      isEmpty: total === 0,
     };
-  }, [data, startDate, endDate]);
+  }, [data, startDate, endDate, dateCol, qtyCol]);
 
   return (
     <div className="custom-card">
       <div className="card-header justify-content-between"></div>
       <div className="card-body">
-        {graphData.graphSeries.length > 0 &&
-        graphData.graphOptions.chart?.type ? (
+        {!graphData.isEmpty ? (
           <Spkapexcharts
             chartOptions={graphData.graphOptions}
             chartSeries={graphData.graphSeries}
@@ -85,7 +94,7 @@ export default function AppmerceChartByDate({ data, startDate, endDate }) {
             height={315}
           />
         ) : (
-          <p>Nessun dato disponibile per il range selezionato.</p>
+          <div className="no-data text-muted">{t("NoData")}</div>
         )}
       </div>
     </div>

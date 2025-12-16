@@ -3,7 +3,7 @@
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import dayjs from "dayjs";
+import { fmt } from "@/utils/dateUtils";
 import { Fragment } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
@@ -18,24 +18,6 @@ const Generale = {
     dataConsegna: "2025-12-15",
   },
 };
-
-// DATE UTILS
-const calcolaRange = (periodo) => {
-  const oggi = dayjs();
-  const inizio = {
-    settimana: oggi.subtract(7, "day"),
-    mese: oggi.subtract(1, "month"),
-    anno: oggi.startOf("year"),
-  }[periodo];
-
-  return {
-    startDate: inizio.format("YYYY-MM-DD"),
-    endDate: oggi.format("YYYY-MM-DD"),
-  };
-};
-
-const fmt = (d) =>
-  !d ? "" : typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
 
 // COMPONENTE PRINCIPALE
 export default function PaginaTest() {

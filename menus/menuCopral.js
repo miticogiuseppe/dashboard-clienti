@@ -1,10 +1,12 @@
 import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
+import { RiDashboardHorizontalFill } from "react-icons/ri";
+import { LuFactory } from "react-icons/lu";
 
 export const menuCopral = [
-  { menutitle: "MAIN" },
+  { menutitle: "MENU" },
   {
-    title: "Dashboards",
-    icon: Dashboardicon,
+    title: "Dashboard",
+    icon: <RiDashboardHorizontalFill className="side-menu__icon" />,
     type: "sub",
     children: [
       {
@@ -15,23 +17,9 @@ export const menuCopral = [
       },
     ],
   },
-  { menutitle: "WEB APPS" },
   {
-    title: "Apps",
-    icon: Appsicon,
-    type: "sub",
-    children: [
-      {
-        title: "Calendario",
-        path: "/dashboard/copral/calendario",
-        type: "link",
-        ready: true,
-      },
-    ],
-  },
-  {
-    title: "Pages",
-    icon: Pagesicon,
+    title: "Macchine",
+    icon: <LuFactory className="side-menu__icon" />,
     type: "sub",
     children: [
       {
@@ -41,7 +29,7 @@ export const menuCopral = [
         ready: true,
       },
       {
-        path: "/dashboard/copral/copral_nas",
+        path: "/dashboard/copral/troncatrice",
         title: "Troncatrice (Mecal)",
         type: "link",
         ready: true,
@@ -56,6 +44,19 @@ export const menuCopral = [
       {
         path: "#",
         title: "Intestatrice 90°",
+        type: "link",
+        ready: true,
+      },
+    ],
+  },
+  {
+    title: "App",
+    icon: Appsicon,
+    type: "sub",
+    children: [
+      {
+        title: "Calendario",
+        path: "/dashboard/copral/calendario",
         type: "link",
         ready: true,
       },

@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { Card } from "react-bootstrap";
 import { FiDownload } from "react-icons/fi"; // icona Excel/download
 import moment from "moment";
+import { useTranslations } from "next-intl";
 
 function AppmerceTable({
   data,
@@ -15,6 +16,8 @@ function AppmerceTable({
   tableHeaders,
   filterDate,
 }) {
+  const t = useTranslations("Graph");
+
   // Ordino gli ultimi 7 ordini per data
   const filteredData = useMemo(() => {
     if (!data) return [];
@@ -32,7 +35,7 @@ function AppmerceTable({
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
           x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
       );
-    return sorted.slice(0, 7);
+    return sorted;
   }, [data, dateColumn, filterDate]);
 
   const downloadExcel = async () => {
@@ -40,7 +43,7 @@ function AppmerceTable({
   };
 
   return (
-    <Card className="custom-card overflow-hidden">
+    <Card className="custom-card fixed-height-card">
       <Card.Header className="justify-content-between d-flex align-items-center">
         <div className="card-title">{title}</div>
         {fileExcel && (
@@ -53,33 +56,48 @@ function AppmerceTable({
         )}
       </Card.Header>
 
-      <Card.Body className="p-0">
-        <div className="table-responsive">
-          <SpkTablescomponent
-            tableClass="text-nowrap table-hover"
-            header={tableHeaders.map((header) => ({ title: header.title }))}
-          >
-            {filteredData.map((row, index) => (
-              <tr key={index}>
-                {tableHeaders.map((header, index) => (
-                  <td className={header.bold ? "fw-semibold" : ""} key={index}>
-                    {moment.isDuration(row[header.column])
-                      ? moment("1900-01-01")
-                          .add(row[header.column])
-                          .format("m:ss")
-                      : moment.isMoment(row[header.column])
-                      ? header.showSeconds
-                        ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
-                        : row[header.column].format("DD/MM/YYYY")
-                      : row[header.column] ||
-                        header.default ||
-                        (header.allowEmpty ? "" : "N/A")}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </SpkTablescomponent>
-        </div>
+      <Card.Body className="p-2">
+        {filteredData.length > 0 ? (
+          <div className="scroller-container">
+            <SpkTablescomponent
+              tableClass="table-hover table-break-word sticky-header-table customable"
+              header={tableHeaders.map((header) => ({
+                title: header.title,
+                className: header.className,
+              }))}
+            >
+              {filteredData.map((row, index) => (
+                <tr key={index}>
+                  {tableHeaders.map((header, index) => (
+                    <td
+                      className={
+                        (header.bold ? "fw-semibold" : "") +
+                        " " +
+                        (header.type === "number" ? "text-right" : "")
+                      }
+                      key={index}
+                    >
+                      {moment.isDuration(row[header.column])
+                        ? moment("1900-01-01")
+                            .add(row[header.column])
+                            .format("m:ss")
+                        : moment.isMoment(row[header.column])
+                        ? header.showSeconds
+                          ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
+                          : row[header.column].format("DD/MM/YYYY")
+                        : row[header.column] !== "" &&
+                          row[header.column] !== undefined
+                        ? row[header.column]
+                        : header.default || (header.allowEmpty ? "" : "N/A")}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </SpkTablescomponent>
+          </div>
+        ) : (
+          <div className="no-data text-muted">{t("NoData")}</div>
+        )}
       </Card.Body>
     </Card>
   );

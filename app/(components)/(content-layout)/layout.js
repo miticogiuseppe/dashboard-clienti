@@ -1,22 +1,15 @@
 "use client";
+import { Fragment, useContext } from "react";
+import { connect } from "react-redux";
+import Backtotop from "../../../shared/layouts-components/backtotop/backtotop";
 import Footer from "../../../shared/layouts-components/footer/footer";
 import Header from "../../../shared/layouts-components/header/header";
+import Loader from "../../../shared/layouts-components/loader/loader";
 import Sidebar from "../../../shared/layouts-components/sidebar/sidebar";
 import Switcher from "../../../shared/layouts-components/switcher/switcher";
-import React, { Fragment } from "react";
-import { connect } from "react-redux";
 import { ThemeChanger } from "../../../shared/redux/action";
-import Backtotop from "../../../shared/layouts-components/backtotop/backtotop";
-import Loader from "../../../shared/layouts-components/loader/loader";
-import { useContext } from "react";
-import GlobalContext from "@/context/GlobalContext";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Layout = ({ children }) => {
-  const { menu } = useContext(GlobalContext);
-
   return (
     <Fragment>
       <Switcher />
@@ -29,7 +22,7 @@ const Layout = ({ children }) => {
           showNotifications={false}
         />
 
-        <Sidebar menu={menu} />
+        <Sidebar />
         <div className="main-content app-content">
           <div className="container-fluid">{children}</div>
         </div>
