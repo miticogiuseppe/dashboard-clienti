@@ -1,72 +1,124 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
-dayjs.extend(isSameOrAfter);
+// --- CONFIGURAZIONE DAYJS & CONSTANTI ---
 dayjs.extend(isSameOrBefore);
+dayjs.extend(customParseFormat);
 
-const headerStyle = {
-  padding: "10px 6px",
-  fontWeight: 700,
-  fontSize: 14,
-  borderBottom: "1px solid #ddd",
-  background: "#f8f9fa",
-  textAlign: "center",
+const DATE_FORMATS_TO_TRY = [
+  "YYYY-MM-DD HH:mm:ss",
+  "DD/MM/YYYY HH:mm",
+  "M/D/YYYY H:mm",
+  "YYYY-MM-DDTHH:mm:ss.SSSZ",
+];
+
+const COMMON_STYLES = {
+  header: {
+    padding: "10px 6px",
+    fontWeight: 700,
+    fontSize: 14,
+    borderBottom: "1px solid #ddd",
+    background: "#f8f9fa",
+    textAlign: "center",
+  },
+  cell: {
+    padding: "8px 6px",
+    borderBottom: "1px solid #eee",
+    textAlign: "center",
+  },
 };
 
-const cellStyle = {
-  padding: "8px 6px",
-  borderBottom: "1px solid #eee",
-  textAlign: "center",
+// --- UTILITY ESTRATTE E COMPATTATE ---
+
+const parseDate = (raw) => {
+  if (!raw) return dayjs(null);
+  try {
+    if (typeof raw === "number" && raw > 1) {
+      const d = XLSX.SSF.parse_date_code(raw);
+      return dayjs(new Date(d.y, d.m - 1, d.d, d.H, d.M, d.S));
+    }
+    if (typeof raw === "string") {
+      for (const format of DATE_FORMATS_TO_TRY) {
+        const tentative = dayjs(raw, format, true);
+        if (tentative.isValid()) return tentative;
+      }
+    }
+    return dayjs(raw);
+  } catch (e) {
+    return dayjs(null);
+  }
 };
 
+const parseNum = (raw) => Number(String(raw || 0).replace(",", ".")) || 0;
+
+/**
+ * Formatta un numero nello stile italiano (separatore migliaia: ., decimale: ,).
+ */
+const formatNumber = (value) => {
+  if (typeof value !== "number") return value;
+  return new Intl.NumberFormat("it-IT", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
+};
+
+// --- FUNZIONE DI CARICAMENTO DATI Ottimizzata ---
 const loadSheet = async (idOrUrl, providedTenant) => {
-  const tenant = providedTenant
-    ? providedTenant
-    : typeof window !== "undefined"
-    ? window.location.pathname.split("/")[2]
-    : null;
-
-  const isApiPath = typeof idOrUrl === "string" && idOrUrl.startsWith("/api/");
+  const tenant =
+    providedTenant ||
+    (typeof window !== "undefined"
+      ? window.location.pathname.split("/")[2]
+      : null);
+  const isApiPath = idOrUrl?.startsWith("/api/");
   const url = isApiPath
     ? idOrUrl
     : `/api/fetch-excel-json?id=${encodeURIComponent(idOrUrl)}`;
+  const response = await fetch(url, {
+    headers: tenant ? { "x-tenant": tenant } : {},
+  });
 
-  const headers = tenant ? { "x-tenant": tenant } : {};
-
-  const response = await fetch(url, { headers });
   if (!response.ok) {
-    let msg;
+    let msg = `Errore HTTP ${response.status}`;
     try {
-      const clone = response.clone();
-      const json = await clone.json();
-      msg = json?.error ?? JSON.stringify(json);
+      msg = (await response.json())?.error ?? msg;
     } catch (_) {
-      const clone2 = response.clone();
-      msg = await clone2.text();
+      msg = await response.text();
     }
-    throw new Error(
-      `Impossibile trovare o leggere il file con id: ${idOrUrl} -> ${msg}`
-    );
+    throw new Error(`Impossibile leggere il file ${idOrUrl} -> ${msg}`);
   }
 
   const contentType = (
     response.headers.get("content-type") || ""
   ).toLowerCase();
 
-  if (contentType.includes("application/json") || isApiPath === false) {
+  if (contentType.includes("application/json") || !isApiPath) {
     return await response.json();
   }
 
-  const arrayBuffer = await response.arrayBuffer();
-  const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: "array" });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  return XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  const workbook = XLSX.read(new Uint8Array(await response.arrayBuffer()), {
+    type: "array",
+  });
+  return XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
+    defval: "",
+  });
 };
+
+// --- COMPONENTE PRINCIPALE ---
 
 const ConfezionatriceChart = ({ file, colonne, tenant }) => {
   const [dataChart, setDataChart] = useState(null);
@@ -74,64 +126,67 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
-  // CARICO I DATI
+  const fetchData = useCallback(async () => {
+    if (!file) return;
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const jsonSheet = await loadSheet(file, tenant);
+
+      const normalized = jsonSheet.map((row) => ({
+        ...row,
+        _parsedDate: parseDate(row[colonne.dataOra]),
+      }));
+
+      setDataChart({ rows: normalized });
+    } catch (err) {
+      setErrorMsg(`Errore: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [file, colonne.dataOra, tenant]);
+
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      if (!isMounted || !file) return;
-      try {
-        setLoading(true);
-        setErrorMsg("");
-
-        const jsonSheet = await loadSheet(file, tenant);
-
-        const normalized = jsonSheet.map((row) => {
-          const rawDate = row[colonne.dataOra];
-          let parsed = dayjs("");
-
-          try {
-            if (!rawDate) {
-              parsed = dayjs.invalid();
-            } else if (typeof rawDate === "number" && rawDate > 1) {
-              const d = XLSX.SSF.parse_date_code(rawDate);
-              parsed = dayjs(new Date(d.y, d.m - 1, d.d, d.H, d.M, d.S));
-            } else {
-              parsed = dayjs(rawDate);
-            }
-          } catch (e) {
-            parsed = dayjs.invalid();
-          }
-
-          return { ...row, _parsedDate: parsed };
-        });
-
-        if (isMounted) setDataChart({ rows: normalized });
-      } catch (err) {
-        if (isMounted) setErrorMsg(`Errore: ${err.message}`);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
     fetchData();
-    return () => (isMounted = false);
-  }, [file, colonne, tenant]);
+  }, [fetchData]);
 
-  // FILTRO PER DATA
+  // FILTRO E ORDINAMENTO
   const filtered = useMemo(() => {
     let f = dataChart?.rows || [];
     if (filterDate) {
       const selected = dayjs(filterDate);
-      if (selected.isValid()) {
-        f = f.filter(
-          (r) =>
-            r._parsedDate?.isValid() && r._parsedDate.isSame(selected, "day")
-        );
-      }
+      f = f.filter(
+        (r) => r._parsedDate?.isValid() && r._parsedDate.isSame(selected, "day")
+      );
     }
     return f.sort((a, b) => b._parsedDate.diff(a._parsedDate));
   }, [dataChart, filterDate]);
+
+  // AGGREGAZIONE DATI GRAFICO
+  const chartData = useMemo(() => {
+    if (!filterDate || filtered.length === 0) return [];
+    const aggregation = {};
+
+    filtered.forEach((r) => {
+      const key =
+        r[colonne.descrizione] || r[colonne.bilancia] || "Sconosciuto";
+      const pesoScaricato = parseNum(
+        r[colonne.valorePeso] || r[colonne.valore]
+      );
+      const valoreRiservato = parseNum(r[colonne.valoreRiservato]);
+
+      if (pesoScaricato > 0 || valoreRiservato > 0) {
+        if (!aggregation[key]) {
+          aggregation[key] = { name: key, "Peso Scaricato": 0, Riservato: 0 };
+        }
+        aggregation[key]["Peso Scaricato"] += pesoScaricato;
+        aggregation[key]["Riservato"] += valoreRiservato;
+      }
+    });
+    return Object.values(aggregation);
+  }, [filtered, filterDate, colonne]);
+
+  // --- RENDERING ---
 
   if (loading) return <div className="p-4 text-blue-600">Caricamento...</div>;
   if (errorMsg) return <div className="p-4 text-red-600">{errorMsg}</div>;
@@ -139,7 +194,7 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
 
   return (
     <div style={{ padding: 32, width: "100%" }}>
-      {/* FILTRO A SINISTRA */}
+      {/* 1. SELETTORE DATA E AZZERA FILTRO */}
       <div
         style={{
           marginBottom: 20,
@@ -160,7 +215,6 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
           >
             Seleziona giorno:
           </label>
-
           <input
             type="date"
             value={filterDate}
@@ -173,7 +227,6 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
               fontSize: 15,
             }}
           />
-
           <button
             type="button"
             onClick={() => setFilterDate("")}
@@ -193,7 +246,67 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
         </div>
       </div>
 
-      {/* TABELLA SCROLLABILE FULL WIDTH/HEIGHT */}
+      {/* 2. GRAFICO A COLONNE */}
+      <div
+        style={{
+          width: "100%",
+          height: 350,
+          marginBottom: 40,
+          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+          boxShadow: "0 2px 16px rgba(0,0,0,0.07)",
+          padding: 10,
+        }}
+      >
+        <h3 style={{ margin: "0 0 10px 10px", color: "#555" }}>
+          Produzione Confezionatrice
+        </h3>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height="90%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 5, right: 5, left: 5, bottom: 60 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                angle={-30}
+                textAnchor="end"
+                height={45}
+                interval={0}
+                style={{ fontSize: 11 }}
+              />
+
+              {/* === APPLICATA FORMATTAZIONE ALL'ASSE Y === */}
+              <YAxis allowDecimals={false} tickFormatter={formatNumber} />
+
+              {/* === APPLICATA FORMATTAZIONE AL TOOLTIP === */}
+              <Tooltip formatter={formatNumber} />
+
+              <Legend
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{
+                  paddingTop: 10,
+                  position: "relative",
+                  marginTop: 10,
+                }}
+              />
+
+              <Bar dataKey="Peso Scaricato" fill="#8884d8" />
+              <Bar dataKey="Riservato" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div style={{ textAlign: "center", padding: 50 }}>
+            {filterDate
+              ? "Nessun dato di produzione valido per il giorno selezionato."
+              : "Seleziona una data per visualizzare l'aggregazione per Descrizione."}
+          </div>
+        )}
+      </div>
+
+      {/* 3. TABELLA DATI CONFEZIONATRICE */}
       <div
         style={{
           width: "100%",
@@ -211,20 +324,15 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
           style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}
         >
           <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
-            <tr style={{ background: "#f8f9fa" }}>
-              <th style={headerStyle}>{colonne.indice}</th>
-              <th style={headerStyle}>{colonne.dataOra}</th>
-              <th style={headerStyle}>
-                {colonne.valorePeso || colonne.valore || "Valore"}
-              </th>
-              <th style={headerStyle}>{colonne.bilancia}</th>
-              <th style={headerStyle}>
-                {colonne.valoreRiservato || "Riservato"}
-              </th>
-              <th style={headerStyle}>{colonne.descrizione}</th>
+            <tr>
+              <th style={COMMON_STYLES.header}>Indice</th>
+              <th style={COMMON_STYLES.header}>Data e Ora</th>
+              <th style={COMMON_STYLES.header}>Peso Scaricato</th>
+              <th style={COMMON_STYLES.header}>Bilancia</th>
+              <th style={COMMON_STYLES.header}>Riservato</th>
+              <th style={COMMON_STYLES.header}>Descrizione</th>
             </tr>
           </thead>
-
           <tbody>
             {filtered.length === 0 ? (
               <tr>
@@ -241,24 +349,34 @@ const ConfezionatriceChart = ({ file, colonne, tenant }) => {
                     fontSize: 13,
                   }}
                 >
-                  <td style={cellStyle}>{r[colonne.indice] ?? i + 1}</td>
-                  <td style={cellStyle}>
+                  <td style={COMMON_STYLES.cell}>
+                    {r[colonne.indice] ?? i + 1}
+                  </td>
+                  <td style={COMMON_STYLES.cell}>
                     {r._parsedDate.isValid()
                       ? r._parsedDate.format("DD-MM-YYYY HH:mm")
-                      : ""}
+                      : r[colonne.dataOra] ?? ""}
                   </td>
-                  <td style={cellStyle}>
-                    {Number(r[colonne.valorePeso] ?? r[colonne.valore] ?? 0)}
+                  {/* === APPLICATA FORMATTAZIONE ALLA TABELLA (Peso Scaricato) === */}
+                  <td style={COMMON_STYLES.cell}>
+                    {formatNumber(
+                      parseNum(r[colonne.valorePeso] ?? r[colonne.valore])
+                    )}
                   </td>
-                  <td style={cellStyle}>{r[colonne.bilancia]}</td>
-                  <td style={cellStyle}>{r[colonne.valoreRiservato] ?? ""}</td>
+
+                  <td style={COMMON_STYLES.cell}>{r[colonne.bilancia]}</td>
+
+                  {/* === APPLICATA FORMATTAZIONE ALLA TABELLA (Riservato) === */}
+                  <td style={COMMON_STYLES.cell}>
+                    {formatNumber(parseNum(r[colonne.valoreRiservato]))}
+                  </td>
+
                   <td
                     style={{
-                      ...cellStyle,
+                      ...COMMON_STYLES.cell,
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
                       maxWidth: 300,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
                     }}
                   >
                     {r[colonne.descrizione]}
