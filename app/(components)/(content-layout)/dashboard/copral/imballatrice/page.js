@@ -86,9 +86,9 @@ export default function PaginaImballatrice() {
           </Row>
 
           {/* Card TS Azienda */}
-          <Row className="mt-4">
-            <Col xl={6}>
-              <Card className="custom-card h-100">
+          <Row>
+            <Col xxl={6}>
+              <Card className="custom-card fixed-height">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione</Card.Title>
                   <PeriodDropdown
@@ -116,8 +116,8 @@ export default function PaginaImballatrice() {
             </Col>
 
             {/* Card Produzione per Articolo */}
-            <Col xl={6}>
-              <Card className="custom-card h-100">
+            <Col xxl={6}>
+              <Card className="custom-card fixed-height">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione per articolo</Card.Title>
                   <PeriodDropdown
@@ -142,7 +142,7 @@ export default function PaginaImballatrice() {
               </Card>
             </Col>
           </Row>
-          <Row className="mt-4">
+          <Row>
             <Col xl={6}>
               <AppmerceTable
                 data={data}
