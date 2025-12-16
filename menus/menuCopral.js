@@ -41,7 +41,7 @@ export const menuCopral = [
         ready: true,
       },
       {
-        path: "/dashboard/copral/copral_nas",
+        path: "/dashboard/copral/troncatrice",
         title: "Troncatrice (Mecal)",
         type: "link",
         ready: true,

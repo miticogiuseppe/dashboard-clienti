@@ -1,20 +1,19 @@
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
 import LogTroncatriceChart from "@/components/LogTroncatriceChart";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { fmt, computeDate } from "@/utils/dateUtils";
 import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
 
-const troncatrice = {
+const resources = {
   fileStorico: "/api/download-resource?id=STORICO_TRONCATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 };
@@ -65,18 +64,6 @@ export default function PaginaTroncatrice() {
     return !data || !data2;
   }, [data, data2]);
 
-  // Stato per TS Azienda
-  const computedDateTS = useMemo(() => {
-    if (pickerDateTS) return pickerDateTS;
-    return calcolaRange(periodoTS);
-  }, [pickerDateTS, periodoTS]);
-
-  // Stato per Log Troncatrice Esteso
-  const computedDateLog = useMemo(() => {
-    if (pickerDateLog) return pickerDateLog;
-    return calcolaRange(periodoLog);
-  }, [pickerDateLog, periodoLog]);
-
   return (
     <>
       <Seo title="Macchina - Troncatrice (Mecal)" />
@@ -94,7 +81,7 @@ export default function PaginaTroncatrice() {
 
           <Row>
             <Col>
-              <MacchinaDashboard {...troncatrice} />
+              <MacchinaDashboard {...resources} />
             </Col>
           </Row>
 
@@ -104,47 +91,23 @@ export default function PaginaTroncatrice() {
               <Card className="custom-card h-100">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("settimana");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("mese");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("anno");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateTS(date)}
-                    value={computedDateTS}
+                    value={pickerDateTS}
+                    period={periodoTS}
                   />
                   <AppmerceChart
                     data={data}
-                    startDate={fmt(computedDateTS[0])}
-                    endDate={fmt(computedDateTS[1])}
+                    startDate={fmt(pickerDateTS, periodoTS, 0)}
+                    endDate={fmt(pickerDateTS, periodoTS, 1)}
                     dateCol="Data ord"
                     qtyCol="Qta da ev"
                   />
@@ -157,47 +120,23 @@ export default function PaginaTroncatrice() {
               <Card className="custom-card h-100">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Log troncatrice esteso</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoLog("settimana");
-                        setPickerDateLog(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoLog("mese");
-                        setPickerDateLog(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoLog("anno");
-                        setPickerDateLog(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoLog(period);
+                      setPickerDateLog(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateLog(date)}
-                    value={computedDateLog}
+                    value={pickerDateLog}
+                    period={periodoLog}
                   />
                   <LogTroncatriceChart
                     data={data2}
-                    startDate={fmt(computedDateLog[0])}
-                    endDate={fmt(computedDateLog[1])}
+                    startDate={fmt(pickerDateLog, periodoLog, 0)}
+                    endDate={fmt(pickerDateLog, periodoLog, 1)}
                   />
                 </Card.Body>
               </Card>
@@ -241,7 +180,7 @@ export default function PaginaTroncatrice() {
                 title="Log troncatrice esteso (dati grezzi)"
                 fileExcel="TRONCATRICE_ESTESO"
                 dateColumn="Timestamp"
-                filterDate={computedDateLog}
+                filterDate={computeDate(pickerDateLog, periodoLog)}
                 tableHeaders={[
                   {
                     title: "Data e ora",

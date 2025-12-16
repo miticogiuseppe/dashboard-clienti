@@ -13,9 +13,13 @@ const calcolaRange = (periodo) => {
 };
 
 // Utility per formattare sempre le date
-const fmt = (d) => {
-  if (!d) return "";
-  return typeof d === "string" ? d : dayjs(d).format("YYYY-MM-DD");
+const fmt = (value, period, idx) => {
+  if (!value) value = calcolaRange(period);
+  return value[idx];
+};
+const computeDate = (value, period) => {
+  if (!value) value = calcolaRange(period);
+  return value;
 };
 
-export { calcolaRange, fmt };
+export { calcolaRange, fmt, computeDate };

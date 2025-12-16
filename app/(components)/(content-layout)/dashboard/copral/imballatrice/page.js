@@ -3,8 +3,8 @@ import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
 import AppmerceTable from "@/components/AppmerceTable";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { calcolaRange, fmt } from "@/utils/dateUtils";
@@ -12,9 +12,9 @@ import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
+import CustomDateComponent from "@/components/CustomDateComponent";
 
-const imballatrice = {
+const resources = {
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 };
@@ -65,18 +65,6 @@ export default function PaginaImballatrice() {
     return !data || !data2;
   }, [data, data2]);
 
-  // Stato per TS Azienda
-  const computedDateTS = useMemo(() => {
-    if (pickerDateTS) return pickerDateTS;
-    return calcolaRange(periodoTS);
-  }, [pickerDateTS, periodoTS]);
-
-  // Stato per Produzione per Articolo
-  const computedDateArt = useMemo(() => {
-    if (pickerDateArt) return pickerDateArt;
-    return calcolaRange(periodoArt);
-  }, [pickerDateArt, periodoArt]);
-
   return (
     <>
       <Seo title="Macchina - Imballatrice" />
@@ -94,7 +82,7 @@ export default function PaginaImballatrice() {
 
           <Row>
             <Col>
-              <MacchinaDashboard {...imballatrice} />
+              <MacchinaDashboard {...resources} />
             </Col>
           </Row>
 
@@ -104,47 +92,23 @@ export default function PaginaImballatrice() {
               <Card className="custom-card h-100">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("settimana");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("mese");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("anno");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateTS(date)}
-                    value={computedDateTS}
+                    value={pickerDateTS}
+                    period={periodoTS}
                   />
                   <AppmerceChart
                     data={data}
-                    startDate={fmt(computedDateTS[0])}
-                    endDate={fmt(computedDateTS[1])}
+                    startDate={fmt(pickerDateTS, periodoTS, 0)}
+                    endDate={fmt(pickerDateTS, periodoTS, 1)}
                     dateCol="Data ord"
                     qtyCol="Qta da ev"
                   />
@@ -157,47 +121,23 @@ export default function PaginaImballatrice() {
               <Card className="custom-card h-100">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione per articolo</Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("settimana");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("mese");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("anno");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoArt(period);
+                      setPickerDateArt(undefined);
+                    }}
+                  />
                 </Card.Header>
                 <Card.Body>
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateArt(date)}
-                    value={computedDateArt}
+                    value={pickerDateArt}
+                    period={periodoArt}
                   />
                   <AppmerceChartByArticolo
                     data={data2}
-                    startDate={fmt(computedDateArt[0])}
-                    endDate={fmt(computedDateArt[1])}
+                    startDate={fmt(pickerDateArt, periodoArt, 0)}
+                    endDate={fmt(pickerDateArt, periodoArt, 1)}
                   />
                 </Card.Body>
               </Card>
