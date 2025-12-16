@@ -58,7 +58,7 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
   };
 
   return (
-    <Row className="mb-4 align-items-stretch">
+    <Row>
       <Col xl={6}>
         <Spkcardscomponent
           cardClass="overflow-hidden main-content-card"
