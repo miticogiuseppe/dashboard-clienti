@@ -56,7 +56,7 @@ function AppmerceTable({
       <Card.Body className="p-0">
         <div className="scroller-container">
           <SpkTablescomponent
-            tableClass="table-hover table-break-word sticky-header-table customable text-center"
+            tableClass="table-hover table-break-word sticky-header-table customable"
             header={tableHeaders.map((header) => ({
               title: header.title,
               className: header.className,
@@ -65,7 +65,14 @@ function AppmerceTable({
             {filteredData.map((row, index) => (
               <tr key={index}>
                 {tableHeaders.map((header, index) => (
-                  <td className={header.bold ? "fw-semibold" : ""} key={index}>
+                  <td
+                    className={
+                      (header.bold ? "fw-semibold" : "") +
+                      " " +
+                      (header.type === "number" ? "text-right" : "")
+                    }
+                    key={index}
+                  >
                     {moment.isDuration(row[header.column])
                       ? moment("1900-01-01")
                           .add(row[header.column])
