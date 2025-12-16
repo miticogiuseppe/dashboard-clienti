@@ -35,6 +35,24 @@ export default function PaginaTroncatrice() {
       );
       const resp = await res.json();
       let data = resp.data;
+
+      data = data.map((item) => {
+        const qtaEv = item["QTAev II UM"];
+        const sanitizedQtaEv =
+          qtaEv === null || qtaEv === undefined || qtaEv === "" ? 0 : qtaEv;
+
+        const qtaDaEv = item["Qta da ev"];
+        const sanitizedQtaDaEv =
+          qtaDaEv === null || qtaDaEv === undefined || qtaDaEv === ""
+            ? 0
+            : qtaDaEv;
+        return {
+          ...item,
+          "QTAev II UM": sanitizedQtaEv,
+          "Qta da ev": sanitizedQtaDaEv,
+        };
+      });
+
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
 
@@ -174,13 +192,11 @@ export default function PaginaTroncatrice() {
                   {
                     title: "Qta da ev.",
                     column: "Qta da ev",
-                    allowEmpty: true,
                     type: "number",
                   },
                   {
                     title: "Qta ev.",
                     column: "QTAev II UM",
-                    allowEmpty: true,
                     type: "number",
                   },
                 ]}
