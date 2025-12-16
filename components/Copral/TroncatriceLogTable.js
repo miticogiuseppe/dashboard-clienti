@@ -3,6 +3,7 @@
 import { Card } from "react-bootstrap";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 // Normalizza e pulisci i dati del log nel formato richiesto dalla tabella
 const cleanAndNormalizeLogData = (data) => {
@@ -31,6 +32,8 @@ const cleanAndNormalizeLogData = (data) => {
 };
 
 function TroncatriceLogTable({ data, title }) {
+  const t = useTranslations("Graph");
+
   const logData = useMemo(() => cleanAndNormalizeLogData(data), [data]);
 
   return (
@@ -40,48 +43,52 @@ function TroncatriceLogTable({ data, title }) {
       </Card.Header>
 
       <Card.Body className="p-0">
-        <div className="table-responsive">
-          <SpkTablescomponent
-            tableClass="text-nowrap table-hover"
-            header={[
-              { title: "Data/Ora" },
-              { title: "Evento" },
-              { title: "Descrizione" },
-              { title: "Col 1" },
-              { title: "Col 2" },
-              { title: "Col 3" },
-              { title: "Col 4" },
-              { title: "Col 5" },
-              { title: "Col 6" },
-            ]}
-          >
-            {logData.map((row, index) => (
-              <tr key={index}>
-                <td>
-                  {row.Timestamp
-                    ? new Date(row.Timestamp).toLocaleString()
-                    : ""}
-                </td>
+        {logData.length > 0 ? (
+          <div className="scroller-container">
+            <SpkTablescomponent
+              tableClass="text-nowrap table-hover"
+              header={[
+                { title: "Data/Ora" },
+                { title: "Evento" },
+                { title: "Descrizione" },
+                { title: "Col 1" },
+                { title: "Col 2" },
+                { title: "Col 3" },
+                { title: "Col 4" },
+                { title: "Col 5" },
+                { title: "Col 6" },
+              ]}
+            >
+              {logData.map((row, index) => (
+                <tr key={index}>
+                  <td>
+                    {row.Timestamp
+                      ? new Date(row.Timestamp).toLocaleString()
+                      : ""}
+                  </td>
 
-                <td>{row.Evento || ""}</td>
+                  <td>{row.Evento || ""}</td>
 
-                <td>{row.Descrizione || ""}</td>
+                  <td>{row.Descrizione || ""}</td>
 
-                <td>{row.Col1 || ""}</td>
+                  <td>{row.Col1 || ""}</td>
 
-                <td>{row.Col2 || ""}</td>
+                  <td>{row.Col2 || ""}</td>
 
-                <td>{row.Col3 || ""}</td>
+                  <td>{row.Col3 || ""}</td>
 
-                <td>{row.Col4 || ""}</td>
+                  <td>{row.Col4 || ""}</td>
 
-                <td>{row.Col5 || ""}</td>
+                  <td>{row.Col5 || ""}</td>
 
-                <td>{row.Col6 || ""}</td>
-              </tr>
-            ))}
-          </SpkTablescomponent>
-        </div>
+                  <td>{row.Col6 || ""}</td>
+                </tr>
+              ))}
+            </SpkTablescomponent>
+          </div>
+        ) : (
+          <div className="no-data text-muted">{t("NoData")}</div>
+        )}
       </Card.Body>
     </Card>
   );

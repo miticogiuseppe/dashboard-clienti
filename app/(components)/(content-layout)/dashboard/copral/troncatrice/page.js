@@ -149,6 +149,7 @@ export default function PaginaTroncatrice() {
                 title="Produzione"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ord" },
                   {

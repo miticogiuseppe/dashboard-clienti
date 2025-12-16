@@ -7,12 +7,11 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import { useTranslations } from "next-intl";
 
 const resources = {
   fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
@@ -28,8 +27,6 @@ export default function PaginaImballatrice() {
 
   const [data, setData] = useState(undefined);
   const [data2, setData2] = useState(undefined);
-
-  const t = useTranslations("Graph");
 
   useEffect(() => {
     async function fetchData() {
@@ -152,6 +149,7 @@ export default function PaginaImballatrice() {
                 title="Produzione"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ord" },
                   {
@@ -189,6 +187,7 @@ export default function PaginaImballatrice() {
                 title="Produzione per articolo"
                 fileExcel="imballatrice_a"
                 dateColumn="Data"
+                filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
                   { title: "Numero", column: "Numero", type: "number" },
                   { title: "Descrizione", column: "Descrizione" },
