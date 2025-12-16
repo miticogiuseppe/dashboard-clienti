@@ -53,7 +53,7 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
       </>
     ),
     svgIcon: <FaRectangleList />,
-    backgroundColor: "info svg-white",
+    backgroundColor: "primary2 svg-white",
     color: "success",
   };
 
