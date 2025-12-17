@@ -1,4 +1,5 @@
 import React from "react";
+import { basePath } from "@/next.config";
 
 const Preloader = (props) => {
   const { show } = props;
