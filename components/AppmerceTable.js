@@ -2,11 +2,12 @@
 
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import fileDownload from "@/utils/fileDownload";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Card } from "react-bootstrap";
 import { FiDownload } from "react-icons/fi"; // icona Excel/download
 import moment from "moment";
 import { useTranslations } from "next-intl";
+import VisibilityChecker from "./VisibilityChecker";
 
 function AppmerceTable({
   data,
@@ -42,6 +43,10 @@ function AppmerceTable({
   const downloadExcel = async () => {
     fileDownload(fileExcel);
   };
+
+  const handlePageLoad = useCallback(() => {
+    console.log("triggered");
+  }, []);
 
   return (
     <Card className={className ? className : "custom-card fixed-height-card"}>
@@ -101,6 +106,7 @@ function AppmerceTable({
                 </tr>
               ))}
             </SpkTablescomponent>
+            <VisibilityChecker onLoading={handlePageLoad} />
           </div>
         ) : (
           <div className="no-data text-muted">{t("NoData")}</div>
