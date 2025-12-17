@@ -165,17 +165,27 @@ const Ecommerce = () => {
       .slice(0, 20)
       .map((x) => x[0]);
 
-    for (let item of ordersByCustomer) {
-      if (filterList.includes(item[0])) {
-        newPie.labels.push(item[0]);
-        newPie.datasets[0].data.push(item[1]);
-        newPie.datasets[0].backgroundColor.push(randomColor());
-      }
+    let top20 = [];
+    for (let item of ordersByCustomer)
+      if (filterList.includes(item[0])) top20.push(item);
+
+    for (let item of top20) {
+      newPie.labels.push(item[0]);
+      newPie.datasets[0].data.push(item[1]);
+      newPie.datasets[0].backgroundColor.push(randomColor());
     }
 
     setPieData(newPie);
 
-    setTop3([...ordersByCustomer].sort((a, b) => b[1] - a[1]).slice(0, 3));
+    setTop3(
+      top20
+        .map((item, index) => ({
+          ...item,
+          originalIndex: index,
+        }))
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+    );
 
     // ----------------------- fine caricamento
 
@@ -336,7 +346,10 @@ const Ecommerce = () => {
                           <i
                             className={`ri-circle-fill p-1 lh-1 fs-17 rounded-2`}
                             style={{
-                              color: pieData.datasets[0].backgroundColor[idx],
+                              color:
+                                pieData.datasets[0].backgroundColor[
+                                  item.originalIndex
+                                ],
                             }}
                           ></i>
                           <span className="text-muted fs-12 mb-1 rounded-dot d-inline-block ms-2">
