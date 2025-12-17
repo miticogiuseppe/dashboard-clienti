@@ -48,14 +48,20 @@ export async function GET(req) {
       });
 
     const filePath = path.join(process.env.DRIVE_PATH, resource.path);
+    const jsonFile = path.join(
+      process.env.DRIVE_PATH,
+      path.parse(resource.path).dir,
+      path.parse(resource.path).name + ".json"
+    );
     const fileInfo = await getFileInfo(filePath);
     let jsonSheet = undefined;
-    let cacheFile = "json_cache/" + fileInfo.hash + ".json";
 
-    if (fs.existsSync(cacheFile)) {
-      let data = fs.readFileSync(cacheFile, "utf-8");
+    if (fs.existsSync(jsonFile)) {
+      let data = fs.readFileSync(jsonFile, "utf-8");
       jsonSheet = JSON.parse(data);
     } else {
+      console.log("Il file JSON non esiste: ", jsonFile);
+
       const fileBuffer = fs.readFileSync(filePath);
       const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
@@ -69,10 +75,6 @@ export async function GET(req) {
 
       const sheet = workbook.Sheets[sheetName];
       jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-      // crea il file di cache
-      const jsonString = JSON.stringify(jsonSheet, null, 2);
-      fs.writeFileSync(cacheFile, jsonString, "utf-8");
     }
 
     const jsonData = {
