@@ -116,6 +116,7 @@ const Sales = () => {
       counters,
       "Data ord",
       (d) => d.format("DD/MM/YYYY"),
+      undefined,
       "bar"
     );
     setGraphSeries(series);

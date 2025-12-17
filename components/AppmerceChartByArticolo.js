@@ -46,7 +46,13 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     ];
 
     // Usa createOptions come AppmerceChart
-    const chartOptions = createOptions(counters, "Descrizione", null, "bar");
+    const chartOptions = createOptions(
+      counters,
+      "Descrizione",
+      undefined,
+      undefined,
+      "bar"
+    );
 
     // Colore verdino più evidente
     chartOptions.colors = ["#4CAF50"];

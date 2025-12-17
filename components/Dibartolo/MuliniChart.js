@@ -70,7 +70,8 @@ export default function MuliniChart({ file, colonne, startDate, endDate }) {
         const chartOptions = createOptions(
           jsonSheet,
           colonneMemo.data,
-          null,
+          undefined,
+          undefined,
           "line"
         );
         chartOptions.xaxis = {

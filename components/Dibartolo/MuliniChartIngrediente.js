@@ -74,7 +74,8 @@ export default function MuliniChartIngrediente({
         const chartOptions = createOptions(
           jsonSheet,
           colonneMemo.data,
-          null,
+          undefined,
+          undefined,
           "line"
         );
         chartOptions.xaxis = {

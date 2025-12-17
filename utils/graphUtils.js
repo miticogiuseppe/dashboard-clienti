@@ -146,7 +146,7 @@ const pieOptions = {
       },
     },
     datalabels: {
-      formatter: function (value, context) {
+      formatter: function (value) {
         return value.toLocaleString("it-IT", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
@@ -172,6 +172,7 @@ const createOptions = (
   countArray,
   keyCol,
   formatFunc = undefined,
+  formatter = undefined,
   chartType = "bar",
   fillColor = "var(--primary-color)"
 ) => {
@@ -184,6 +185,7 @@ const createOptions = (
     o[keyCol] ? (formatFunc ? formatFunc(o[keyCol]) : o[keyCol]) : ""
   );
   options.colors[0] = fillColor;
+  if (formatter) options.yaxis.labels.formatter = formatter;
   return options;
 };
 
@@ -207,10 +209,34 @@ function makeRandomColors(length) {
   return Array.from({ length }, () => randomColor());
 }
 
+function durationFormatter(s) {
+  s = s / 1000;
+
+  const hours = Math.floor(s / 3600);
+  const minutes = Math.floor((s % 3600) / 60);
+  const seconds = Math.floor(s % 60);
+
+  let formatted = "";
+  if (hours > 0) formatted += hours + "h ";
+  if (minutes > 0) formatted += minutes + "m ";
+  formatted += seconds + "s";
+
+  return formatted;
+}
+
+function currencyFormatter(s) {
+  return s.toLocaleString("it-IT", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export {
   createSeries,
   createOptions,
   makeRandomColors,
   randomColor,
   pieOptions,
+  durationFormatter,
+  currencyFormatter,
 };

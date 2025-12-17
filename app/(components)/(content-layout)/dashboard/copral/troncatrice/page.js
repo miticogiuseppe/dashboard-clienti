@@ -91,7 +91,7 @@ export default function PaginaTroncatrice() {
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Produzione</Card.Title>
+                  <Card.Title>Ordini</Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
                       setPeriodoTS(period);
@@ -120,7 +120,7 @@ export default function PaginaTroncatrice() {
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Log troncatrice esteso</Card.Title>
+                  <Card.Title>Log troncatrice (tempi per comando)</Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
                       setPeriodoLog(period);
@@ -147,7 +147,7 @@ export default function PaginaTroncatrice() {
             <Col xxl={6}>
               <AppmerceTable
                 data={data}
-                title="Produzione"
+                title="Ordini"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 filterDate={computeDate(pickerDateTS, periodoTS)}

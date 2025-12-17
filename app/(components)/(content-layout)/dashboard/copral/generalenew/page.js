@@ -13,6 +13,7 @@ import {
   createSeries,
   pieOptions,
   randomColor,
+  currencyFormatter,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
 import _ from "lodash";
@@ -89,14 +90,21 @@ const Ecommerce = () => {
       });
     }
 
-    // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Qta da evadere)
+    // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Importi)
 
-    let grouped = sumByKey(filteredData, "descfam", "Qta da ev", true);
+    let grouped = sumByKey(filteredData, "descfam", "ValoreTotale", true);
     grouped = grouped.filter((x) => x["descfam"] !== "0");
     setChartOptions(
-      createOptions(grouped, "descfam", undefined, "bar", "#b94eed")
+      createOptions(
+        grouped,
+        "descfam",
+        undefined,
+        currencyFormatter,
+        "bar",
+        "#b94eed"
+      )
     );
-    setChartSeries(createSeries(grouped, "Quantità"));
+    setChartSeries(createSeries(grouped, "Importo"));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
@@ -258,7 +266,7 @@ const Ecommerce = () => {
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
-                    Incidenza degli importi sulle famiglie
+                    Incidenza degli importi sulle famiglie (€)
                   </div>
                   <div className="d-flex align-items-center">
                     <PeriodDropdown

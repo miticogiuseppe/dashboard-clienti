@@ -60,7 +60,13 @@ export default function AppmerceChartByDate({
     ];
 
     // Mantieni lo stile di createOptions e sostituisci le categorie
-    const baseOptions = createOptions(counters, dateCol, null, "bar");
+    const baseOptions = createOptions(
+      counters,
+      dateCol,
+      undefined,
+      undefined,
+      "bar"
+    );
     const chartOptions = {
       ...baseOptions,
       xaxis: {

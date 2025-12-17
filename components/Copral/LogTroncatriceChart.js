@@ -6,7 +6,11 @@ import { useTranslations } from "next-intl";
 
 // Utility Excel
 import { filterByRange, sumByKey } from "@/utils/excelUtils";
-import { createOptions } from "@/utils/graphUtils";
+import {
+  createOptions,
+  durationFormatter,
+  currencyFormatter,
+} from "@/utils/graphUtils";
 
 // ApexCharts
 const Spkapexcharts = dynamic(
@@ -71,27 +75,19 @@ export default function LogTroncatriceChart({ data, startDate, endDate }) {
     ];
 
     // Usa createOptions come AppmerceChart
-    const chartOptions = createOptions(counters, "CommandName", null, "bar");
+    const chartOptions = createOptions(
+      counters,
+      "CommandName",
+      undefined,
+      durationFormatter,
+      "bar"
+    );
 
     // Colore verdino più evidente
     chartOptions.colors = ["#4CAF50"];
     chartOptions.fill = {
       ...chartOptions.fill,
       opacity: 1,
-    };
-    chartOptions.yaxis.labels.formatter = function (s) {
-      s = s / 1000;
-
-      const hours = Math.floor(s / 3600);
-      const minutes = Math.floor((s % 3600) / 60);
-      const seconds = Math.floor(s % 60);
-
-      let formatted = "";
-      if (hours > 0) formatted += hours + "h ";
-      if (minutes > 0) formatted += minutes + "m ";
-      formatted += seconds + "s";
-
-      return formatted;
     };
 
     return {
