@@ -21,8 +21,6 @@ export async function GET(req) {
     const id = searchParams.get("id");
     const sheetNameParam = searchParams.get("sheet"); // il nome del foglio
 
-    console.log("ID:", id, "Sheet param:", sheetNameParam);
-
     if (!id)
       return new Response(JSON.stringify({ error: "Missing id" }), {
         status: 400,
@@ -60,7 +58,7 @@ export async function GET(req) {
       let data = fs.readFileSync(jsonFile, "utf-8");
       jsonSheet = JSON.parse(data);
     } else {
-      console.log("Il file JSON non esiste: ", jsonFile);
+      console.log(`JSON not found: ${jsonFile}. Reading XLS.`);
 
       const fileBuffer = fs.readFileSync(filePath);
       const workbook = XLSX.read(fileBuffer, { type: "buffer" });
@@ -70,8 +68,6 @@ export async function GET(req) {
         sheetNameParam && workbook.SheetNames.includes(sheetNameParam)
           ? sheetNameParam
           : workbook.SheetNames[0];
-
-      console.log("Sheet name used:", sheetName);
 
       const sheet = workbook.Sheets[sheetName];
       jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });

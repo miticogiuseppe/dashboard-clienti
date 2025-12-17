@@ -87,9 +87,15 @@ function AppmerceTable({
                           ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
                           : row[header.column].format("DD/MM/YYYY")
                         : row[header.column] !== "" &&
+                          row[header.column] !== null &&
                           row[header.column] !== undefined
                         ? row[header.column]
-                        : header.default || (header.allowEmpty ? "" : "N/A")}
+                        : header.default ||
+                          (header.allowZero
+                            ? "0"
+                            : header.allowEmpty
+                            ? ""
+                            : "N/A")}
                     </td>
                   ))}
                 </tr>
