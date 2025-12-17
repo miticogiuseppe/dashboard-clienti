@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { basePath } from '../../../next.config';
+import React, { useState, useEffect } from "react";
+import { basePath } from "../../../next.config";
 
 const Loader = () => {
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,12 @@ const Loader = () => {
 
   return loading ? (
     <div id="loader" className="loader">
-      <img src={`${process.env.NODE_ENV === 'production' ? basePath : ''}/assets/images/media/loader.svg`} alt="Loading..." />
+      <img
+        src={`${
+          process.env.NODE_ENV === "production" ? basePath : ""
+        }/assets/images/media/loader.svg`}
+        alt="Loading..."
+      />
     </div>
   ) : null;
 };

@@ -13,10 +13,10 @@ const Preloader = (props) => {
       }`}
     >
       <img
-        className="loader-element animate__animated animate__jackInTheBox"
-        src={REACT_LOGO_PATH}
-        height={80}
-        alt="React Logo"
+        src={`${
+          process.env.NODE_ENV === "production" ? basePath : ""
+        }/assets/images/media/loader.svg`}
+        alt="Loading..."
       />
     </div>
   );
