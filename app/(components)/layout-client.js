@@ -59,7 +59,7 @@ const Layout = ({ local_varaiable, ThemeChanger, children, globalData }) => {
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <title> Xintra - NextJs App-Router Admin & Dashboard Template </title>
+        {/* <title></title> */}
         <meta name="Author" content="Spruko Technologies Private Limited" />
         <meta
           name="keywords"
