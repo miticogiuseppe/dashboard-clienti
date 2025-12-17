@@ -323,7 +323,7 @@ const Ecommerce = () => {
                   </div>
                 </Card.Header>
                 <Card.Body>
-                  <div className="vertical-center">
+                  <div className="vertical-center fill">
                     {pieData && <Pie data={pieData} options={pieOptions} />}
                   </div>
                 </Card.Body>
