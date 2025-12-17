@@ -1,7 +1,5 @@
 import React from "react";
 
-const REACT_LOGO_PATH = "/bouncing-circles.svg";
-
 const Preloader = (props) => {
   const { show } = props;
   // Preloader Component in attesa al caricamento dei dati
