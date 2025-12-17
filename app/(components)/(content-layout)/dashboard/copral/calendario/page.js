@@ -17,9 +17,11 @@ export default function Home() {
   useEffect(() => {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
-      const response = await fetch("/data/APPMERCE-000.xlsx");
-      const blob = await response.blob();
-      let newOrders = await loadFirstSheet(blob);
+      const response = await fetch(
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
+      );
+      const json = await response.json();
+      let newOrders = json.data;
       newOrders = parseDates(newOrders, ["Data Cons."]);
       setOrders(newOrders);
     };
