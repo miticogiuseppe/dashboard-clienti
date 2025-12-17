@@ -6,14 +6,6 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [orders, setOrders] = useState([]);
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const newOrders = await loadFirstSheet(file);
-      setOrders(newOrders);
-    }
-  };
-
   useEffect(() => {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
