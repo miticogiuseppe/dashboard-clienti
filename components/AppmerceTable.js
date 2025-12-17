@@ -2,7 +2,7 @@
 
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import fileDownload from "@/utils/fileDownload";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { Card } from "react-bootstrap";
 import { FiDownload } from "react-icons/fi"; // icona Excel/download
 import moment from "moment";
@@ -19,6 +19,10 @@ function AppmerceTable({
   className,
 }) {
   const t = useTranslations("Graph");
+
+  const ITEMS_PER_PAGE = 50;
+  const [visibleItemsCount, setVisibleItemsCount] = useState(ITEMS_PER_PAGE);
+  const [prevData, setPrevData] = useState(undefined);
 
   // Ordino gli ultimi 7 ordini per data
   const filteredData = useMemo(() => {
@@ -40,14 +44,24 @@ function AppmerceTable({
     return sorted;
   }, [data, dateColumn, filterDate]);
 
+  if (filteredData !== prevData) {
+    setVisibleItemsCount(ITEMS_PER_PAGE);
+    setPrevData(filteredData);
+  }
+
+  const displayedData = useMemo(() => {
+    return filteredData.slice(0, visibleItemsCount);
+  }, [filteredData, visibleItemsCount]);
+
   const downloadExcel = async () => {
     fileDownload(fileExcel);
   };
 
   const handlePageLoad = useCallback(() => {
-    console.log("triggered");
-  }, []);
-
+    if (visibleItemsCount < filteredData.length) {
+      setVisibleItemsCount((prev) => prev + ITEMS_PER_PAGE);
+    }
+  }, [visibleItemsCount, filteredData.length]);
   return (
     <Card className={className ? className : "custom-card fixed-height-card"}>
       <Card.Header className="justify-content-between d-flex align-items-center">
@@ -72,7 +86,7 @@ function AppmerceTable({
                 className: header.className,
               }))}
             >
-              {filteredData.map((row, index) => (
+              {displayedData.map((row, index) => (
                 <tr key={index}>
                   {tableHeaders.map((header, index) => (
                     <td
@@ -106,7 +120,9 @@ function AppmerceTable({
                 </tr>
               ))}
             </SpkTablescomponent>
-            <VisibilityChecker onLoading={handlePageLoad} />
+            {visibleItemsCount < filteredData.length && (
+              <VisibilityChecker onLoading={handlePageLoad} />
+            )}
           </div>
         ) : (
           <div className="no-data text-muted">{t("NoData")}</div>
