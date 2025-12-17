@@ -82,21 +82,18 @@ export default function AppmerceChartByDate({
   }, [data, startDate, endDate, dateCol, qtyCol]);
 
   return (
-    <div className="custom-card">
-      <div className="card-header justify-content-between"></div>
-      <div className="card-body">
-        {!graphData.isEmpty ? (
-          <Spkapexcharts
-            chartOptions={graphData.graphOptions}
-            chartSeries={graphData.graphSeries}
-            type={graphData.graphOptions.chart.type}
-            width={"100%"}
-            height={315}
-          />
-        ) : (
-          <div className="no-data text-muted">{t("NoData")}</div>
-        )}
-      </div>
-    </div>
+    <>
+      {!graphData.isEmpty ? (
+        <Spkapexcharts
+          chartOptions={graphData.graphOptions}
+          chartSeries={graphData.graphSeries}
+          type={graphData.graphOptions.chart.type}
+          width={"100%"}
+          height={315}
+        />
+      ) : (
+        <div className="no-data text-muted">{t("NoData")}</div>
+      )}
+    </>
   );
 }

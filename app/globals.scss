@@ -63,19 +63,23 @@ body {
   flex-direction: column;
 }
 .stretch-card {
+  /* la stretch-card si allunga in modo da riempire tutta l'altezza della riga */
+  flex: 1 0 0;
+}
+.fixed-height-card {
+  /* card ad altezza fissa */
+  height: 640px;
+}
+.sibling-card {
+  /* nel layout, la sibling-card si può accostare a una card normale oppure a una fixed-height-card */
+  /* la sibling-card si adatta all'altezza della card sorella */
   min-height: 640px;
   flex: 1 0 0;
   .card-body {
+    /* serve a forzare le dimensioni: la sibling card non può essere più alta della sorella */
     height: 0px;
     display: flex;
     flex-direction: column;
-  }
-}
-.fixed-height-card {
-  height: 640px;
-  max-height: 640px;
-  .card-body {
-    overflow: hidden;
   }
 }
 .table-break-word td,

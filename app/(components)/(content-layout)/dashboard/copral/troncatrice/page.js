@@ -104,9 +104,9 @@ export default function PaginaTroncatrice() {
           </Row>
 
           {/* Card TS Azienda */}
-          <Row>
-            <Col xxl={6}>
-              <Card className="custom-card fixed-height">
+          <Row className="stretch-row">
+            <Col xxl={6} className="stretch-column">
+              <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Produzione</Card.Title>
                   <PeriodDropdown
@@ -134,8 +134,8 @@ export default function PaginaTroncatrice() {
             </Col>
 
             {/* Card Produzione per Articolo */}
-            <Col xxl={6}>
-              <Card className="custom-card fixed-height">
+            <Col xxl={6} className="stretch-column">
+              <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
                   <Card.Title>Log troncatrice esteso</Card.Title>
                   <PeriodDropdown

@@ -283,7 +283,7 @@ const Ecommerce = () => {
             {/* Tabella Ordini */}
             <Col xxl={8} xl={12} className="stretch-column">
               <AppmerceTable
-                className="custom-card stretch-card"
+                className="custom-card sibling-card"
                 data={recentOrders}
                 title="Ordini"
                 dateColumn="Data ord"
@@ -315,7 +315,7 @@ const Ecommerce = () => {
             </Col>
 
             {/* Grafico a Ciambella (Statistiche clienti per Totale €) */}
-            <Col xxl={4} xl={12}>
+            <Col xxl={4} xl={12} className="stretch-column">
               <Card className="custom-card fixed-height-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
