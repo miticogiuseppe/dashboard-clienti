@@ -120,7 +120,7 @@ export default function PaginaTroncatrice() {
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Log troncatrice (tempi per comando)</Card.Title>
+                  <Card.Title>Log troncatrice (tempi esecuzione)</Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
                       setPeriodoLog(period);
