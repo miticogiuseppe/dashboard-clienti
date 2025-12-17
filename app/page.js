@@ -51,6 +51,9 @@ const page = () => {
   return (
     <Fragment>
       <html lang="it">
+        <head>
+          <title>SupplyChainItalia</title>
+        </head>
         <body className="">
           <div className="container">
             <div className="row justify-content-center align-items-center authentication authentication-basic h-100 pt-3">
