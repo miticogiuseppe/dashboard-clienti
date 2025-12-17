@@ -57,32 +57,22 @@ body {
 }
 .stretch-row {
   align-items: stretch;
-  // min-height: 420px; /* metti la stessa altezza del grafico */
 }
 .stretch-column {
   display: flex;
   flex-direction: column;
 }
 .stretch-card {
-  min-height: 560px;
-  height: 100%;
+  flex: 1 0 0;
   .card-body {
+    height: 0px;
     display: flex;
     flex-direction: column;
-    height: 0px;
   }
-}
-.stretch-sibling {
-  min-height: 560px;
 }
 .fixed-height-card {
-  height: 640px;
-  max-height: 640px;
-  .card-body {
-    display: flex;
-    flex-direction: column;
-    height: 0px;
-  }
+    height: 640px;
+    max-height: 640px;
 }
 .table-break-word td,
 .table-break-word th {
