@@ -63,6 +63,7 @@ body {
   flex-direction: column;
 }
 .stretch-card {
+  min-height: 640px;
   flex: 1 0 0;
   .card-body {
     height: 0px;
@@ -71,8 +72,12 @@ body {
   }
 }
 .fixed-height-card {
-    height: 640px;
-    max-height: 640px;
+  height: 640px;
+  max-height: 640px;
+  .card-body {
+    flex: 1 0 0;
+    overflow: hidden;
+  }
 }
 .table-break-word td,
 .table-break-word th {
