@@ -37,19 +37,21 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
     count: "Download file macchina",
     inc: (
       <>
-        <button
-          onClick={() => downloadFile(fileStorico)}
-          className="btn btn-primary btn-sm px-3"
-        >
-          <FaDownload /> Scarica STORICO
-        </button>
-        &nbsp;&nbsp;
-        <button
-          onClick={() => downloadFile(fileAppmerce)}
-          className="btn btn-secondary btn-sm px-3"
-        >
-          <FaDownload /> Scarica APPMERCE
-        </button>
+        <div className="d-flex flex-wrap gap-2">
+          <button
+            onClick={() => downloadFile(fileStorico)}
+            className="btn btn-primary btn-sm px-3"
+          >
+            <FaDownload /> Scarica STORICO
+          </button>
+
+          <button
+            onClick={() => downloadFile(fileAppmerce)}
+            className="btn btn-secondary btn-sm px-3"
+          >
+            <FaDownload /> Scarica APPMERCE
+          </button>
+        </div>
       </>
     ),
     svgIcon: <FaRectangleList />,

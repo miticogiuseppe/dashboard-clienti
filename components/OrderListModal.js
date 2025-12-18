@@ -8,7 +8,7 @@ const OrderListModal = ({ orders, onClose }) => {
   };
 
   const modalContentStyle = {
-    backgroundColor: "white",
+    backgroundColor: "var(--modal-bg)",
     padding: "1.5rem",
     borderRadius: "0.5rem",
     position: "relative",
@@ -24,7 +24,7 @@ const OrderListModal = ({ orders, onClose }) => {
   const tableContainerStyle = {
     maxHeight: "60vh",
     overflowY: "auto",
-    border: "1px solid #ccc",
+    border: "1px solid var(--modal-border)",
     borderRadius: "0.5rem",
     // --- IMPORTANTE PER MOBILE: Abilita lo scorrimento orizzontale per la tabella ---
     overflowX: "auto",
@@ -32,7 +32,8 @@ const OrderListModal = ({ orders, onClose }) => {
   };
   // Stili per il contenitore del modale (la parte bianca):
   const mobileOptimizedModal = {
-    backgroundColor: "white",
+    backgroundColor: "var(--modal-bg)",
+    color: "var(--modal-text)",
     padding: "1rem", // Riduci il padding su mobile
     borderRadius: "0.5rem",
     position: "relative",
@@ -94,7 +95,7 @@ const OrderListModal = ({ orders, onClose }) => {
               style={{
                 position: "sticky",
                 top: 0,
-                backgroundColor: "white",
+                backgroundColor: "var(--modal-header-bg)",
                 zIndex: 10,
               }}
             >
