@@ -314,6 +314,14 @@ body {
   height: 100%;
 }
 
+/* Colori di default (Tema Chiaro) */
+:root {
+  --modal-bg: #ffffff;
+  --modal-text: #1a1c23;
+  --modal-border: #e5e7eb;
+  --modal-header-bg: #ffffff;
+}
+
 /* Variabili base per il tema scuro */
 [data-theme-mode="dark"] {
   --modal-bg: #1a1c23;
