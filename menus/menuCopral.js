@@ -42,7 +42,7 @@ export const menuCopral = [
         ready: true,
       },
       {
-        path: "#",
+        path: "/dashboard/copral/intestatrice",
         title: "Intestatrice 90°",
         type: "link",
         ready: true,

@@ -62,6 +62,7 @@ function AppmerceTable({
       setVisibleItemsCount((prev) => prev + ITEMS_PER_PAGE);
     }
   }, [visibleItemsCount, filteredData.length]);
+
   return (
     <Card className={className ? className : "custom-card fixed-height-card"}>
       <Card.Header className="justify-content-between d-flex align-items-center">

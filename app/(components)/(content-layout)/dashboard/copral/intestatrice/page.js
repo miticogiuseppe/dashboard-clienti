@@ -18,7 +18,7 @@ const resources = {
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 };
 
-export default function PaginaPulitrice() {
+export default function PaginaIntestatrice() {
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
 
@@ -64,7 +64,9 @@ export default function PaginaPulitrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch("/api/fetch-excel-json?id=pulitrice&sheet=Arsv");
+      const res = await fetch(
+        "/api/fetch-excel-json?id=intestatrice&sheet=foglio1"
+      );
       const resp = await res.json();
       let data = resp.data;
       data = parseDates(data, ["Data"]);
@@ -83,7 +85,7 @@ export default function PaginaPulitrice() {
 
   return (
     <>
-      <Seo title="Macchina - Pulitrice" />
+      <Seo title="Macchina - Intestatrice" />
 
       {isLoading ? (
         <Preloader show={true} />
@@ -91,8 +93,8 @@ export default function PaginaPulitrice() {
         <>
           <Pageheader
             title="Macchine"
-            currentpage="Pulitrice"
-            activepage="Pulitrice"
+            currentpage="Intestatrice"
+            activepage="Intestatrice"
             showActions={false}
           />
 
@@ -155,7 +157,7 @@ export default function PaginaPulitrice() {
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
-                    groupCol="descrizione"
+                    groupCol="Descrizione"
                   />
                 </Card.Body>
               </Card>
@@ -203,7 +205,7 @@ export default function PaginaPulitrice() {
               <AppmerceTable
                 data={data2}
                 title="Produzione per articolo"
-                fileExcel="pulitrice"
+                fileExcel="intestatrice"
                 dateColumn="Data"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
@@ -211,7 +213,7 @@ export default function PaginaPulitrice() {
 
                   { title: "ID", column: "Id" },
 
-                  { title: "Descrizione", column: "descrizione" },
+                  { title: "Descrizione", column: "Descrizione" },
 
                   { title: "Inizio", column: "ora_inizio", format: "HH:mm:ss" },
 
