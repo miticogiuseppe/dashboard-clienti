@@ -220,6 +220,9 @@ export default function PaginaTostini() {
                     data={data2}
                     startDate={fmt(computedDateArt[0])}
                     endDate={fmt(computedDateArt[1])}
+                    dateCol="Data"
+                    groupCol="Descrizione"
+                    valueCol="Numero"
                   />
                 </Card.Body>
               </Card>

@@ -8,17 +8,17 @@ import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate, fmt } from "@/utils/dateUtils";
-import { orderSheet, parseDates } from "@/utils/excelUtils";
+import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
 const resources = {
-  fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
+  // fileStorico: "/api/download-resource?id=STORICO_IMBALLATRICE",
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 };
 
-export default function PaginaImballatrice() {
+export default function PaginaPulitrice() {
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
 
@@ -64,12 +64,11 @@ export default function PaginaImballatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
-        "/api/fetch-excel-json?id=imballatrice_a&sheet=Foglio1"
-      );
+      const res = await fetch("/api/fetch-excel-json?id=pulitrice&sheet=Arsv");
       const resp = await res.json();
       let data = resp.data;
       data = parseDates(data, ["Data"]);
+      data = parseTimes(data, ["ora_inizio", "ora_fine"]);
       data = orderSheet(data, ["Data"], ["asc"]);
 
       setData2(data);
@@ -84,7 +83,7 @@ export default function PaginaImballatrice() {
 
   return (
     <>
-      <Seo title="Macchina - Imballatrice" />
+      <Seo title="Macchina - Pulitrice" />
 
       {isLoading ? (
         <Preloader show={true} />
@@ -92,8 +91,8 @@ export default function PaginaImballatrice() {
         <>
           <Pageheader
             title="Macchine"
-            currentpage="Imballatrice"
-            activepage="Imballatrice"
+            currentpage="Pulitrice"
+            activepage="Pulitrice"
             showActions={false}
           />
 
@@ -156,8 +155,7 @@ export default function PaginaImballatrice() {
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
-                    groupCol="Descrizione"
-                    valueCol="Numero"
+                    groupCol="descrizione"
                   />
                 </Card.Body>
               </Card>
@@ -205,14 +203,26 @@ export default function PaginaImballatrice() {
               <AppmerceTable
                 data={data2}
                 title="Produzione per articolo"
-                fileExcel="imballatrice_a"
+                fileExcel="Arsv"
+                // 1. dateColumn CORRETTO: Deve usare "Data"
                 dateColumn="Data"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
-                  { title: "Numero", column: "Numero", type: "number" },
-                  { title: "Descrizione", column: "Descrizione" },
-                  { title: "Data", column: "Data", bold: true },
-                  { title: "Ora", column: "Ora" },
+                  // 2. Colonna Data CORRETTA: La chiave è "Data" (con la D maiuscola)
+                  { title: "Data e ora", column: "Data", bold: true },
+
+                  // 3. Colonna ID CORRETTA: La chiave è "Id" (con la I minuscola o maiuscola,
+                  //    qui usiamo "Id" come avevi indicato precedentemente)
+                  { title: "ID", column: "Id", type: "number" },
+
+                  // 4. Colonna Descrizione CORRETTA: La chiave è "descrizione"
+                  { title: "Descrizione", column: "descrizione" },
+
+                  // 5. Colonna Inizio CORRETTA: La chiave è "ora_inizio"
+                  { title: "Inizio", column: "ora_inizio", format: "hh:mm:ss" },
+
+                  // 6. Colonna Fine CORRETTA: La chiave è "ora_fine"
+                  { title: "Fine", column: "ora_fine", format: "hh:mm:ss" },
                 ]}
               />
             </Col>

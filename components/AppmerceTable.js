@@ -100,7 +100,7 @@ function AppmerceTable({
                       {moment.isDuration(row[header.column])
                         ? moment("1900-01-01")
                             .add(row[header.column])
-                            .format("m:ss")
+                            .format(header.format ?? "m:ss")
                         : moment.isMoment(row[header.column])
                         ? header.showSeconds
                           ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
