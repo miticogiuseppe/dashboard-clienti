@@ -313,3 +313,84 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* Variabili base per il tema scuro */
+[data-theme-mode="dark"] {
+  --modal-bg: #1a1c23;
+  --modal-text: #f3f4f6;
+  --modal-border: #374151;
+  --modal-header-bg: #24262d;
+}
+
+/* FIX FULLCALENDAR (Grid e Eventi) */
+[data-theme-mode="dark"] {
+  .fc-theme-standard .fc-scrollgrid,
+  .fc-theme-standard td,
+  .fc-theme-standard th {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: transparent !important;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    color: #cbd5e1 !important;
+  }
+
+  .fc .fc-daygrid-day-number {
+    color: #94a3b8 !important;
+  }
+
+  .fc-event {
+    background-color: #1e3a8a !important;
+    border: 1px solid #3b82f6 !important;
+    .fc-event-title {
+      color: #ffffff !important;
+    }
+  }
+}
+
+/* FIX SEARCHBOX */
+[data-theme-mode="dark"] .search-box {
+  label {
+    color: #e5e7eb;
+  }
+
+  button {
+    background-color: #1a1c23;
+    border-color: #374151;
+    color: #f3f4f6;
+  }
+
+  .search-box-search {
+    background-color: #1a1c23;
+    border-color: #007bff;
+  }
+
+  input {
+    background-color: #111827;
+    color: white;
+    border-color: #374151;
+  }
+
+  li {
+    color: #f3f4f6;
+    border-bottom-color: #374151;
+    &:hover {
+      background: #2d2f39;
+    }
+    &.selected {
+      background: #007bff;
+    }
+  }
+}
+
+/* FIX CARD E MODAL */
+[data-theme-mode="dark"] {
+  .custom-card {
+    background-color: #1a1c23 !important;
+    border-color: #374151 !important;
+    .card-header {
+      color: white !important;
+      border-bottom-color: #374151 !important;
+    }
+  }
+}
