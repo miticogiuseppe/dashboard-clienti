@@ -51,12 +51,15 @@ export async function GET(req) {
       path.parse(resource.path).dir,
       path.parse(resource.path).name + ".json"
     );
-    const fileInfo = await getFileInfo(filePath);
     let jsonSheet = undefined;
+    let fileDate = undefined;
 
     if (fs.existsSync(jsonFile)) {
       let data = fs.readFileSync(jsonFile, "utf-8");
       jsonSheet = JSON.parse(data);
+
+      const fileInfo = await getFileInfo(jsonFile);
+      fileDate = fileInfo.mtime;
     } else {
       console.log(`JSON not found: ${jsonFile}. Reading XLS.`);
 
@@ -71,11 +74,14 @@ export async function GET(req) {
 
       const sheet = workbook.Sheets[sheetName];
       jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      const fileInfo = await getFileInfo(filePath);
+      fileDate = fileInfo.mtime;
     }
 
     const jsonData = {
       data: jsonSheet,
-      lwt: fileInfo.mtime,
+      lwt: fileDate,
     };
 
     return new Response(JSON.stringify(jsonData), {
