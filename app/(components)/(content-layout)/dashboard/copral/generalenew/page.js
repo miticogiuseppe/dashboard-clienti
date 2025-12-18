@@ -62,14 +62,14 @@ const Ecommerce = () => {
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      let resp = await res.json();
-      let data = resp.data;
+      let json = await response.json();
+      let data = json.data;
       data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
-      setFileDate(new Date(resp.lwt));
+      setFileDate(new Date(json.lwt));
     };
     fetchData();
   }, []);

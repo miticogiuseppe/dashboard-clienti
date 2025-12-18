@@ -56,13 +56,15 @@ const Generale = () => {
   // Caricamento Excel
   useEffect(() => {
     (async () => {
-      const response = await fetch("/data/Analisi.xlsx");
-      const blob = await response.blob();
+      const response = await fetch(
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+      );
+      const json = await response.json();
+      let data = json.data;
 
-      let jsonSheet = await loadSheet(blob, "appmerce_db");
-      setSheetData(jsonSheet);
+      setSheetData(data);
 
-      let products = extractUniques(jsonSheet, "Descrizione famiglia");
+      let products = extractUniques(data, "Descrizione famiglia");
       setProducts(products);
     })();
   }, []);

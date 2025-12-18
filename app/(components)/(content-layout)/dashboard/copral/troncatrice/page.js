@@ -30,11 +30,11 @@ export default function PaginaTroncatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      const resp = await res.json();
-      let data = resp.data;
+      const json = await response.json();
+      let data = json.data;
 
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
@@ -47,11 +47,11 @@ export default function PaginaTroncatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=TRONCATRICE_ESTESO&sheet=Foglio1"
       );
-      const resp = await res.json();
-      let data = resp.data;
+      const json = await response.json();
+      let data = json.data;
       data = parseDates(data, ["Timestamp"]);
       data = parseTimes(data, ["Tempo"]);
       data = orderSheet(data, ["Timestamp"], ["asc"]);

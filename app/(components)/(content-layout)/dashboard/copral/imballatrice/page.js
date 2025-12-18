@@ -30,28 +30,11 @@ export default function PaginaImballatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
       );
-      const resp = await res.json();
-      let data = resp.data;
-
-      data = data.map((item) => {
-        const qtaEv = item["QTAev II UM"];
-        const sanitizedQtaEv =
-          qtaEv === null || qtaEv === undefined || qtaEv === "" ? 0 : qtaEv;
-
-        const qtaDaEv = item["Qta da ev"];
-        const sanitizedQtaDaEv =
-          qtaDaEv === null || qtaDaEv === undefined || qtaDaEv === ""
-            ? 0
-            : qtaDaEv;
-        return {
-          ...item,
-          "QTAev II UM": sanitizedQtaEv,
-          "Qta da ev": sanitizedQtaDaEv,
-        };
-      });
+      const json = await response.json();
+      let data = json.data;
 
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
@@ -64,11 +47,11 @@ export default function PaginaImballatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=imballatrice_a&sheet=Foglio1"
       );
-      const resp = await res.json();
-      let data = resp.data;
+      const json = await response.json();
+      let data = json.data;
       data = parseDates(data, ["Data"]);
       data = orderSheet(data, ["Data"], ["asc"]);
 
@@ -189,11 +172,17 @@ export default function PaginaImballatrice() {
                     className: "text-center",
                     column: "Articolo",
                   },
-                  { title: "Qta da ev.", column: "Qta da ev", type: "number" },
+                  {
+                    title: "Qta da ev.",
+                    column: "Qta da ev",
+                    type: "number",
+                    allowZero: true,
+                  },
                   {
                     title: "Qta ev.",
                     column: "QTAev II UM",
                     type: "number",
+                    allowZero: true,
                   },
                 ]}
               />

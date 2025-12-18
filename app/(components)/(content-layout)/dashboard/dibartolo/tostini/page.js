@@ -40,11 +40,11 @@ export default function PaginaTostini() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
+      const response = await fetch(
         "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
       );
-      const resp = await res.json();
-      let data = resp.data;
+      const json = await response.json();
+      let data = json.data;
       data = parseDates(data, ["Data ordine", "Data cons. rich."]);
       data = orderSheet(data, ["Data ordine"], ["asc"]);
 
@@ -56,9 +56,11 @@ export default function PaginaTostini() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch("/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1");
-      const resp = await res.json();
-      let data = resp.data;
+      const response = await fetch(
+        "/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1"
+      );
+      const json = await response.json();
+      let data = json.data;
       data = parseDates(data, ["Data"]);
       data = orderSheet(data, ["Data"], ["asc"]);
 
