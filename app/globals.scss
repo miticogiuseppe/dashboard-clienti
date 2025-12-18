@@ -314,7 +314,7 @@ body {
   height: 100%;
 }
 
-/* Colori di default (Tema Chiaro) */
+/* Colori di default */
 :root {
   --modal-bg: #ffffff;
   --modal-text: #1a1c23;
@@ -330,7 +330,7 @@ body {
   --modal-header-bg: #24262d;
 }
 
-/* FIX FULLCALENDAR (Grid e Eventi) */
+/* FIX FULLCALENDAR */
 [data-theme-mode="dark"] {
   .fc-theme-standard .fc-scrollgrid,
   .fc-theme-standard td,
