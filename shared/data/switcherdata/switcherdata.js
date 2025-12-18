@@ -937,8 +937,6 @@ export const LocalStorageBackup = (actionfunction) => {
 
       break;
     default:
-      gradientMenu(actionfunction);
-
       break;
   }
 
