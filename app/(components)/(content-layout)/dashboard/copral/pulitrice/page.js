@@ -36,23 +36,6 @@ export default function PaginaPulitrice() {
       const resp = await res.json();
       let data = resp.data;
 
-      data = data.map((item) => {
-        const qtaEv = item["QTAev II UM"];
-        const sanitizedQtaEv =
-          qtaEv === null || qtaEv === undefined || qtaEv === "" ? 0 : qtaEv;
-
-        const qtaDaEv = item["Qta da ev"];
-        const sanitizedQtaDaEv =
-          qtaDaEv === null || qtaDaEv === undefined || qtaDaEv === ""
-            ? 0
-            : qtaDaEv;
-        return {
-          ...item,
-          "QTAev II UM": sanitizedQtaEv,
-          "Qta da ev": sanitizedQtaDaEv,
-        };
-      });
-
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
 
@@ -190,11 +173,17 @@ export default function PaginaPulitrice() {
                     className: "text-center",
                     column: "Articolo",
                   },
-                  { title: "Qta da ev.", column: "Qta da ev", type: "number" },
+                  {
+                    title: "Qta da ev.",
+                    column: "Qta da ev",
+                    type: "number",
+                    allowZero: true,
+                  },
                   {
                     title: "Qta ev.",
                     column: "QTAev II UM",
                     type: "number",
+                    allowZero: true,
                   },
                 ]}
               />
