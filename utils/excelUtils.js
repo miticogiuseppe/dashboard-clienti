@@ -215,7 +215,9 @@ const sumByKey = (
 
   // 1. Caso: Calcola la somma totale (groupKey è null o undefined)
   if (!groupKey) {
-    return _.sumBy(jsonSheet, (item) => getValue(item[valueKey]));
+    return _.sumBy(jsonSheet, (item) =>
+      valueKey ? getValue(item[valueKey]) : 1
+    );
   }
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
@@ -227,7 +229,9 @@ const sumByKey = (
 
     return {
       [groupKey]: computedKey,
-      count: _.sumBy(items, (item) => getValue(item[valueKey])),
+      count: _.sumBy(items, (item) =>
+        valueKey ? getValue(item[valueKey]) : 1
+      ),
     };
   });
 };

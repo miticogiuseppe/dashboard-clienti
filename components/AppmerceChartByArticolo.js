@@ -13,7 +13,14 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
+export default function AppmerceChartByArticolo({
+  data,
+  startDate,
+  endDate,
+  groupCol,
+  valueCol,
+  dateCol,
+}) {
   const t = useTranslations("Graph");
 
   let graphData = useMemo(() => {
@@ -23,14 +30,14 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     if (startDate && endDate) {
       filteredData = filterByRange(
         filteredData,
-        "Data",
+        dateCol,
         moment(startDate),
         moment(endDate)
       );
     }
 
     // Somma quantità per Articolo
-    let counters = sumByKey(filteredData, "Descrizione", "Numero");
+    let counters = sumByKey(filteredData, groupCol, valueCol);
     let total = counters.reduce((acc, item) => acc + item.count, 0);
     counters = counters.sort((a, b) => b.count - a.count);
 
@@ -39,7 +46,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
       {
         name: "Quantità",
         data: counters.map((c) => ({
-          x: c.Descrizione,
+          x: c[groupCol],
           y: Number(c.count),
         })),
       },
@@ -48,7 +55,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
     // Usa createOptions come AppmerceChart
     const chartOptions = createOptions(
       counters,
-      "Descrizione",
+      groupCol,
       undefined,
       undefined,
       "bar"
@@ -66,7 +73,7 @@ export default function AppmerceChartByArticolo({ data, startDate, endDate }) {
       graphOptions: chartOptions,
       isEmpty: total === 0,
     };
-  }, [data, startDate, endDate]);
+  }, [data, startDate, endDate, dateCol, groupCol, valueCol]);
 
   return (
     <>

@@ -62,6 +62,7 @@ function AppmerceTable({
       setVisibleItemsCount((prev) => prev + ITEMS_PER_PAGE);
     }
   }, [visibleItemsCount, filteredData.length]);
+
   return (
     <Card className={className ? className : "custom-card fixed-height-card"}>
       <Card.Header className="justify-content-between d-flex align-items-center">
@@ -100,7 +101,7 @@ function AppmerceTable({
                       {moment.isDuration(row[header.column])
                         ? moment("1900-01-01")
                             .add(row[header.column])
-                            .format("m:ss")
+                            .format(header.format ?? "m:ss")
                         : moment.isMoment(row[header.column])
                         ? header.showSeconds
                           ? row[header.column].format("DD/MM/YYYY HH:mm:ss")

@@ -36,13 +36,13 @@ export const menuCopral = [
       },
 
       {
-        path: "#",
+        path: "/dashboard/copral/pulitrice",
         title: "Pulitrice",
         type: "link",
         ready: true,
       },
       {
-        path: "#",
+        path: "/dashboard/copral/intestatrice",
         title: "Intestatrice 90°",
         type: "link",
         ready: true,
