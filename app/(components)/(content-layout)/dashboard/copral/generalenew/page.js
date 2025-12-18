@@ -2,7 +2,6 @@
 import PeriodDropdown from "@/components/PeriodDropdown";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
-import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate } from "@/utils/dateUtils";
@@ -141,32 +140,15 @@ const Ecommerce = () => {
     };
 
     let map = {};
-    filteredData.forEach((item) => {
+    uniqData.forEach((item) => {
       const customer = item["Ragione sociale"] || "Senza Nome";
 
-      // Pulizia del valore totale
-      let orderValue = item["ValoreTotale"];
-      if (typeof orderValue === "string") {
-        orderValue = orderValue.replace(".", "").replace(",", ".");
-      }
-      const total = parseFloat(orderValue) || 0;
-
-      if (!map[customer]) {
-        map[customer] = 0;
-      }
-
-      map[customer] += total;
+      if (!map[customer]) map[customer] = 0;
+      map[customer] += 1;
     });
     let ordersByCustomer = Object.entries(map);
 
-    ordersByCustomer = ordersByCustomer.map((x) => [
-      x[0],
-      Math.round(x[1] * 100) / 100,
-      x[1].toLocaleString("it-IT", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }),
-    ]);
+    ordersByCustomer = ordersByCustomer.map((x) => [x[0], x[1]]);
 
     let filterList = [...ordersByCustomer]
       .sort((a, b) => b[1] - a[1])
@@ -336,9 +318,7 @@ const Ecommerce = () => {
             <Col xxl={4} xl={12} className="stretch-column">
               <Card className="custom-card fixed-height-card">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">
-                    Totale ordini per cliente (€)
-                  </div>
+                  <div className="card-title">Totale ordini per cliente</div>
                 </Card.Header>
                 <Card.Body>
                   <div className="vertical-center fill">
@@ -364,7 +344,7 @@ const Ecommerce = () => {
                             {item[0]}
                           </span>
                           <div>
-                            <span className="fs-16 fw-medium">{item[2]} €</span>
+                            <span className="fs-16 fw-medium">{item[1]}</span>
                           </div>
                         </div>
                       </div>

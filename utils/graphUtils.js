@@ -136,22 +136,22 @@ const pieOptions = {
   plugins: {
     tooltip: {
       callbacks: {
-        label: function (context) {
-          let value = context.raw; // valore numerico
-          return value.toLocaleString("it-IT", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          });
-        },
+        // label: function (context) {
+        //   let value = context.raw; // valore numerico
+        //   return value.toLocaleString("it-IT", {
+        //     minimumFractionDigits: 2,
+        //     maximumFractionDigits: 2,
+        //   });
+        // },
       },
     },
     datalabels: {
-      formatter: function (value) {
-        return value.toLocaleString("it-IT", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-      },
+      // formatter: function (value) {
+      //   return value.toLocaleString("it-IT", {
+      //     minimumFractionDigits: 2,
+      //     maximumFractionDigits: 2,
+      //   });
+      // },
     },
     legend: {
       display: false,
