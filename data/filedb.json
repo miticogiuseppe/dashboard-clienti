@@ -50,6 +50,10 @@
     {
       "id": "TOSTINI",
       "path": "Dibartolo\\4.0\\Tostini\\Latest\\tostini.xls"
+    },
+    {
+      "id": "RIBUS",
+      "path": "Dibartolo\\4.0\\storico\\dati_ribus.xlsx"
     }
   ]
 }
