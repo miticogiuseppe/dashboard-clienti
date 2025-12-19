@@ -10,6 +10,7 @@ import Seo from "@/shared/layouts-components/seo/seo";
 import { calcolaRange, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
+import { type } from "os";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -240,8 +241,8 @@ export default function PaginaTostini() {
                 dateColumn="Data ordine"
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
-                  { title: "Num. ord.", column: "Nr. ord." },
-                  { title: "Ser.", column: "Ser." },
+                  { title: "Num. ord.", column: "Nr. ord.", type: "number" },
+                  { title: "Ser.", column: "Ser.", type: "number" },
                   { title: "Cod. Cliente", column: "Cod. Cliente" },
                   {
                     title: "Rag. Soc.",
@@ -251,9 +252,19 @@ export default function PaginaTostini() {
                   },
                   { title: "Cod. Art.", column: "Articolo" },
                   { title: "Descr. Art", column: "Descrizione art. cliente" },
-                  { title: "Qta/kg OV", column: "Qta/kg OV" },
-                  { title: "Qta/kg evasa", column: "Qta/kg evasa" },
-                  { title: "Qta/kg da ev.", column: "Qta/kg da ev." },
+                  { title: "Qta/kg OV", column: "Qta/kg OV", type: "number" },
+                  {
+                    title: "Qta/kg evasa",
+                    column: "Qta/kg evasa",
+                    type: "number",
+                    allowZero: true,
+                  },
+                  {
+                    title: "Qta/kg da ev.",
+                    column: "Qta/kg da ev.",
+                    type: "number",
+                    allowZero: true,
+                  },
                   { title: "Data Cons. Rich.", column: "Data cons. rich." },
                 ]}
               />
@@ -265,19 +276,37 @@ export default function PaginaTostini() {
                 fileExcel="TOSTINI"
                 dateColumn="Data"
                 tableHeaders={[
-                  { title: "Num. Form.", column: "Numero FORMULA" },
+                  {
+                    title: "Num. Form.",
+                    column: "Numero FORMULA",
+                    type: "number",
+                  },
                   { title: "Data", column: "Data", bold: true },
                   {
                     title: "T. Carico",
                     column: "Temperatura tostino al carico °C",
+                    type: "number",
                   },
-                  { title: "Quatità (Kg)", column: "Quantità Caricata Kg" },
-                  { title: "Durata ciclo", column: "Durata ciclo  " },
+                  {
+                    title: "Quatità (Kg)",
+                    column: "Quantità Caricata Kg",
+                    type: "number",
+                  },
+                  {
+                    title: "Durata ciclo",
+                    column: "Durata ciclo  ",
+                    type: "number",
+                  },
                   {
                     title: "T. Scarico",
                     column: "Temperatura tostino allo scarico",
+                    type: "number",
                   },
-                  { title: "Vel. (Hz)", column: "Velocità Tostino Hz" },
+                  {
+                    title: "Vel. (Hz)",
+                    column: "Velocità Tostino Hz",
+                    type: "number",
+                  },
                   { title: "Macchina", column: "Macchina_" },
                 ]}
               />
