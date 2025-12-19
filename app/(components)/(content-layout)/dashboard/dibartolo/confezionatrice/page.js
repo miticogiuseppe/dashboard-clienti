@@ -269,7 +269,7 @@ export default function PaginaConfezionatrice() {
                 dateColumn="Data e Ora"
                 tableHeaders={[
                   { title: "Indice", column: "Indice" },
-                  { title: "Data", column: "Data e Ora", bold: true },
+                  { title: "Data e ora", column: "Data e Ora", bold: true },
                   {
                     title: "Peso Scaricato",
                     column: "Peso Scaricato",
