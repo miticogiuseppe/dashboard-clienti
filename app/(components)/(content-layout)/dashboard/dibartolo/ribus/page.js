@@ -15,9 +15,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
-const tostini = {
-  nome: "Tostini",
-  fileStorico: "/api/download-resource?id=DATI_TOSTINI",
+const ribus = {
+  nome: "Ribus",
+  fileStorico: "/api/download-resource?id=RIBUS",
   fileAppmerce: "/api/download-resource?id=ANALISI",
   appmerce: {
     ordini: 90,
@@ -27,7 +27,7 @@ const tostini = {
 };
 
 // COMPONENTE PRINCIPALE
-export default function PaginaTostini() {
+export default function PaginaRibus() {
   // Filtri TS Azienda
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
@@ -58,12 +58,12 @@ export default function PaginaTostini() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1"
+        "/api/fetch-excel-json?id=RIBUS&sheet=Foglio1"
       );
       const json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["Data"]);
-      data = orderSheet(data, ["Data"], ["asc"]);
+      data = parseDates(data, ["planned_date"]);
+      data = orderSheet(data, ["planned_date"], ["asc"]);
 
       setData2(data);
     }
@@ -71,11 +71,11 @@ export default function PaginaTostini() {
     fetchData();
   }, []);
 
+  console.log("data2:", data2);
+
   const isLoading = useMemo(() => {
     return !data || !data2;
   }, [data, data2]);
-
-  console.log("data2:", data2);
 
   // Stato per TS Azienda
   const computedDateTS = useMemo(() => {
@@ -91,7 +91,7 @@ export default function PaginaTostini() {
 
   return (
     <>
-      <Seo title="Macchina - Tostini" />
+      <Seo title="Macchina - Ribus" />
 
       {isLoading ? (
         <Preloader show={true} />
@@ -99,15 +99,15 @@ export default function PaginaTostini() {
         <>
           <Pageheader
             title="Macchine"
-            currentpage="Tostini"
-            activepage="Tostini"
+            currentpage="Ribus"
+            activepage="Ribus"
             showActions={false}
           />
 
           {/* DASHBOARD MACCHINA */}
           <Row className="g-4 mb-4">
             <Col xxl={12}>
-              <MacchinaDashboard {...tostini} tenant={tostini.tenant} />
+              <MacchinaDashboard {...ribus} tenant={ribus.tenant} />
             </Col>
           </Row>
 
@@ -273,41 +273,50 @@ export default function PaginaTostini() {
               <AppmerceTable
                 data={data2}
                 title="Produzione per articolo"
-                fileExcel="TOSTINI"
-                dateColumn="Data"
+                fileExcel="RIBUS"
+                dateColumn="planned_date"
                 tableHeaders={[
                   {
-                    title: "Num. Form.",
-                    column: "Numero FORMULA",
+                    title: "id",
+                    column: "id",
                     type: "number",
                   },
-                  { title: "Data", column: "Data", bold: true },
+                  { title: "Data", column: "planned_date", bold: true },
                   {
-                    title: "T. Carico",
-                    column: "Temperatura tostino al carico °C",
-                    type: "number",
-                  },
-                  {
-                    title: "Quatità (Kg)",
-                    column: "Quantità Caricata Kg",
+                    title: "Work ID",
+                    column: "work_id",
                     type: "number",
                   },
                   {
-                    title: "Durata ciclo",
-                    column: "Durata ciclo  ",
+                    title: "Ref.",
+                    column: "reference",
+                    allowEmpty: true,
+                  },
+                  {
+                    title: "Lotto",
+                    column: "lot",
+                    type: "number",
+                    allowEmpty: true,
+                  },
+                  {
+                    title: "Box tot.",
+                    column: "boxes_tot",
                     type: "number",
                   },
                   {
-                    title: "T. Scarico",
-                    column: "Temperatura tostino allo scarico",
+                    title: "Pallet tot.",
+                    column: "pallet_tot",
                     type: "number",
                   },
+                  { title: "Start", column: "start_time", allowEmpty: true },
+                  { title: "End", column: "end_time", allowEmpty: true },
+                  { title: "Box lav.", column: "worked_box", type: "number" },
                   {
-                    title: "Vel. (Hz)",
-                    column: "Velocità Tostino Hz",
+                    title: "Pallet lav.",
+                    column: "worked_pallet",
                     type: "number",
                   },
-                  { title: "Macchina", column: "Macchina_" },
+                  { title: "Stato", column: "state", type: "number" },
                 ]}
               />
             </Col>
