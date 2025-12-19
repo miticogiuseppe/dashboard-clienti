@@ -38,10 +38,13 @@ const Generale = () => {
   const [graphSeries, setGraphSeries] = useState([]);
   const [graphOptions, setGraphOptions] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(undefined);
   const [startDate, setStartDate] = useState(undefined);
   const [pickerDate, setPickerDate] = useState(undefined);
-  const [productCount, setProductCount] = useState(0);
+
+  // STATI PER LE CARD
+  const [lastUpdateDate, setLastUpdateDate] = useState("N/D");
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+  const [activeCustomersCount, setActiveCustomersCount] = useState(0);
 
   const [pickerDateTS, setPickerDateTS] = useState([null, null]);
   const [periodoTS, setPeriodoTS] = useState("mese");
@@ -53,7 +56,7 @@ const Generale = () => {
     if (date?.[0] && date?.[1]) setStartDate({ ...date });
   };
 
-  // Caricamento Excel
+  // Caricamento Excel e calcolo del totale storico dei Clienti Attivi
   useEffect(() => {
     (async () => {
       const response = await fetch(
@@ -63,39 +66,42 @@ const Generale = () => {
       let data = json.data;
 
       setSheetData(data);
+      setLastUpdateDate(moment().format("DD/MM/YYYY HH:mm"));
 
       let products = extractUniques(data, "Descrizione famiglia");
       setProducts(products);
+
+      // ✅ CALCOLO CLIENTI ATTIVI STORICI:
+      // Viene eseguito solo qui, su tutti i dati 'data', per un conteggio univoco fisso
+      const totalActiveCustomers = extractUniques(data, "Ragione sociale");
+      setActiveCustomersCount(totalActiveCustomers.length);
     })();
   }, []);
 
-  //Logica filtro + grafico
+  // 🔄 LOGICA PER FILTRARE SOLO GLI ORDINI E IL GRAFICO (dipende da data)
   useEffect(() => {
     if (!sheetData) return;
 
-    let jsonSheet = parseDates(sheetData, ["Data ordine"]);
-    jsonSheet = orderSheet(jsonSheet, ["Data ordine"], ["asc"]);
+    let filteredData = parseDates(sheetData, ["Data ordine"]);
+    filteredData = orderSheet(filteredData, ["Data ordine"], ["asc"]);
 
+    // 1. FILTRAGGIO PER DATA
     if (startDate?.[0] && startDate?.[1]) {
-      jsonSheet = filterByRange(
-        jsonSheet,
+      // Se è selezionato un intervallo di date, filtra
+      filteredData = filterByRange(
+        filteredData,
         "Data ordine",
         moment(startDate[0]),
         moment(startDate[1])
       );
-    } else {
-      jsonSheet = filterByWeek(jsonSheet, "Data ordine", moment(), 2);
     }
 
-    if (selectedProduct) {
-      jsonSheet = filterByValue(
-        jsonSheet,
-        "Descrizione famiglia",
-        selectedProduct
-      );
-    }
+    // 2. CALCOLO DEGLI ORDINI (Numero di Ordini Unici nel periodo/storico)
+    const uniqueOrderNumbers = extractUniques(filteredData, "Nr. ord.");
+    setPendingOrdersCount(uniqueOrderNumbers.length); // Conteggio degli ordini unici
 
-    const counters = sumByKey(jsonSheet, "Articolo", "Qta/kg da ev.");
+    // 3. CALCOLO SERIE PER GRAFICO ANALISI QUANTITÀ
+    const counters = sumByKey(filteredData, "Articolo", "Qta/kg da ev.");
     const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 15);
 
     setGraphSeries([
@@ -108,19 +114,24 @@ const Generale = () => {
     setGraphOptions({
       chart: { type: "bar" },
       dataLabels: { enabled: true },
-      xaxis: {},
+      xaxis: {
+        type: "category",
+        labels: {
+          rotate: -45, // Rotazione diagonale fissa
+          trim: false, //Disabilita il troncamento
+          style: {
+            fontSize: "10px", // Una dimensione di base
+          },
+        },
+      },
+      // Regolazione padding per evitare che il testo ruotato venga tagliato
+      grid: {
+        padding: {
+          bottom: 20, // Aumenta lo spazio inferiore se le etichette sono lunghe
+        },
+      },
     });
-  }, [sheetData, selectedProduct, startDate]);
-
-  // Conta prodotti totali
-  useEffect(() => {
-    if (!sheetData) return;
-    const total = sheetData.reduce((acc, row) => {
-      const value = parseFloat(row["Qta/kg da ev."]);
-      return acc + (isNaN(value) ? 0 : value);
-    }, 0);
-    setProductCount(Math.round(total));
-  }, [sheetData]);
+  }, [sheetData, startDate]);
 
   return (
     <Fragment>
@@ -163,56 +174,32 @@ const Generale = () => {
               </button>
             </div>
           </div>
-
-          <SpkDropdown Toggletext="Group By" Togglevariant="white">
-            <Dropdown.Item onClick={() => setSelectedProduct(undefined)}>
-              --- Tutti i prodotti ---
-            </Dropdown.Item>
-            {products.map((x) => (
-              <Dropdown.Item key={x} onClick={() => setSelectedProduct(x)}>
-                {x}
-              </Dropdown.Item>
-            ))}
-          </SpkDropdown>
-
-          <SpkButton Buttonvariant="white">
-            <i className="ri-filter-3-line me-1" /> Filter
-          </SpkButton>
-
-          <SpkButton Buttonvariant="primary">
-            <i className="ri-share-forward-line me-1" /> Share
-          </SpkButton>
         </div>
       </div>
 
       {/* CARDS CENTRATE E DISTANZIATE */}
       <Row className="g-4 justify-content-center">
-        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
-          <div className="w-100 p-3 shadow-sm rounded-3 white text-center">
-            <Spkcardscomponent
-              cardClass="overflow-hidden main-content-card h-100"
-              headingClass="d-block mb-1 fw-semibold"
-              mainClass="d-flex align-items-start justify-content-between mb-2"
-              Icon={true}
-              iconClass="ti ti-shopping-cart"
-              card={{ id: 1, title: "Total Products", count: productCount }}
-              badgeClass="md rounded-pill"
-              dataClass="mb-0"
-            />
-          </div>
-        </Col>
-
+        {/* Card 1: Ultimo Aggiornamento */}
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
-            <h6 className="fw-semibold">Ordini Evasi</h6>
-            <h2 className="text-success">0</h2>
+            <h6 className="fw-semibold">Ultimo Aggiornamento</h6>
+            <h2 className="text-primary">{lastUpdateDate}</h2>
           </Card>
         </Col>
 
+        {/* Card 2: Clienti Attivi (Mostra il totale storico univoco) */}
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
-            <h6 className="fw-semibold">Clienti Attivi</h6>
-            <h2 className="text-info">0</h2>
+            <h6 className="fw-semibold">Clienti</h6>
+            <h2 className="text-info">{activeCustomersCount}</h2>
+          </Card>
+        </Col>
+
+        {/* Card 3: Ordini (Numero di ordini unici filtrati per data) */}
+        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
+          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
+            <h6 className="fw-semibold">Ordini</h6>
+            <h2 className="text-success">{pendingOrdersCount}</h2>
           </Card>
         </Col>
       </Row>
@@ -238,7 +225,7 @@ const Generale = () => {
           </Card>
         </Col>
 
-        {/*  NUOVO GRAFICO LATERALE */}
+        {/* NUOVO GRAFICO LATERALE (Analisi Quantità) */}
         <Col xl={4}>
           <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
             <Card.Header>

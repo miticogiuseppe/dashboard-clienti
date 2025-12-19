@@ -15,21 +15,6 @@ export const menuDibartolo = [
       },
     ],
   },
-  //   { menutitle: "WEB APPS" },
-  {
-    title: "Apps",
-    icon: Appsicon,
-    type: "sub",
-    ready: false,
-    children: [
-      {
-        title: "Calendario",
-        path: "/dashboard/dibartolo/calendario",
-        type: "link",
-        ready: false,
-      },
-    ],
-  },
 
   {
     title: "Pages",
@@ -63,6 +48,21 @@ export const menuDibartolo = [
       {
         path: "/dashboard/dibartolo/ribus",
         title: "Ribus",
+        type: "link",
+        ready: true,
+      },
+    ],
+  },
+  //   { menutitle: "WEB APPS" },
+  {
+    title: "Apps",
+    icon: Appsicon,
+    type: "sub",
+    ready: true,
+    children: [
+      {
+        title: "Calendario",
+        path: "/dashboard/dibartolo/calendario",
         type: "link",
         ready: true,
       },
