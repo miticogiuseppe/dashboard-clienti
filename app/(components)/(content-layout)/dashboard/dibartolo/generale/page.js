@@ -99,7 +99,7 @@ const Ecommerce = () => {
       );
       let json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["Data ordine"]); // Converte le date in oggetti Moment/Date
+      data = parseDates(data, ["Data ordine", "Data cons. rich."]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
       setFileDate(new Date(json.lwt));
     };
@@ -162,15 +162,15 @@ const Ecommerce = () => {
     // Filtra per visualizzare i primi 30, ad esempio.
     const top10Counters = topCounters.slice(0, 30);
 
-    // setGraphSeries([
-    //   {
-    //     name: t("Quantity"),
-    //     data: top10Counters.map((c) => ({
-    //       x: c["Descrizione famiglia"],
-    //       y: Number(c.count),
-    //     })),
-    //   },
-    // ]);
+    setGraphSeries([
+      {
+        name: t("Quantity"),
+        data: top10Counters.map((c) => ({
+          x: c["Descrizione famiglia"],
+          y: Number(c.count),
+        })),
+      },
+    ]);
 
     // Aggiorna le opzioni per le categorie, per visualizzare solo le famiglie top
     setGraphOptions({
@@ -269,21 +269,34 @@ const Ecommerce = () => {
                     column: "Nr. ord.",
                   },
                   {
-                    title: "Sez",
+                    title: "Ser",
                     column: "Ser.",
                   },
                   {
-                    title: "Ragione sociale",
+                    title: "Cod.Cliente",
+                    column: "Cod. Cliente",
+                  },
+                  {
+                    title: "Rag.Soc",
                     column: "Ragione sociale",
                     default: "Cliente Generico",
                     bold: true,
                   },
                   {
-                    title: "Descrizione",
-                    column: "Descrizione famiglia",
+                    title: "Cod.Art.",
+                    column: "Articolo",
                   },
                   {
-                    title: "Data Consegna",
+                    title: "Descr.Art",
+                    column: "Descrizione art. cliente",
+                  },
+                  {
+                    title: "Qta/kg da ev.",
+                    column: "Qta/kg da ev.",
+                  },
+                  { title: "Qta/kg da ev.Orig.", column: "Qta/kg OV" },
+                  {
+                    title: "Data Consegna Rich.",
                     column: "Data cons. rich.",
                   },
                 ]}
