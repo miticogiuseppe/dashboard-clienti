@@ -1,10 +1,12 @@
 import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
+import { RiDashboardHorizontalFill } from "react-icons/ri";
+import { LuFactory } from "react-icons/lu";
 
 export const menuDibartolo = [
   { menutitle: "MAIN" },
   {
     title: "Dashboards",
-    icon: Dashboardicon,
+    icon: <RiDashboardHorizontalFill className="side-menu__icon" />,
     type: "sub",
     children: [
       {
@@ -17,8 +19,8 @@ export const menuDibartolo = [
   },
 
   {
-    title: "Pages",
-    icon: Pagesicon,
+    title: "Macchine",
+    icon: <LuFactory className="side-menu__icon" />,
     type: "sub",
     children: [
       {
@@ -53,7 +55,7 @@ export const menuDibartolo = [
       },
     ],
   },
-  //   { menutitle: "WEB APPS" },
+
   {
     title: "Apps",
     icon: Appsicon,
