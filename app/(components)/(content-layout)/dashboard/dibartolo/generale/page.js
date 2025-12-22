@@ -59,7 +59,7 @@ const Generale = () => {
 
   // Caricamento Excel e calcolo del totale storico dei Clienti Attivi
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       const response = await fetch(
         "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
       );
@@ -76,7 +76,14 @@ const Generale = () => {
       // Viene eseguito solo qui, su tutti i dati 'data', per un conteggio univoco fisso
       const totalActiveCustomers = extractUniques(data, "Ragione sociale");
       setActiveCustomersCount(totalActiveCustomers.length);
-    })();
+    };
+
+    fetchData(); // Carica subito
+
+    // Aggiorna ogni 60 secondi per controllare aggiornamenti del file Excel
+    const interval = setInterval(fetchData, 60000);
+
+    return () => clearInterval(interval); // Pulisce l'intervallo al unmount
   }, []);
 
   // 🔄 LOGICA PER FILTRARE SOLO GLI ORDINI E IL GRAFICO (dipende da data)
@@ -107,19 +114,22 @@ const Generale = () => {
       return item["Descrizione famiglia"] !== "IMBALLAGGI";
     });
 
-    // Calcola i contatori sulla base dei dati filtrati
+    // Calcola i contatori sulla base dei dati filtrati, raggruppati per "Descrizione famiglia"
     const counters = sumByKey(
       filteredDataExcludingImballaggi,
-      "Articolo",
+      "Descrizione famiglia",
       "Qta/kg da ev."
     );
 
-    // Ordina e prendi i primi 15 (come nel codice originale)
-    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 20);
+    // Ordina tutti gli elementi per quantità decrescente
+    const topCounters = counters.sort((a, b) => b.count - a.count);
     setGraphSeries([
       {
         name: "Quantità",
-        data: topCounters.map((c) => ({ x: c.Articolo, y: Number(c.count) })),
+        data: topCounters.map((c) => ({
+          x: c["Descrizione famiglia"],
+          y: Number(c.count),
+        })),
       },
     ]);
 
@@ -132,8 +142,9 @@ const Generale = () => {
       plotOptions: {
         bar: {
           horizontal: false,
-          columnWidth: "60%",
+          columnWidth: "80%", // Aumentato per rendere le colonne più larghe e facili da hoverare
           borderRadius: 6,
+          minBarHeight: 20, // Altezza minima per le barre piccole, facilita l'hover
         },
       },
 
@@ -274,7 +285,7 @@ const Generale = () => {
         <Col xl={4}>
           <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
             <Card.Header>
-              <Card.Title>Analisi Quantità (Top 20)</Card.Title>
+              <Card.Title>Analisi Quantità</Card.Title>
             </Card.Header>
 
             <Card.Body>
