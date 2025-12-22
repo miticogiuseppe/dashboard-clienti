@@ -25,6 +25,7 @@ import moment from "moment";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Dropdown, Row } from "react-bootstrap";
+import { Vertical } from "@/shared/data/switcherdata/switcherdata";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -66,7 +67,7 @@ const Generale = () => {
       let data = json.data;
 
       setSheetData(data);
-      setLastUpdateDate(moment().format("DD/MM/YYYY HH:mm"));
+      setLastUpdateDate(moment(json.lwt).format("DD/MM/YYYY HH:mm"));
 
       let products = extractUniques(data, "Descrizione famiglia");
       setProducts(products);
@@ -101,9 +102,20 @@ const Generale = () => {
     setPendingOrdersCount(uniqueOrderNumbers.length); // Conteggio degli ordini unici
 
     // 3. CALCOLO SERIE PER GRAFICO ANALISI QUANTITÀ
-    const counters = sumByKey(filteredData, "Articolo", "Qta/kg da ev.");
-    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 15);
+    const filteredDataExcludingImballaggi = filteredData.filter((item) => {
+      // Escludi l'elemento se il valore di 'Descrizione famiglia' è 'IMBALLAGGI'
+      return item["Descrizione famiglia"] !== "IMBALLAGGI";
+    });
 
+    // Calcola i contatori sulla base dei dati filtrati
+    const counters = sumByKey(
+      filteredDataExcludingImballaggi,
+      "Articolo",
+      "Qta/kg da ev."
+    );
+
+    // Ordina e prendi i primi 15 (come nel codice originale)
+    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 20);
     setGraphSeries([
       {
         name: "Quantità",
@@ -112,23 +124,56 @@ const Generale = () => {
     ]);
 
     setGraphOptions({
-      chart: { type: "bar" },
-      dataLabels: { enabled: true },
+      chart: {
+        type: "bar",
+        toolbar: { show: false },
+      },
+
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: "60%",
+          borderRadius: 6,
+        },
+      },
+
+      // ❌ NIENTE NUMERI DENTRO LE COLONNE
+      dataLabels: {
+        enabled: false,
+      },
+
       xaxis: {
         type: "category",
         labels: {
-          rotate: -45, // Rotazione diagonale fissa
-          trim: false, //Disabilita il troncamento
+          rotate: -90, // SCRITTE VERTICALI
+          rotateAlways: true,
+          trim: false,
           style: {
-            fontSize: "10px", // Una dimensione di base
+            fontSize: "11px",
+            fontWeight: 500,
           },
         },
       },
-      // Regolazione padding per evitare che il testo ruotato venga tagliato
+
+      // ✅ NUMERI SOLO LATERALI (ASSE Y)
+      yaxis: {
+        labels: {
+          formatter: (val) => Math.round(val),
+          style: {
+            fontSize: "11px",
+          },
+        },
+      },
+
       grid: {
         padding: {
-          bottom: 20, // Aumenta lo spazio inferiore se le etichette sono lunghe
+          bottom: 40,
         },
+        strokeDashArray: 4,
+      },
+
+      tooltip: {
+        enabled: true, // i valori li vedi al passaggio
       },
     });
   }, [sheetData, startDate]);
@@ -229,7 +274,7 @@ const Generale = () => {
         <Col xl={4}>
           <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
             <Card.Header>
-              <Card.Title>Analisi Quantità</Card.Title>
+              <Card.Title>Analisi Quantità (Top 20)</Card.Title>
             </Card.Header>
 
             <Card.Body>
