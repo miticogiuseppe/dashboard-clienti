@@ -258,6 +258,7 @@ const Ecommerce = () => {
                 data={recentOrders}
                 title="Ordini"
                 dateColumn="Data ordine"
+                enableSearch={true}
                 tableHeaders={[
                   {
                     title: "Data ordine",

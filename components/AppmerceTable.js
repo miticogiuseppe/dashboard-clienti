@@ -44,8 +44,31 @@ function AppmerceTable({
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
           x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
       );
+
+    //per riquadro filtro
+    if (searchText) {
+      const lowerSearchText = searchText.toLowerCase().trim();
+      sorted = sorted.filter((row) =>
+        // Cerchiamo la corrispondenza del testo in TUTTE le colonne definite in tableHeaders
+        tableHeaders.some((header) => {
+          const value = row[header.column];
+          if (value === null || value === undefined) return false;
+
+          let cellValue = String(value);
+
+          // Gestione specifica per gli oggetti Moment (Date)
+          if (moment.isMoment(value)) {
+            cellValue = value.format("DD/MM/YYYY");
+          } else {
+            cellValue = String(value);
+          }
+
+          return cellValue.toLowerCase().includes(lowerSearchText);
+        })
+      );
+    }
     return sorted;
-  }, [data, dateColumn, filterDate]);
+  }, [data, dateColumn, filterDate, searchText, tableHeaders]);
 
   if (filteredData !== prevData) {
     setVisibleItemsCount(ITEMS_PER_PAGE);
