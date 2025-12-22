@@ -260,46 +260,32 @@ const Ecommerce = () => {
                 dateColumn="Data ordine"
                 enableSearch={true}
                 tableHeaders={[
+                  { title: "Data ord.", column: "Data ordine" },
+                  { title: "Num. ord.", column: "Nr. ord.", type: "number" },
+                  { title: "Ser.", column: "Ser.", type: "number" },
+                  { title: "Cod. Cliente", column: "Cod. Cliente" },
                   {
-                    title: "Data ordine",
-                    column: "Data ordine",
-                  },
-
-                  {
-                    title: "Nr.ord",
-                    column: "Nr. ord.",
-                  },
-                  {
-                    title: "Ser",
-                    column: "Ser.",
-                  },
-                  {
-                    title: "Cod.Cliente",
-                    column: "Cod. Cliente",
-                  },
-                  {
-                    title: "Rag.Soc",
+                    title: "Rag. Soc.",
                     column: "Ragione sociale",
-                    default: "Cliente Generico",
+                    default: "Cliente generico",
                     bold: true,
                   },
+                  { title: "Cod. Art.", column: "Articolo" },
+                  { title: "Descr. Art", column: "Descrizione art. cliente" },
+                  { title: "Qta/kg OV", column: "Qta/kg OV", type: "number" },
                   {
-                    title: "Cod.Art.",
-                    column: "Articolo",
-                  },
-                  {
-                    title: "Descr.Art",
-                    column: "Descrizione art. cliente",
+                    title: "Qta/kg evasa",
+                    column: "Qta/kg evasa",
+                    type: "number",
+                    allowZero: true,
                   },
                   {
                     title: "Qta/kg da ev.",
                     column: "Qta/kg da ev.",
+                    type: "number",
+                    allowZero: true,
                   },
-                  { title: "Qta/kg da ev.Orig.", column: "Qta/kg OV" },
-                  {
-                    title: "Data Consegna Rich.",
-                    column: "Data cons. rich.",
-                  },
+                  { title: "Data Cons. Rich.", column: "Data cons. rich." },
                 ]}
               />
             </Col>
