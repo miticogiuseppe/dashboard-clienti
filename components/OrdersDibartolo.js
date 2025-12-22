@@ -16,6 +16,7 @@ const OrdersDibartolo = ({ data }) => {
   const [clientSearch, setClientSearch] = useState({});
   const [orderSearch, setOrderSearch] = useState({});
   const [articleSearch, setArticleSearch] = useState({});
+  const [serSearch, setSerSearch] = useState({});
 
   const handleEventClick = (info) => {
     const clickedDate = info.event.startStr;
@@ -58,6 +59,10 @@ const OrdersDibartolo = ({ data }) => {
     (data) => setArticleSearch(data),
     [setArticleSearch]
   );
+  const handleSerSearch = useCallback(
+    (data) => setSerSearch(data),
+    [setSerSearch]
+  );
 
   // Funzione di filtraggio
   function checkRow(row, column, searchData) {
@@ -77,7 +82,8 @@ const OrdersDibartolo = ({ data }) => {
     const matchClient = checkRow(order, "Ragione sociale", clientSearch);
     const matchOrder = checkRow(order, "Nr. ord.", orderSearch);
     const matchArticle = checkRow(order, "Articolo", articleSearch);
-    return matchGroup && matchClient && matchOrder && matchArticle;
+    const matchSer = checkRow(order, "Ser.", serSearch);
+    return matchGroup && matchClient && matchOrder && matchArticle && matchSer;
   });
 
   // Raggruppamento per calendario
@@ -134,6 +140,9 @@ const OrdersDibartolo = ({ data }) => {
   const orders = Array.from(
     new Set(data.map((o) => String(o["Nr. ord."])).filter(Boolean))
   );
+  const ser = Array.from(
+    new Set(data.map((o) => String(o["Ser."])).filter(Boolean))
+  );
   const articles = Array.from(
     new Set(data.map((o) => String(o.Articolo)).filter(Boolean))
   );
@@ -149,6 +158,11 @@ const OrdersDibartolo = ({ data }) => {
   const filteredOrders = orders.filter(
     (n) =>
       !n || n.toLowerCase().includes((orderSearch.search || "").toLowerCase())
+  );
+
+  const filteredSer = ser.filter(
+    (n) =>
+      !n || n.toLowerCase().includes((serSearch.search || "").toLowerCase())
   );
   const filteredArticles = articles.filter(
     (a) =>
@@ -198,6 +212,14 @@ const OrdersDibartolo = ({ data }) => {
                   name="N.Ordine"
                   placeholder="Cerca numero ordine..."
                   onSearch={handleOrderSearch}
+                />
+
+                {/* SER */}
+                <SearchBox
+                  data={filteredSer}
+                  name="Ser."
+                  placeholder="Cerca numero sezione..."
+                  onSearch={handleSerSearch}
                 />
 
                 {/* ARTICOLO */}
