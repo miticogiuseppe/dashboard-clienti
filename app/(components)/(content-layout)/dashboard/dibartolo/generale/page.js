@@ -1,21 +1,16 @@
 "use client";
 
 import AppmerceChart from "@/components/AppmerceChart";
-import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
 import SpkBreadcrumb from "@/shared/@spk-reusable-components/reusable-uielements/spk-breadcrumb";
-import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { calcolaRange, fmt } from "@/utils/dateUtils";
 import dynamic from "next/dynamic";
+import AppmerceTable from "@/components/AppmerceTable";
 
 import {
   extractUniques,
   filterByRange,
-  filterByValue,
-  filterByWeek,
-  loadSheet,
   orderSheet,
   parseDates,
   sumByKey,
@@ -24,8 +19,7 @@ import {
 import moment from "moment";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
-import { Card, Col, Dropdown, Row } from "react-bootstrap";
-import { Vertical } from "@/shared/data/switcherdata/switcherdata";
+import { Card, Col, Row } from "react-bootstrap";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -33,16 +27,13 @@ const Spkapexcharts = dynamic(
   { ssr: false }
 );
 
-// COMPONENTE
 const Generale = () => {
   const [sheetData, setSheetData] = useState(undefined);
   const [graphSeries, setGraphSeries] = useState([]);
   const [graphOptions, setGraphOptions] = useState([]);
-  const [products, setProducts] = useState([]);
   const [startDate, setStartDate] = useState(undefined);
   const [pickerDate, setPickerDate] = useState(undefined);
 
-  // STATI PER LE CARD
   const [lastUpdateDate, setLastUpdateDate] = useState("N/D");
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const [activeCustomersCount, setActiveCustomersCount] = useState(0);
@@ -52,50 +43,58 @@ const Generale = () => {
   const { startDate: startDateTS, endDate: endDateTS } =
     calcolaRange(periodoTS);
 
+  const [recentOrders, setRecentOrders] = useState([]);
+
+  const [sortConfig, setSortConfig] = useState({
+    column: null,
+    direction: "asc",
+  });
+
   const handleDateChange = (date) => {
     setPickerDate(date);
     if (date?.[0] && date?.[1]) setStartDate({ ...date });
   };
 
-  // Caricamento Excel e calcolo del totale storico dei Clienti Attivi
+  const toggleSort = (column) => {
+    if (sortConfig.column === column) {
+      setSortConfig({
+        column,
+        direction: sortConfig.direction === "asc" ? "desc" : "asc",
+      });
+    } else {
+      setSortConfig({ column, direction: "asc" });
+    }
+  };
+
+  // Caricamento Excel
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
         "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
       );
       const json = await response.json();
-      let data = json.data;
+      const data = json.data;
 
       setSheetData(data);
       setLastUpdateDate(moment(json.lwt).format("DD/MM/YYYY HH:mm"));
 
-      let products = extractUniques(data, "Descrizione famiglia");
-      setProducts(products);
-
-      // ✅ CALCOLO CLIENTI ATTIVI STORICI:
-      // Viene eseguito solo qui, su tutti i dati 'data', per un conteggio univoco fisso
       const totalActiveCustomers = extractUniques(data, "Ragione sociale");
       setActiveCustomersCount(totalActiveCustomers.length);
     };
 
-    fetchData(); // Carica subito
-
-    // Aggiorna ogni 60 secondi per controllare aggiornamenti del file Excel
+    fetchData();
     const interval = setInterval(fetchData, 60000);
-
-    return () => clearInterval(interval); // Pulisce l'intervallo al unmount
+    return () => clearInterval(interval);
   }, []);
 
-  // 🔄 LOGICA PER FILTRARE SOLO GLI ORDINI E IL GRAFICO (dipende da data)
+  // Filtri e calcoli
   useEffect(() => {
     if (!sheetData) return;
 
     let filteredData = parseDates(sheetData, ["Data ordine"]);
     filteredData = orderSheet(filteredData, ["Data ordine"], ["asc"]);
 
-    // 1. FILTRAGGIO PER DATA
     if (startDate?.[0] && startDate?.[1]) {
-      // Se è selezionato un intervallo di date, filtra
       filteredData = filterByRange(
         filteredData,
         "Data ordine",
@@ -104,24 +103,19 @@ const Generale = () => {
       );
     }
 
-    // 2. CALCOLO DEGLI ORDINI (Numero di Ordini Unici nel periodo/storico)
     const uniqueOrderNumbers = extractUniques(filteredData, "Nr. ord.");
-    setPendingOrdersCount(uniqueOrderNumbers.length); // Conteggio degli ordini unici
+    setPendingOrdersCount(uniqueOrderNumbers.length);
 
-    // 3. CALCOLO SERIE PER GRAFICO ANALISI QUANTITÀ
-    const filteredDataExcludingImballaggi = filteredData.filter((item) => {
-      // Escludi l'elemento se il valore di 'Descrizione famiglia' è 'IMBALLAGGI'
-      return item["Descrizione famiglia"] !== "IMBALLAGGI";
-    });
+    const filteredDataExcludingImballaggi = filteredData.filter(
+      (item) => item["Descrizione famiglia"] !== "IMBALLAGGI"
+    );
 
-    // Calcola i contatori sulla base dei dati filtrati, raggruppati per "Descrizione famiglia"
     const counters = sumByKey(
       filteredDataExcludingImballaggi,
       "Descrizione famiglia",
       "Qta/kg da ev."
     );
 
-    // Ordina tutti gli elementi per quantità decrescente
     const topCounters = counters.sort((a, b) => b.count - a.count);
     setGraphSeries([
       {
@@ -134,59 +128,44 @@ const Generale = () => {
     ]);
 
     setGraphOptions({
-      chart: {
-        type: "bar",
-        toolbar: { show: false },
-      },
-
+      chart: { type: "bar", toolbar: { show: false } },
       plotOptions: {
         bar: {
           horizontal: false,
-          columnWidth: "80%", // Aumentato per rendere le colonne più larghe e facili da hoverare
+          columnWidth: "80%",
           borderRadius: 6,
-          minBarHeight: 20, // Altezza minima per le barre piccole, facilita l'hover
+          minBarHeight: 20,
         },
       },
-
-      // ❌ NIENTE NUMERI DENTRO LE COLONNE
-      dataLabels: {
-        enabled: false,
-      },
-
+      dataLabels: { enabled: false },
       xaxis: {
         type: "category",
         labels: {
-          rotate: -90, // SCRITTE VERTICALI
+          rotate: -90,
           rotateAlways: true,
           trim: false,
-          style: {
-            fontSize: "11px",
-            fontWeight: 500,
-          },
+          style: { fontSize: "11px", fontWeight: 600 },
         },
       },
-
-      // ✅ NUMERI SOLO LATERALI (ASSE Y)
       yaxis: {
         labels: {
           formatter: (val) => Math.round(val),
-          style: {
-            fontSize: "11px",
-          },
+          style: { fontSize: "11px" },
         },
       },
-
-      grid: {
-        padding: {
-          bottom: 40,
-        },
-        strokeDashArray: 4,
-      },
-
-      tooltip: {
-        enabled: true, // i valori li vedi al passaggio
-      },
+      grid: { padding: { bottom: 40 }, strokeDashArray: 4 },
+      tooltip: { enabled: true },
     });
+
+    // Prepara dati tabella Ordini
+    const tableData = filteredData.map((item) => ({
+      "Nr. ord": item["Nr. ord."],
+      "Ser.": item["Ser."],
+      "Ragione sociale": item["Ragione sociale"] || "Cliente Generico",
+      "Desc gr/sgru": item["Desc gr/sgru"],
+      "Data cons. rich.": item["Data cons. rich."],
+    }));
+    setRecentOrders(tableData);
   }, [sheetData, startDate]);
 
   return (
@@ -204,38 +183,10 @@ const Generale = () => {
           </SpkBreadcrumb>
           <h1 className="page-title fw-medium fs-18 mb-0">Generale</h1>
         </div>
-
-        {/* FILTRI */}
-        <div className="d-flex gap-2 align-items-center flex-wrap">
-          <div className="form-group m-0">
-            <div className="input-group">
-              <div className="input-group-text bg-white border">
-                <i className="ri-calendar-line" />
-              </div>
-              <SpkFlatpickr
-                inputClass="form-control"
-                options={{ mode: "range", dateFormat: "Y-m-d" }}
-                onfunChange={handleDateChange}
-                value={pickerDate}
-              />
-              <button
-                type="button"
-                className="btn btn-light ms-2"
-                onClick={() => {
-                  setStartDate(undefined);
-                  setPickerDate(undefined);
-                }}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* CARDS CENTRATE E DISTANZIATE */}
+      {/* CARDS */}
       <Row className="g-4 justify-content-center">
-        {/* Card 1: Ultimo Aggiornamento */}
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
             <h6 className="fw-semibold">Ultimo Aggiornamento</h6>
@@ -243,7 +194,6 @@ const Generale = () => {
           </Card>
         </Col>
 
-        {/* Card 2: Clienti Attivi (Mostra il totale storico univoco) */}
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
             <h6 className="fw-semibold">Clienti</h6>
@@ -251,7 +201,6 @@ const Generale = () => {
           </Card>
         </Col>
 
-        {/* Card 3: Ordini (Numero di ordini unici filtrati per data) */}
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
             <h6 className="fw-semibold">Ordini</h6>
@@ -260,30 +209,51 @@ const Generale = () => {
         </Col>
       </Row>
 
-      {/* GRAFICI AFFIANCATI */}
+      {/* ORDINI + ANALISI QUANTITÀ */}
       <Row className="g-4 mt-4">
-        {/* TS AZIENDA */}
+        {/* Tabella Ordini */}
         <Col xl={8}>
-          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <Card.Title>TS Azienda</Card.Title>
-            </Card.Header>
-
-            <Card.Body>
-              <AppmerceChart
-                title="TS Azienda"
-                startDate={fmt(pickerDateTS?.[0]) || startDateTS}
-                endDate={fmt(pickerDateTS?.[1]) || endDateTS}
-                dateCol="Data ordine"
-                qtyCol="Qta/kg da ev."
-              />
-            </Card.Body>
-          </Card>
+          <AppmerceTable
+            className="custom-card sibling-card"
+            // enableSearch={true}
+            data={recentOrders}
+            title="Ordini"
+            dateColumn="Data cons. rich."
+            tableHeaders={[
+              {
+                title: "Nr.Ord",
+                column: "Nr. ord",
+                onClick: () => toggleSort("Nr. ord"),
+              },
+              {
+                title: "Sez",
+                column: "Ser.",
+                onClick: () => toggleSort("Ser."),
+              },
+              {
+                title: "Ragione sociale",
+                column: "Ragione sociale",
+                default: "Cliente Generico",
+                bold: true,
+                onClick: () => toggleSort("Ragione sociale"),
+              },
+              {
+                title: "Descrizione",
+                column: "Desc gr/sgru",
+                onClick: () => toggleSort("Desc gr/sgru"),
+              },
+              {
+                title: "Data consegna richiesta",
+                column: "Data cons. rich.",
+                onClick: () => toggleSort("Data cons. rich."),
+              },
+            ]}
+          />
         </Col>
 
-        {/* NUOVO GRAFICO LATERALE (Analisi Quantità) */}
+        {/* Analisi Quantità */}
         <Col xl={4}>
-          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
+          <Card className="custom-card sibling-card">
             <Card.Header>
               <Card.Title>Analisi Quantità</Card.Title>
             </Card.Header>

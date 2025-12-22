@@ -17,12 +17,15 @@ function AppmerceTable({
   tableHeaders,
   filterDate,
   className,
+  enableSearch,
 }) {
   const t = useTranslations("Graph");
 
   const ITEMS_PER_PAGE = 50;
   const [visibleItemsCount, setVisibleItemsCount] = useState(ITEMS_PER_PAGE);
   const [prevData, setPrevData] = useState(undefined);
+
+  const [searchText, setSearchText] = useState("");
 
   // Ordino gli ultimi 7 ordini per data
   const filteredData = useMemo(() => {
@@ -78,6 +81,19 @@ function AppmerceTable({
       </Card.Header>
 
       <Card.Body className="p-2">
+        {/* Input ricerca fuori dal container scrollable */}
+        {enableSearch && (
+          <div style={{ marginBottom: "10px" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Cerca Ordini..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+        )}
+
         {filteredData.length > 0 ? (
           <div className="scroller-container">
             <SpkTablescomponent
