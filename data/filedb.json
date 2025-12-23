@@ -68,6 +68,10 @@
     {
       "id": "ANALISI",
       "path": "Rica\\4.0\\analisi.xlsx"
+    },
+    {
+      "id": "STORICO",
+      "path": "Rica\\4.0\\storico\\storico.zip"
     }
   ]
 }

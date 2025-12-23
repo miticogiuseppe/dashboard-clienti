@@ -28,6 +28,12 @@ export const menuRica = [
         type: "link",
         ready: true,
       },
+      {
+        title: "Download",
+        path: "/dashboard/rica/download",
+        type: "link",
+        ready: true,
+      },
     ],
   },
 ];
