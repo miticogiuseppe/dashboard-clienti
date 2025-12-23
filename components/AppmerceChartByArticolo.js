@@ -40,6 +40,7 @@ export default function AppmerceChartByArticolo({
     let counters = sumByKey(filteredData, groupCol, valueCol);
     let total = counters.reduce((acc, item) => acc + item.count, 0);
     counters = counters.sort((a, b) => b.count - a.count);
+    counters = counters.filter((c) => c.count > 0);
 
     // Trasforma per ApexCharts
     const seriesData = [

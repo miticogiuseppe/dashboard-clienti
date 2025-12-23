@@ -160,7 +160,7 @@ export default function PaginaRibus() {
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="insert_datetime"
-                    groupCol="reference"
+                    groupCol="id"
                     valueCol="worked_box"
                   />
                 </Card.Body>
