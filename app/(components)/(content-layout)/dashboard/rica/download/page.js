@@ -28,7 +28,6 @@ export default function PaginaDownload() {
           showActions={false}
         />
 
-        {/* DASHBOARD MACCHINA */}
         <Row className="g-4 mb-4">
           <Col xxl={12}>
             <MacchinaDashboard {...download} tenant={download.tenant} />
