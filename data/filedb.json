@@ -40,16 +40,28 @@
       "path": "Dibartolo\\4.0\\Mulini\\Latest\\Last.xls"
     },
     {
-      "id": "Dibartolo_Confezionatrice",
-      "path": "Dibartolo\\4.0\\Confezionatrice\\Latest\\last_confezionatrice.xlsx"
+      "id": "CONFEZIONATRICE",
+      "path": "Dibartolo\\4.0\\storico\\dati_confezionatrice.xlsx"
     },
     {
       "id": "DATI_TOSTINI",
       "path": "Dibartolo\\4.0\\storico\\dati_tostini.xls"
     },
     {
+      "id": "VARIEGATI",
+      "path": "Dibartolo\\4.0\\storico\\dati_variegati.xls"
+    },
+    {
+      "id": "MULINI",
+      "path": "Dibartolo\\4.0\\storico\\dati_mulini.xls"
+    },
+    {
       "id": "TOSTINI",
       "path": "Dibartolo\\4.0\\Tostini\\Latest\\tostini.xls"
+    },
+    {
+      "id": "RIBUS",
+      "path": "Dibartolo\\4.0\\storico\\dati_ribus.xlsx"
     }
   ]
 }

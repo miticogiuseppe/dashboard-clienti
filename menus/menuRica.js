@@ -2,69 +2,61 @@ import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { LuFactory } from "react-icons/lu";
 
-export const menuDibartolo = [
-  { menutitle: "MAIN" },
+export const menuCopral = [
+  { menutitle: "MENU" },
   {
-    title: "Dashboards",
+    title: "Dashboard",
     icon: <RiDashboardHorizontalFill className="side-menu__icon" />,
     type: "sub",
     children: [
       {
-        path: "/dashboard/dibartolo/generale",
+        path: "/dashboard/copral/generalenew",
         title: "Generale",
         type: "link",
         ready: true,
       },
     ],
   },
-
   {
     title: "Macchine",
     icon: <LuFactory className="side-menu__icon" />,
     type: "sub",
     children: [
       {
-        path: "/dashboard/dibartolo/tostini",
-        title: "Tostini",
+        path: "/dashboard/copral/imballatrice",
+        title: "Imballatrice",
         type: "link",
         ready: true,
       },
       {
-        path: "/dashboard/dibartolo/confezionatrice",
-        title: "Confezionatrice",
+        path: "/dashboard/copral/troncatrice",
+        title: "Troncatrice (Mecal)",
+        type: "link",
+        ready: true,
+      },
+
+      {
+        path: "/dashboard/copral/pulitrice",
+        title: "Pulitrice",
         type: "link",
         ready: true,
       },
       {
-        path: "/dashboard/dibartolo/variegati",
-        title: "Variegati",
-        type: "link",
-        ready: true,
-      },
-      {
-        path: "/dashboard/dibartolo/mulini",
-        title: "Mulini",
-        type: "link",
-        ready: true,
-      },
-      {
-        path: "/dashboard/dibartolo/ribus",
-        title: "Ribus",
+        path: "/dashboard/copral/intestatrice",
+        title: "Intestatrice 90°",
         type: "link",
         ready: true,
       },
     ],
   },
-
   {
-    title: "Apps",
+    title: "App",
     icon: Appsicon,
     type: "sub",
-    ready: true,
     children: [
       {
         title: "Calendario",
-        path: "/dashboard/dibartolo/calendario",
+        path: "/dashboard/copral/calendario",
         type: "link",
         ready: true,
       },

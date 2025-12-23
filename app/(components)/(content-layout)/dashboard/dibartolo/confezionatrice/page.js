@@ -1,66 +1,224 @@
 "use client";
-
-import { usePathname } from "next/navigation";
-import { Fragment, useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import AppmerceChart from "@/components/AppmerceChart";
+import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
+import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
+import MacchinaDashboard from "@/components/MacchinaDashboard";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import ConfezionatriceChart from "@/components/Dibartolo/ConfezionatriceChart";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
-import GlobalContext from "@/context/GlobalContext";
+import { fmt } from "@/utils/dateUtils";
+import { orderSheet, parseDates } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
+import { useEffect, useMemo, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
 
-//import filedb from "@/filedb.json";
-//import * as XLSX from "xlsx";
-
-const confezionatriceData = {
-  fileExcel: "/api/download-resource?id=Dibartolo_Confezionatrice", // legge il percorso dal JSON
+const confezionatrice = {
+  nome: "Confezionatrice",
+  fileStorico: "/api/download-resource?id=CONFEZIONATRICE",
+  fileAppmerce: "/api/download-resource?id=ANALISI",
+  appmerce: {
+    ordini: 90,
+    produzione: 1450,
+    dataConsegna: "2025-12-15",
+  },
 };
 
+// COMPONENTE PRINCIPALE
 export default function PaginaConfezionatrice() {
-  const [pickerDate, setPickerDate] = useState([null, null]);
-  const [periodo, setPeriodo] = useState("mese");
-  const pathname = usePathname();
-  const { startDate, endDate } = calcolaRange(periodo);
-  const { tenant } = useContext(GlobalContext);
+  // Filtri TS Azienda
+  const [pickerDateTS, setPickerDateTS] = useState(undefined);
+  const [periodoTS, setPeriodoTS] = useState("mese");
+
+  // Filtri Produzione Articoli
+  const [pickerDateArt, setPickerDateArt] = useState(undefined);
+  const [periodoArt, setPeriodoArt] = useState("mese");
+
+  const [data, setData] = useState(undefined);
+  const [data2, setData2] = useState(undefined);
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+      );
+      const json = await response.json();
+      let data = json.data;
+      data = parseDates(data, ["Data ordine", "Data cons. rich."]);
+      data = orderSheet(data, ["Data ordine"], ["asc"]);
+
+      setData(data);
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        "/api/fetch-excel-json?id=CONFEZIONATRICE&sheet=Foglio1"
+      );
+      const json = await response.json();
+      let data = json.data;
+      data = parseDates(data, ["Data"]);
+      data = orderSheet(data, ["Data"], ["asc"]);
+
+      setData2(data);
+    }
+
+    fetchData();
+  }, []);
+
+  const isLoading = useMemo(() => {
+    return !data || !data2;
+  }, [data, data2]);
 
   return (
-    <Fragment>
-      <Seo title="Confezionatrice" />
-      <Pageheader
-        title="Confezionatrice"
-        currentpage="Confezionatrice"
-        activepage="Confezionatrice"
-        showActions={false}
-      />
+    <>
+      <Seo title="Macchina - Confezionatrice" />
 
-      {/* GRAFICO UNICO: PESO SCARICATO E RISERVATO PER BILANCIA */}
-      <Row className="g-4">
-        <Col xl={12} md={12}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Peso Scaricato e Quantità Riservata per Bilancia
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <ConfezionatriceChart
-                file={confezionatriceData.fileExcel}
-                colonne={{
-                  indice: "Indice",
-                  dataOra: "Data e Ora",
-                  valorePeso: "Peso Scaricato",
-                  valoreRiservato: "Riservato",
-                  bilancia: "Bilancia",
-                  descrizione: "Descrizione",
-                }}
-                tenant={tenant}
-                startDate={fmt(pickerDate?.[0]) || startDate}
-                endDate={fmt(pickerDate?.[1]) || endDate}
+      {isLoading ? (
+        <Preloader show={true} />
+      ) : (
+        <>
+          <Pageheader
+            title="Macchine"
+            currentpage="Confezionatrice"
+            activepage="Confezionatrice"
+            showActions={false}
+          />
+
+          {/* DASHBOARD MACCHINA */}
+          <Row className="g-4 mb-4">
+            <Col xxl={12}>
+              <MacchinaDashboard {...confezionatrice} />
+            </Col>
+          </Row>
+
+          {/* SEZIONE GRAFICI PRINCIPALI */}
+          <Row className="g-4">
+            {/* TS AZIENDA */}
+            <Col xl={6}>
+              <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+                <Card.Header className="d-flex justify-content-between align-items-center py-3">
+                  <Card.Title className="mb-0 fw-semibold">
+                    TS Azienda
+                  </Card.Title>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
+                </Card.Header>
+
+                <Card.Body className="pt-2">
+                  <CustomDateComponent
+                    onfunChange={(date) => setPickerDateTS(date)}
+                    value={pickerDateTS}
+                    period={periodoTS}
+                  />
+
+                  {/* CHART */}
+                  <div className="mt-3">
+                    <AppmerceChart
+                      data={data}
+                      startDate={fmt(pickerDateTS, periodoTS, 0)}
+                      endDate={fmt(pickerDateTS, periodoTS, 1)}
+                      dateCol="Data ordine"
+                      qtyCol="Qta/kg da ev."
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* PRODUZIONE PER ARTICOLO */}
+            <Col xl={6}>
+              <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+                <Card.Header className="d-flex justify-content-between align-items-center py-3">
+                  <Card.Title className="mb-0 fw-semibold">
+                    Produzione per Articolo
+                  </Card.Title>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoArt(period);
+                      setPickerDateArt(undefined);
+                    }}
+                  />
+                </Card.Header>
+
+                <Card.Body className="pt-2">
+                  <CustomDateComponent
+                    onfunChange={(date) => setPickerDateArt(date)}
+                    value={pickerDateArt}
+                    period={periodoArt}
+                  />
+                  <AppmerceChartByArticolo
+                    data={data2}
+                    startDate={fmt(pickerDateArt, periodoArt, 0)}
+                    endDate={fmt(pickerDateArt, periodoArt, 1)}
+                    dateCol="Data"
+                    groupCol="Descrizione"
+                    valueCol="Numero"
+                  />
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row className="mt-4">
+            <Col xl={6}>
+              <AppmerceTable
+                data={data}
+                title="Produzione"
+                fileExcel="ANALISI"
+                dateColumn="Data ordine"
+                tableHeaders={[
+                  { title: "Data ord.", column: "Data ordine" },
+                  { title: "Num. ord.", column: "Nr. ord." },
+                  { title: "Ser.", column: "Ser." },
+                  { title: "Cod. Cliente", column: "Cod. Cliente" },
+                  {
+                    title: "Rag. Soc.",
+                    column: "Ragione sociale",
+                    default: "Cliente generico",
+                    bold: true,
+                  },
+                  { title: "Cod. Art.", column: "Articolo" },
+                  { title: "Descr. Art", column: "Descrizione art. cliente" },
+                  { title: "Qta/kg OV", column: "Qta/kg OV" },
+                  { title: "Qta/kg evasa", column: "Qta/kg evasa" },
+                  { title: "Qta/kg da ev.", column: "Qta/kg da ev." },
+                  { title: "Data Cons. Rich.", column: "Data cons. rich." },
+                ]}
               />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Fragment>
+            </Col>
+            <Col xl={6}>
+              <AppmerceTable
+                data={data2}
+                title="Produzione per articolo"
+                fileExcel="CONFEZIONATRICE"
+                dateColumn="Data e Ora"
+                tableHeaders={[
+                  { title: "Indice", column: "Indice" },
+                  { title: "Data e ora", column: "Data e Ora", bold: true },
+                  {
+                    title: "Peso Scaricato",
+                    column: "Peso Scaricato",
+                  },
+                  { title: "Bilancia", column: "Bilancia" },
+                  {
+                    title: "Riservato",
+                    column: "Riservato",
+                  },
+                  { title: "Descrizione", column: "Descrizione" },
+                ]}
+              />
+            </Col>
+          </Row>
+        </>
+      )}
+    </>
   );
 }

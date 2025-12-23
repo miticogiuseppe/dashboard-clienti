@@ -1,232 +1,276 @@
 "use client";
-
-import MuliniChart from "@/components/Dibartolo/MuliniChart";
-import "@/lib/chart-setup";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import AppmerceChart from "@/components/AppmerceChart";
+import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
+import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
+import MacchinaDashboard from "@/components/MacchinaDashboard";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
-import dayjs from "dayjs";
-import { Fragment, useEffect, useState } from "react";
+import { fmt } from "@/utils/dateUtils";
+import { orderSheet, parseDates } from "@/utils/excelUtils";
+import Preloader from "@/utils/Preloader";
+import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
-import { Bar } from "react-chartjs-2";
-import * as XLSX from "xlsx";
 
-const muliniData = {
-  fileExcel: "/api/download-resource?id=Dibartolo_Condivisione",
+const mulini = {
+  nome: "Mulini",
+  fileStorico: "/api/download-resource?id=MULINI",
+  fileAppmerce: "/api/download-resource?id=ANALISI",
+  appmerce: {
+    ordini: 90,
+    produzione: 1450,
+    dataConsegna: "2025-12-15",
+  },
 };
 
-// Grafico colonne con dati reali per un set di ingredienti
-const MuliniBarChartGroup = ({ file, ingredienti, startDate, endDate }) => {
-  const [dataChart, setDataChart] = useState(null);
+// COMPONENTE PRINCIPALE
+export default function PaginaMulini() {
+  // Filtri TS Azienda
+  const [pickerDateTS, setPickerDateTS] = useState(undefined);
+  const [periodoTS, setPeriodoTS] = useState("mese");
+
+  // Filtri Produzione Articoli
+  const [pickerDateArt, setPickerDateArt] = useState(undefined);
+  const [periodoArt, setPeriodoArt] = useState("mese");
+
+  const [data, setData] = useState(undefined);
+  const [data2, setData2] = useState(undefined);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(file);
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
+    async function fetchData() {
+      const response = await fetch(
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+      );
+      const json = await response.json();
+      let data = json.data;
+      data = parseDates(data, ["Data ordine", "Data cons. rich."]);
+      data = orderSheet(data, ["Data ordine"], ["asc"]);
 
-        // Filtra per range date
-        const filtered = jsonData.filter((row) => {
-          const rowDate = dayjs(row["DATA"]);
-          return (
-            rowDate.isAfter(dayjs(startDate).subtract(1, "day")) &&
-            rowDate.isBefore(dayjs(endDate).add(1, "day"))
-          );
-        });
-
-        const labels = filtered.map((row) => row["DATA"]);
-        const datasets = [];
-
-        const colorsSetpoint = ["#1f77b4", "#ff7f0e", "#2ca02c"];
-        const colorsConsumo = ["#aec7e8", "#ffbb78", "#98df8a"];
-
-        ingredienti.forEach((ingrediente, i) => {
-          datasets.push({
-            label: `Setpoint ${ingrediente}`,
-            data: filtered.map(
-              (row) => row[`SETPOINT INGREDIENTE ${ingrediente} (KG)`] || 0
-            ),
-            backgroundColor: colorsSetpoint[i],
-          });
-          datasets.push({
-            label: `Consumo ${ingrediente}`,
-            data: filtered.map(
-              (row) => row[`CONSUMO REALE INGREDIENTE ${ingrediente} (KG)`] || 0
-            ),
-            backgroundColor: colorsConsumo[i],
-          });
-        });
-
-        setDataChart({ labels, datasets });
-      } catch (error) {
-        console.error("Errore lettura Excel:", error);
-      }
-    };
+      setData(data);
+    }
 
     fetchData();
-  }, [file, ingredienti, startDate, endDate]);
+  }, []);
 
-  if (!dataChart) return <p>Caricamento dati...</p>;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        "/api/fetch-excel-json?id=MULINI&sheet=Foglio1"
+      );
+      const json = await response.json();
+      let data = json.data;
+      data = parseDates(data, ["Data"]);
+      data = orderSheet(data, ["Data"], ["asc"]);
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { position: "bottom", maxHeight: 100 },
-      tooltip: {
-        callbacks: {
-          label: (context) =>
-            `${context.dataset.label}: ${context.parsed.y} kg`,
-        },
-      },
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: "KG" } },
-      x: { stacked: false, title: { display: true, text: "Data" } },
-    },
-  };
+      setData2(data);
+    }
 
-  return <Bar data={dataChart} options={options} />;
-};
+    fetchData();
+  }, []);
 
-export default function PaginaMulini() {
-  const [pickerDate, setPickerDate] = useState([null, null]);
-  const [periodo, setPeriodo] = useState("mese");
-  const { startDate, endDate } = calcolaRange(periodo);
+  const isLoading = useMemo(() => {
+    return !data || !data2;
+  }, [data, data2]);
 
   return (
-    <Fragment>
-      <Seo title="Mulini" />
-      <Pageheader
-        title="Macchine"
-        currentpage="Mulini"
-        activepage="Mulini"
-        showActions={false}
-      />
+    <>
+      <Seo title="Macchina - Mulini" />
 
-      {/* FILTRO DATE */}
-      <Row className="g-4 mb-4">
-        <Col xl={6}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="d-flex justify-content-between align-items-center py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Seleziona Date
-              </Card.Title>
-              <SpkDropdown
-                toggleas="a"
-                Customtoggleclass="btn btn-sm btn-light text-muted border"
-                Toggletext="Periodo"
-              >
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("settimana");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Questa settimana
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("mese");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Ultimo mese
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setPeriodo("anno");
-                    setPickerDate([null, null]);
-                  }}
-                >
-                  Anno corrente
-                </Dropdown.Item>
-              </SpkDropdown>
-            </Card.Header>
-            <Card.Body>
-              <SpkFlatpickr
-                options={{ mode: "range", dateFormat: "Y-m-d" }}
-                onfunChange={(date) => setPickerDate(date)}
-                value={pickerDate}
-              />
-              <p className="text-muted mt-2 mb-3 small">
-                ({fmt(pickerDate?.[0]) || startDate} →{" "}
-                {fmt(pickerDate?.[1]) || endDate})
-              </p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      {isLoading ? (
+        <Preloader show={true} />
+      ) : (
+        <>
+          <Pageheader
+            title="Macchine"
+            currentpage="Mulini"
+            activepage="Mulini"
+            showActions={false}
+          />
 
-      {/* DUE GRAFICI SEPARATI AFFIANCATI */}
-      <Row className="g-4">
-        <Col xl={6} md={12}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Ingredienti 1-3
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <MuliniBarChartGroup
-                file={muliniData.fileExcel}
-                ingredienti={[1, 2, 3]}
-                startDate={fmt(pickerDate?.[0]) || startDate}
-                endDate={fmt(pickerDate?.[1]) || endDate}
-              />
-            </Card.Body>
-          </Card>
-        </Col>
+          {/* DASHBOARD MACCHINA */}
+          <Row className="g-4 mb-4">
+            <Col xxl={12}>
+              <MacchinaDashboard {...mulini} />
+            </Col>
+          </Row>
 
-        <Col xl={6} md={12}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Ingredienti 4-6
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <MuliniBarChartGroup
-                file={muliniData.fileExcel}
-                ingredienti={[4, 5, 6]}
-                startDate={fmt(pickerDate?.[0]) || startDate}
-                endDate={fmt(pickerDate?.[1]) || endDate}
-              />
-            </Card.Body>
-          </Card>
-        </Col>
+          {/* SEZIONE GRAFICI PRINCIPALI */}
+          <Row className="g-4">
+            {/* TS AZIENDA */}
+            <Col xl={6}>
+              <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+                <Card.Header className="d-flex justify-content-between align-items-center py-3">
+                  <Card.Title className="mb-0 fw-semibold">
+                    TS Azienda
+                  </Card.Title>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
+                </Card.Header>
 
-        {/* GRAFICO TEMPI LAVORO / STOP */}
-        <Col xl={12}>
-          <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
-            <Card.Header className="py-3">
-              <Card.Title className="mb-0 fw-semibold">
-                Tempo Lavorato / Tempo Stop / Tempo Stop Allarme
-              </Card.Title>
-            </Card.Header>
-            <Card.Body>
-              <MuliniChart
-                file={muliniData.fileExcel}
-                colonne={{
-                  data: "DATA",
-                  orario: "ORARIO",
-                  tempoLavorato: "TEMPO LAVORATO  (MINUTI)",
-                  tempoStop: "TEMPO STOP (MINUTI)",
-                  tempoStopAllarme: "TEMPO STOP PER ALLARME (MINUTI)",
-                }}
-                startDate={fmt(pickerDate?.[0]) || startDate}
-                endDate={fmt(pickerDate?.[1]) || endDate}
+                <Card.Body className="pt-2">
+                  <CustomDateComponent
+                    onfunChange={(date) => setPickerDateTS(date)}
+                    value={pickerDateTS}
+                    period={periodoTS}
+                  />
+
+                  {/* CHART */}
+                  <div className="mt-3">
+                    <AppmerceChart
+                      data={data}
+                      startDate={fmt(pickerDateTS, periodoTS, 0)}
+                      endDate={fmt(pickerDateTS, periodoTS, 1)}
+                      dateCol="Data ordine"
+                      qtyCol="Qta/kg da ev."
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* PRODUZIONE PER ARTICOLO */}
+            <Col xl={6}>
+              <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
+                <Card.Header className="d-flex justify-content-between align-items-center py-3">
+                  <Card.Title className="mb-0 fw-semibold">
+                    Produzione per Articolo
+                  </Card.Title>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoArt(period);
+                      setPickerDateArt(undefined);
+                    }}
+                  />
+                </Card.Header>
+
+                <Card.Body className="pt-2">
+                  <CustomDateComponent
+                    onfunChange={(date) => setPickerDateArt(date)}
+                    value={pickerDateArt}
+                    period={periodoArt}
+                  />
+
+                  <AppmerceChartByArticolo
+                    data={data2}
+                    startDate={fmt(pickerDateArt, periodoArt, 0)}
+                    endDate={fmt(pickerDateArt, periodoArt, 1)}
+                    dateCol="Data"
+                    groupCol="Descrizione"
+                    valueCol="Numero"
+                  />
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row className="mt-4">
+            <Col xl={6}>
+              <AppmerceTable
+                data={data}
+                title="Produzione"
+                fileExcel="ANALISI"
+                dateColumn="Data ordine"
+                tableHeaders={[
+                  { title: "Data ord.", column: "Data ordine" },
+                  { title: "Num. ord.", column: "Nr. ord." },
+                  { title: "Ser.", column: "Ser." },
+                  { title: "Cod. Cliente", column: "Cod. Cliente" },
+                  {
+                    title: "Rag. Soc.",
+                    column: "Ragione sociale",
+                    default: "Cliente generico",
+                    bold: true,
+                  },
+                  { title: "Cod. Art.", column: "Articolo" },
+                  { title: "Descr. Art", column: "Descrizione art. cliente" },
+                  { title: "Qta/kg OV", column: "Qta/kg OV" },
+                  { title: "Qta/kg evasa", column: "Qta/kg evasa" },
+                  { title: "Qta/kg da ev.", column: "Qta/kg da ev." },
+                  { title: "Data Cons. Rich.", column: "Data cons. rich." },
+                ]}
               />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Fragment>
+            </Col>
+            <Col xl={6}>
+              <AppmerceTable
+                data={data2}
+                title="Produzione per articolo"
+                fileExcel="MULINI"
+                dateColumn="DATA"
+                tableHeaders={[
+                  { title: "Orario", column: "ORARIO" },
+                  { title: "Data", column: "DATA    ", bold: true },
+                  {
+                    title: "Codice Ricetta",
+                    column: "CODICE IDENTIFICATIVO RICETTA",
+                  },
+                  {
+                    title: "Setpoint 1 (KG)",
+                    column: "SETPOINT INGREDIENTE 1 (KG)",
+                  },
+                  {
+                    title: "Consumo Reale 1 (KG)",
+                    column: "CONSUMO REALE INGREDIENTE 1 (KG)",
+                  },
+                  {
+                    title: "Setpoint 2 (KG)",
+                    column: "SETPOINT INGREDIENTE 2  (KG)",
+                  },
+                  {
+                    title: "Consumo reale 2 (KG)",
+                    column: "CONSUMO REALE INGREDIENTE 2 (KG",
+                  },
+                  {
+                    title: "Setpoint 3 (KG)",
+                    column: "SETPOINT INGREDIENTE 3 (KG)",
+                  },
+                  {
+                    title: "Consumo Reale 3 (KG)",
+                    column: "CONSUMO REALE INGREDIENTE 3 (KG",
+                  },
+                  {
+                    title: "Setpoint 4 (KG)",
+                    column: "SETPOINT INGREDIENTE 4 (KG)",
+                  },
+                  {
+                    title: "Consumo Reale 4 (KG)",
+                    column: "CONSUMO REALE INGREDIENTE 4 (KG",
+                  },
+                  {
+                    title: "Setpoint 5 (KG)",
+                    column: "SETPOINT INGREDIENTE 5 (KG)",
+                  },
+                  {
+                    title: "Consumo Reale 5(KG)",
+                    column: "CONSUMO REALE INGREDIENTE 5 (KG",
+                  },
+                  {
+                    title: "Setpoint 6 (KG)",
+                    column: "SETPOINT INGREDIENTE 6 (KG)",
+                  },
+                  {
+                    title: "Consumo reale 6 (KG)",
+                    column: "CONSUMO REALE INGREDIENTE 6 (KG",
+                  },
+                  {
+                    title: "Tempo lavoro (min)",
+                    column: "TEMPO LAVORATO  (MINUTI)",
+                  },
+                  { title: "Tempo stop (min)", column: "TEMPO STOP (MINUTI)" },
+                  {
+                    title: "Tempo stop allarme (min)",
+                    column: "TEMPO STOP PER ALLARME (MINUTI)",
+                  },
+                ]}
+              />
+            </Col>
+          </Row>
+        </>
+      )}
+    </>
   );
 }
