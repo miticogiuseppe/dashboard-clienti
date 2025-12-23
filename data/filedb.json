@@ -63,5 +63,11 @@
       "id": "RIBUS",
       "path": "Dibartolo\\4.0\\storico\\dati_ribus.xlsx"
     }
+  ],
+  "Rica": [
+    {
+      "id": "ANALISI",
+      "path": "Rica\\4.0\\analisi.xlsx"
+    }
   ]
 }

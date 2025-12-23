@@ -2,7 +2,7 @@ import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { LuFactory } from "react-icons/lu";
 
-export const menuCopral = [
+export const menuRica = [
   { menutitle: "MENU" },
   {
     title: "Dashboard",
@@ -10,40 +10,8 @@ export const menuCopral = [
     type: "sub",
     children: [
       {
-        path: "/dashboard/copral/generalenew",
+        path: "/dashboard/rica/generale",
         title: "Generale",
-        type: "link",
-        ready: true,
-      },
-    ],
-  },
-  {
-    title: "Macchine",
-    icon: <LuFactory className="side-menu__icon" />,
-    type: "sub",
-    children: [
-      {
-        path: "/dashboard/copral/imballatrice",
-        title: "Imballatrice",
-        type: "link",
-        ready: true,
-      },
-      {
-        path: "/dashboard/copral/troncatrice",
-        title: "Troncatrice (Mecal)",
-        type: "link",
-        ready: true,
-      },
-
-      {
-        path: "/dashboard/copral/pulitrice",
-        title: "Pulitrice",
-        type: "link",
-        ready: true,
-      },
-      {
-        path: "/dashboard/copral/intestatrice",
-        title: "Intestatrice 90°",
         type: "link",
         ready: true,
       },
@@ -56,7 +24,7 @@ export const menuCopral = [
     children: [
       {
         title: "Calendario",
-        path: "/dashboard/copral/calendario",
+        path: "/dashboard/rica/calendario",
         type: "link",
         ready: true,
       },
