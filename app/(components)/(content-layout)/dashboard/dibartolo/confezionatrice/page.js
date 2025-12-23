@@ -126,8 +126,8 @@ export default function PaginaConfezionatrice() {
                   <div className="mt-3">
                     <AppmerceChart
                       data={data}
-                      startDate={fmt(computedDateTS[0])}
-                      endDate={fmt(computedDateTS[1])}
+                      startDate={fmt(pickerDateTS, periodoTS, 0)}
+                      endDate={fmt(pickerDateTS, periodoTS, 1)}
                       dateCol="Data ordine"
                       qtyCol="Qta/kg da ev."
                     />
@@ -159,8 +159,8 @@ export default function PaginaConfezionatrice() {
                   />
                   <AppmerceChartByArticolo
                     data={data2}
-                    startDate={fmt(computedDateArt[0])}
-                    endDate={fmt(computedDateArt[1])}
+                    startDate={fmt(pickerDateArt, periodoArt, 0)}
+                    endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
                     groupCol="Descrizione"
                     valueCol="Numero"
