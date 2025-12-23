@@ -164,12 +164,13 @@ const filterByWeek = (
 // Filtra righe in base a un range di date.
 // Specificare la colonna data e il range.
 const filterByRange = (sheet, column, start, end) => {
+  end.add(1, "days");
   return _.filter(sheet, (row) => {
     const cellDate = row[column];
     return (
       moment.isMoment(cellDate) &&
       cellDate.isSameOrAfter(start, "day") &&
-      cellDate.isSameOrBefore(end, "day")
+      cellDate.isBefore(end, "day")
     );
   });
 };
