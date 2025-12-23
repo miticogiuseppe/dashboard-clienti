@@ -9,6 +9,7 @@ import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/s
 import Seo from "@/shared/layouts-components/seo/seo";
 import { calcolaRange, fmt } from "@/utils/dateUtils";
 import dynamic from "next/dynamic";
+import { formatDateTime } from "@/utils/format";
 
 import {
   extractUniques,
@@ -183,7 +184,7 @@ const Generale = () => {
         <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
           <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
             <h6 className="fw-semibold">Ultimo Aggiornamento</h6>
-            <h2 className="text-primary">{lastUpdateDate}</h2>
+            <h2 className="text-primary">{formatDateTime(lastUpdateDate)}</h2>
           </Card>
         </Col>
 
