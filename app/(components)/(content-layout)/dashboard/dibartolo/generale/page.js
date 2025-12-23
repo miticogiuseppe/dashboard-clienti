@@ -1,257 +1,320 @@
 "use client";
-
-import AppmerceChart from "@/components/AppmerceChart";
+import AppmerceTable from "@/components/AppmerceTable";
+import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkBreadcrumb from "@/shared/@spk-reusable-components/reusable-uielements/spk-breadcrumb";
-import SpkButton from "@/shared/@spk-reusable-components/reusable-uielements/spk-button";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
+import { formatDate, formatTime } from "@/utils/format";
+import { createOptions } from "@/utils/graphUtils";
+import Preloader from "@/utils/Preloader";
+import _ from "lodash";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import { formatDateTime } from "@/utils/format";
-
-import {
-  extractUniques,
-  filterByRange,
-  filterByValue,
-  filterByWeek,
-  loadSheet,
-  orderSheet,
-  parseDates,
-  sumByKey,
-} from "@/utils/excelUtils";
-
-import moment from "moment";
-import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
-import { Card, Col, Dropdown, Row } from "react-bootstrap";
+import { Card, Col, Row } from "react-bootstrap";
+import { FaUsers } from "react-icons/fa6";
+import { IoIosCalendar } from "react-icons/io";
+import { PiPackage } from "react-icons/pi";
 
+// Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
   { ssr: false }
 );
 
-// COMPONENTE
-const Generale = () => {
+// Opzioni base per ilgrafico a barre
+const barChartOptions = createOptions({
+  chart: {
+    type: "bar",
+    height: 350,
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  title: {
+    text: "Quantità per Famiglia di Prodotto (Esclusi Imballaggi)",
+  },
+  xaxis: {
+    title: {
+      text: "Qta/kg da ev.",
+    },
+    labels: {
+      formatter: function (val) {
+        return val.toLocaleString("it-IT");
+      },
+    },
+  },
+});
+
+const Ecommerce = () => {
+  // Stati unificati e logica di filtro per data
+  const [isLoading, setIsLoading] = useState(true);
   const [sheetData, setSheetData] = useState(undefined);
-  const [graphSeries, setGraphSeries] = useState([]);
-  const [graphOptions, setGraphOptions] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [startDate, setStartDate] = useState(undefined);
-  const [pickerDate, setPickerDate] = useState(undefined);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  // STATI PER LE CARD
-  const [lastUpdateDate, setLastUpdateDate] = useState("N/D");
-  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
-  const [activeCustomersCount, setActiveCustomersCount] = useState(0);
+  // NUOVI stati per il Grafico a Barre
+  const [graphOptions, setGraphOptions] = useState(barChartOptions); // Opzioni per il grafico a barre
+  const [graphSeries, setGraphSeries] = useState([]); // Serie per il grafico a barre
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0); // Rinomino lo stato per Totale ordini
 
-  const [pickerDateTS, setPickerDateTS] = useState([null, null]);
-  const [periodoTS, setPeriodoTS] = useState("mese");
-  const { startDate: startDateTS, endDate: endDateTS } =
-    calcolaRange(periodoTS);
+  // Vecchi stati rimossi o rinominati:
+  // const [chartOptions, setChartOptions] = useState(undefined); // Rimosso
+  // const [chartSeries, setChartSeries] = useState(undefined); // Rimosso
+  // const [pieData, setPieData] = useState(undefined); // Rimosso
+  // const [top3, setTop3] = useState([]); // Rimosso
 
-  const handleDateChange = (date) => {
-    setPickerDate(date);
-    if (date?.[0] && date?.[1]) setStartDate({ ...date });
-  };
+  // Dati per la tabella e le card
+  const [recentOrders, setRecentOrders] = useState([]);
+  // const [totalUniqueOrders, setTotalUniqueOrders] = useState(0); // SOSTITUITO da pendingOrdersCount
+  const [totalUniqueCustomers, setTotalUniqueCustomers] = useState(0);
 
-  // Caricamento Excel e calcolo del totale storico dei Clienti Attivi
+  // data del file
+  const [fileDate, setFileDate] = useState(undefined);
+
+  const t = useTranslations("Graph");
+
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
+      // 1. Fetch del foglio Excel
       const response = await fetch(
         "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
       );
-      const json = await response.json();
+      let json = await response.json();
       let data = json.data;
-
+      data = parseDates(data, ["Data ordine", "Data cons. rich."]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
-      setLastUpdateDate(new Date(json.lwt));
-
-      let products = extractUniques(data, "Descrizione famiglia");
-      setProducts(products);
-
-      // ✅ CALCOLO CLIENTI ATTIVI STORICI:
-      // Viene eseguito solo qui, su tutti i dati 'data', per un conteggio univoco fisso
-      const totalActiveCustomers = extractUniques(data, "Ragione sociale");
-      setActiveCustomersCount(totalActiveCustomers.length);
-    })();
+      setFileDate(new Date(json.lwt));
+    };
+    fetchData();
   }, []);
 
-  // 🔄 LOGICA PER FILTRARE SOLO GLI ORDINI E IL GRAFICO (dipende da data)
   useEffect(() => {
     if (!sheetData) return;
+    let filteredData = sheetData;
 
-    let filteredData = parseDates(sheetData, ["Data ordine"]);
-    filteredData = orderSheet(filteredData, ["Data ordine"], ["asc"]);
+    // ----------------------- Filtra i dati in base all'intervallo di date
 
-    // 1. FILTRAGGIO PER DATA
-    if (startDate?.[0] && startDate?.[1]) {
-      // Se è selezionato un intervallo di date, filtra
-      filteredData = filterByRange(
-        filteredData,
-        "Data ordine",
-        moment(startDate[0]),
-        moment(startDate[1])
-      );
+    if (startDate && endDate) {
+      const start = startDate;
+      const end = endDate;
+
+      filteredData = sheetData.filter((item) => {
+        const d = item["Data ordine"];
+        return d.isSameOrAfter(start, "day") && d.isSameOrBefore(end, "day");
+      });
     }
 
-    // 2. CALCOLO DEGLI ORDINI (Numero di Ordini Unici nel periodo/storico)
-    const uniqueOrderNumbers = extractUniques(filteredData, "Nr. ord.");
-    setPendingOrdersCount(uniqueOrderNumbers.length); // Conteggio degli ordini unici
+    // ----------------------- Logica per Tabella (Ordini recenti)
 
-    // 3. CALCOLO SERIE PER GRAFICO ANALISI QUANTITÀ
-    const counters = sumByKey(filteredData, "Articolo", "Qta/kg da ev.");
-    const topCounters = counters.sort((a, b) => b.count - a.count).slice(0, 15);
+    const sortedData = filteredData.sort((a, b) =>
+      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1
+    );
+    const uniqData = _.uniqBy(sortedData, "Nr. ord.");
+    setRecentOrders(uniqData);
+
+    // ----------------------- Logica per Card (Statistiche principali)
+
+    // Totale ordini unici (Ora Pending Orders)
+    const uniqueOrderNumbers = extractUniques(filteredData, "Nr. ord.");
+    setPendingOrdersCount(uniqueOrderNumbers.length); // DENOMINATORE AGGIORNATO
+
+    // Totale clienti unici
+    const uniqueCustomersCount = extractUniques(
+      filteredData,
+      "Ragione sociale"
+    ).length;
+    setTotalUniqueCustomers(uniqueCustomersCount);
+
+    // ----------------------- Logica per Grafico a Barre (Analisi Quantità)
+    // Filtra i dati escludendo la famiglia "IMBALLAGGI"
+    const filteredDataExcludingImballaggi = filteredData.filter(
+      (item) => item["Descrizione famiglia"] !== "IMBALLAGGI"
+    );
+
+    // Somma la quantità per ogni "Descrizione famiglia"
+    const counters = sumByKey(
+      filteredDataExcludingImballaggi,
+      "Descrizione famiglia",
+      "Qta/kg da ev."
+    );
+
+    // Ordina i risultati e prepara le serie per ApexCharts
+    const topCounters = counters.sort((a, b) => b.count - a.count);
+
+    // Filtra per visualizzare i primi 30, ad esempio.
+    const top10Counters = topCounters.slice(0, 30);
 
     setGraphSeries([
       {
-        name: "Quantità",
-        data: topCounters.map((c) => ({ x: c.Articolo, y: Number(c.count) })),
+        name: t("Quantity"),
+        data: top10Counters.map((c) => ({
+          x: c["Descrizione famiglia"],
+          y: Number(c.count),
+        })),
       },
     ]);
 
+    // Aggiorna le opzioni per le categorie, per visualizzare solo le famiglie top
     setGraphOptions({
-      chart: { type: "bar" },
-      dataLabels: { enabled: true },
+      ...barChartOptions,
       xaxis: {
-        type: "category",
-        labels: {
-          rotate: -45, // Rotazione diagonale fissa
-          trim: false, //Disabilita il troncamento
-          style: {
-            fontSize: "10px", // Una dimensione di base
-          },
-        },
-      },
-      // Regolazione padding per evitare che il testo ruotato venga tagliato
-      grid: {
-        padding: {
-          bottom: 20, // Aumenta lo spazio inferiore se le etichette sono lunghe
-        },
+        ...barChartOptions.xaxis,
+        categories: top10Counters.map((c) => c["Descrizione famiglia"]),
       },
     });
-  }, [sheetData, startDate]);
+
+    // ----------------------- fine caricamento
+
+    setIsLoading(false);
+  }, [sheetData, startDate, endDate, t]); // Aggiunto 't' tra le dipendenze
+
+  // Cards unificate e dinamiche
+  const dynamicCards = [
+    {
+      id: 1,
+      title: "Ultimo aggiornamento",
+      count: formatDate(fileDate),
+      inc: formatTime(fileDate),
+      svgIcon: <IoIosCalendar />,
+      backgroundColor: "info svg-white",
+      color: "success",
+    },
+    {
+      id: 2,
+      title: "Totale ordini",
+      count: pendingOrdersCount.toLocaleString("it-IT"), // AGGIORNATO
+      svgIcon: <PiPackage />,
+      backgroundColor: "primary3 svg-white",
+      color: "success",
+    },
+    {
+      id: 3,
+      title: "Totale clienti",
+      count: totalUniqueCustomers.toLocaleString("it-IT"),
+      svgIcon: <FaUsers />,
+      backgroundColor: "primary svg-white",
+      color: "success",
+    },
+  ];
 
   return (
     <Fragment>
-      <Seo title="Dashboard Generale" />
+      {" "}
+      {/* Usato Fragment per coerenza con l'output richiesto */}
+      <Seo title="Dibartolo Generale" />
+      {isLoading ? (
+        <Preloader show={true} />
+      ) : (
+        <>
+          <Pageheader
+            title="Dashboards"
+            currentpage="Generale"
+            activepage="Generale"
+            showActions={false}
+          />
 
-      {/* HEADER */}
-      <div className="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
-        <div>
-          <SpkBreadcrumb Customclass="mb-1">
-            <li className="breadcrumb-item">
-              <Link href="#">Dashboard</Link>
-            </li>
-            <li className="breadcrumb-item active">Generale</li>
-          </SpkBreadcrumb>
-          <h1 className="page-title fw-medium fs-18 mb-0">Generale</h1>
-        </div>
-
-        {/* FILTRI */}
-        <div className="d-flex gap-2 align-items-center flex-wrap">
-          <div className="form-group m-0">
-            <div className="input-group">
-              <div className="input-group-text bg-white border">
-                <i className="ri-calendar-line" />
-              </div>
-              <SpkFlatpickr
-                inputClass="form-control"
-                options={{ mode: "range", dateFormat: "Y-m-d" }}
-                onfunChange={handleDateChange}
-                value={pickerDate}
-              />
-              <button
-                type="button"
-                className="btn btn-light ms-2"
-                onClick={() => {
-                  setStartDate(undefined);
-                  setPickerDate(undefined);
-                }}
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CARDS CENTRATE E DISTANZIATE */}
-      <Row className="g-4 justify-content-center">
-        {/* Card 1: Ultimo Aggiornamento */}
-        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
-          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
-            <h6 className="fw-semibold">Ultimo Aggiornamento</h6>
-            <h2 className="text-primary">{formatDateTime(lastUpdateDate)}</h2>
-          </Card>
-        </Col>
-
-        {/* Card 2: Clienti Attivi (Mostra il totale storico univoco) */}
-        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
-          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
-            <h6 className="fw-semibold">Clienti</h6>
-            <h2 className="text-info">{activeCustomersCount}</h2>
-          </Card>
-        </Col>
-
-        {/* Card 3: Ordini (Numero di ordini unici filtrati per data) */}
-        <Col xxl={4} xl={4} lg={4} md={6} sm={10} className="d-flex">
-          <Card className="p-3 shadow-sm h-100 rounded-3 w-100 text-center">
-            <h6 className="fw-semibold">Ordini</h6>
-            <h2 className="text-success">{pendingOrdersCount}</h2>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* GRAFICI AFFIANCATI */}
-      <Row className="g-4 mt-4">
-        {/* TS AZIENDA */}
-        <Col xl={8}>
-          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <Card.Title>TS Azienda</Card.Title>
-            </Card.Header>
-
-            <Card.Body>
-              <AppmerceChart
-                title="TS Azienda"
-                startDate={fmt(pickerDateTS?.[0]) || startDateTS}
-                endDate={fmt(pickerDateTS?.[1]) || endDateTS}
-                dateCol="Data ordine"
-                qtyCol="Qta/kg da ev."
-              />
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* NUOVO GRAFICO LATERALE (Analisi Quantità) */}
-        <Col xl={4}>
-          <Card className="custom-card h-100 shadow-sm rounded-3 p-3">
-            <Card.Header>
-              <Card.Title>Analisi Quantità</Card.Title>
-            </Card.Header>
-
-            <Card.Body>
-              {graphSeries.length > 0 ? (
-                <Spkapexcharts
-                  chartOptions={graphOptions}
-                  chartSeries={graphSeries}
-                  type="bar"
-                  height={350}
+          <Row>
+            {/* Card statistiche */}
+            {dynamicCards.map((idx) => (
+              <Col xxl={4} xl={4} lg={6} key={idx.id}>
+                {" "}
+                {/* Modificata la dimensione per 3 card */}
+                <Spkcardscomponent
+                  cardClass="overflow-hidden main-content-card"
+                  headingClass="d-block mb-1"
+                  mainClass="d-flex align-items-start justify-content-between mb-2"
+                  svgIcon={idx.svgIcon}
+                  card={idx}
+                  badgeClass="md"
+                  dataClass="mb-0"
                 />
-              ) : (
-                <p className="text-muted text-center">
-                  Nessun dato disponibile
-                </p>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+              </Col>
+            ))}
+          </Row>
+
+          <Row className="stretch-row">
+            {/* Tabella Ordini */}
+            <Col xxl={8} xl={12} className="stretch-column">
+              <AppmerceTable
+                className="custom-card sibling-card"
+                data={recentOrders}
+                title="Ordini"
+                dateColumn="Data ordine"
+                enableSearch={true}
+                tableHeaders={[
+                  { title: "Data ord.", column: "Data ordine" },
+                  { title: "Num. ord.", column: "Nr. ord.", type: "number" },
+                  { title: "Ser.", column: "Ser.", type: "number" },
+                  { title: "Cod. Cliente", column: "Cod. Cliente" },
+                  {
+                    title: "Rag. Soc.",
+                    column: "Ragione sociale",
+                    default: "Cliente generico",
+                    bold: true,
+                  },
+                  { title: "Cod. Art.", column: "Articolo" },
+                  { title: "Descr. Art", column: "Descrizione art. cliente" },
+                  { title: "Qta/kg OV", column: "Qta/kg OV", type: "number" },
+                  {
+                    title: "Qta/kg evasa",
+                    column: "Qta/kg evasa",
+                    type: "number",
+                    allowZero: true,
+                  },
+                  {
+                    title: "Qta/kg da ev.",
+                    column: "Qta/kg da ev.",
+                    type: "number",
+                    allowZero: true,
+                  },
+                  { title: "Data Cons. Rich.", column: "Data cons. rich." },
+                ]}
+              />
+            </Col>
+
+            {/* Analisi Quantità (NUOVO Grafico a Barre) */}
+            <Col xxl={4} xl={12} className="stretch-column">
+              {/* Uso `stretch-card` per espandere l'altezza */}
+              <Card className="custom-card fixed-height-card">
+                <Card.Header>
+                  <Card.Title>Analisi Quantità</Card.Title>
+                </Card.Header>
+
+                {/* Aggiungiamo `d-flex flex-column` e `flex-grow-1` per far sì che il body riempia lo spazio */}
+                <Card.Body className="d-flex flex-column h-100 flex-grow-1 p-3 w-100">
+                  {/* Il div interno prende l'altezza completa */}
+                  <div className="h-100 w-100 flex-grow-1">
+                    {graphSeries.length > 0 &&
+                    graphSeries[0].data.length > 0 ? (
+                      <Spkapexcharts
+                        chartOptions={graphOptions}
+                        chartSeries={graphSeries}
+                        type="bar"
+                        // Altezza impostata a '100%' per riempire il div contenitore
+                        height={"100%"}
+                      />
+                    ) : (
+                      <p className="text-muted text-center">
+                        Nessun dato disponibile
+                      </p>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
     </Fragment>
   );
 };
 
-export default Generale;
+export default Ecommerce;

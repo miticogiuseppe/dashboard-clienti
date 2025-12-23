@@ -17,12 +17,15 @@ function AppmerceTable({
   tableHeaders,
   filterDate,
   className,
+  enableSearch,
 }) {
   const t = useTranslations("Graph");
 
   const ITEMS_PER_PAGE = 50;
   const [visibleItemsCount, setVisibleItemsCount] = useState(ITEMS_PER_PAGE);
   const [prevData, setPrevData] = useState(undefined);
+
+  const [searchText, setSearchText] = useState("");
 
   // Ordino gli ultimi 7 ordini per data
   const filteredData = useMemo(() => {
@@ -41,8 +44,31 @@ function AppmerceTable({
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
           x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
       );
+
+    //per riquadro filtro
+    if (searchText) {
+      const lowerSearchText = searchText.toLowerCase().trim();
+      sorted = sorted.filter((row) =>
+        // Cerchiamo la corrispondenza del testo in TUTTE le colonne definite in tableHeaders
+        tableHeaders.some((header) => {
+          const value = row[header.column];
+          if (value === null || value === undefined) return false;
+
+          let cellValue = String(value);
+
+          // Gestione specifica per gli oggetti Moment (Date)
+          if (moment.isMoment(value)) {
+            cellValue = value.format("DD/MM/YYYY");
+          } else {
+            cellValue = String(value);
+          }
+
+          return cellValue.toLowerCase().includes(lowerSearchText);
+        })
+      );
+    }
     return sorted;
-  }, [data, dateColumn, filterDate]);
+  }, [data, dateColumn, filterDate, searchText, tableHeaders]);
 
   if (filteredData !== prevData) {
     setVisibleItemsCount(ITEMS_PER_PAGE);
@@ -78,6 +104,19 @@ function AppmerceTable({
       </Card.Header>
 
       <Card.Body className="p-2">
+        {/* Input ricerca fuori dal container scrollable */}
+        {enableSearch && (
+          <div style={{ marginBottom: "10px" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Cerca Ordini..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+        )}
+
         {filteredData.length > 0 ? (
           <div className="scroller-container">
             <SpkTablescomponent

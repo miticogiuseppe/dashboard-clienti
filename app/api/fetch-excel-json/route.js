@@ -54,12 +54,13 @@ export async function GET(req) {
     let jsonSheet = undefined;
     let fileDate = undefined;
 
+    // Always get the Excel file's modification date
+    const fileInfo = await getFileInfo(filePath);
+    fileDate = fileInfo.mtime;
+
     if (fs.existsSync(jsonFile)) {
       let data = fs.readFileSync(jsonFile, "utf-8");
       jsonSheet = JSON.parse(data);
-
-      const fileInfo = await getFileInfo(jsonFile);
-      fileDate = fileInfo.mtime;
     } else {
       console.log(`JSON not found: ${jsonFile}. Reading XLS.`);
 
@@ -74,9 +75,6 @@ export async function GET(req) {
 
       const sheet = workbook.Sheets[sheetName];
       jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-      const fileInfo = await getFileInfo(filePath);
-      fileDate = fileInfo.mtime;
     }
 
     const jsonData = {
