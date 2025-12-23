@@ -2,17 +2,16 @@
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceChartByArticolo from "@/components/AppmerceChartByArticolo";
 import AppmerceTable from "@/components/AppmerceTable";
+import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
-import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { calcolaRange, fmt } from "@/utils/dateUtils";
+import { fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
 
 const confezionatrice = {
   nome: "Confezionatrice",
@@ -74,20 +73,6 @@ export default function PaginaConfezionatrice() {
     return !data || !data2;
   }, [data, data2]);
 
-  console.log("data2:", data2);
-
-  // Stato per TS Azienda
-  const computedDateTS = useMemo(() => {
-    if (pickerDateTS) return pickerDateTS;
-    return calcolaRange(periodoTS);
-  }, [pickerDateTS, periodoTS]);
-
-  // Stato per Produzione per Articolo
-  const computedDateArt = useMemo(() => {
-    if (pickerDateArt) return pickerDateArt;
-    return calcolaRange(periodoArt);
-  }, [pickerDateArt, periodoArt]);
-
   return (
     <>
       <Seo title="Macchina - Confezionatrice" />
@@ -122,43 +107,19 @@ export default function PaginaConfezionatrice() {
                   <Card.Title className="mb-0 fw-semibold">
                     TS Azienda
                   </Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted border"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("settimana");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("mese");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoTS("anno");
-                        setPickerDateTS(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoTS(period);
+                      setPickerDateTS(undefined);
+                    }}
+                  />
                 </Card.Header>
 
                 <Card.Body className="pt-2">
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateTS(date)}
-                    value={computedDateTS}
+                    value={pickerDateTS}
+                    period={periodoTS}
                   />
 
                   {/* CHART */}
@@ -182,45 +143,20 @@ export default function PaginaConfezionatrice() {
                   <Card.Title className="mb-0 fw-semibold">
                     Produzione per Articolo
                   </Card.Title>
-                  <SpkDropdown
-                    toggleas="a"
-                    Customtoggleclass="btn btn-sm btn-light text-muted border"
-                    Toggletext="Periodo"
-                  >
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("settimana");
-                        setPickerDateArt([undefined]);
-                      }}
-                    >
-                      Questa settimana
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("mese");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Ultimo mese
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        setPeriodoArt("anno");
-                        setPickerDateArt(undefined);
-                      }}
-                    >
-                      Anno corrente
-                    </Dropdown.Item>
-                  </SpkDropdown>
+                  <PeriodDropdown
+                    onChange={(period) => {
+                      setPeriodoArt(period);
+                      setPickerDateArt(undefined);
+                    }}
+                  />
                 </Card.Header>
 
                 <Card.Body className="pt-2">
-                  <SpkFlatpickr
-                    options={{ mode: "range", dateFormat: "d/m/Y" }}
+                  <CustomDateComponent
                     onfunChange={(date) => setPickerDateArt(date)}
-                    value={computedDateArt}
+                    value={pickerDateArt}
+                    period={periodoArt}
                   />
-
                   <AppmerceChartByArticolo
                     data={data2}
                     startDate={fmt(computedDateArt[0])}
