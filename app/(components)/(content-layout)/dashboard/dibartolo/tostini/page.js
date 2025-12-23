@@ -91,7 +91,7 @@ export default function PaginaTostini() {
           {/* DASHBOARD MACCHINA */}
           <Row className="g-4 mb-4">
             <Col xxl={12}>
-              <MacchinaDashboard {...tostini} tenant={tostini.tenant} />
+              <MacchinaDashboard {...tostini} />
             </Col>
           </Row>
 

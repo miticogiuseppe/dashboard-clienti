@@ -1,32 +1,24 @@
 import dayjs from "dayjs";
 
+// Utility per calcolare range date da periodo
 const calcolaRange = (periodo) => {
   const oggi = dayjs();
-
-  const opzioni = {
+  const inizio = {
     settimana: oggi.subtract(7, "day"),
     mese: oggi.subtract(1, "month"),
     anno: oggi.startOf("year"),
-  };
-
-  const inizio = opzioni[periodo] || opzioni["mese"];
+  }[periodo];
 
   return [inizio.toDate(), oggi.toDate()];
 };
 
+// Utility per formattare sempre le date
 const fmt = (value, period, idx) => {
-  if (Array.isArray(value) && value[idx]) {
-    return value[idx];
-  }
-
-  const range = calcolaRange(period);
-  return range[idx];
+  if (!value) value = calcolaRange(period);
+  return value[idx];
 };
-
 const computeDate = (value, period) => {
-  if (!value || (Array.isArray(value) && !value[0])) {
-    return calcolaRange(period);
-  }
+  if (!value) value = calcolaRange(period);
   return value;
 };
 

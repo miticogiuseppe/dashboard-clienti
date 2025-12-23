@@ -91,7 +91,7 @@ export default function PaginaMulini() {
           {/* DASHBOARD MACCHINA */}
           <Row className="g-4 mb-4">
             <Col xxl={12}>
-              <MacchinaDashboard {...mulini} tenant={mulini.tenant} />
+              <MacchinaDashboard {...mulini} />
             </Col>
           </Row>
 

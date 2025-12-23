@@ -91,7 +91,7 @@ export default function PaginaRibus() {
           {/* DASHBOARD MACCHINA */}
           <Row className="g-4 mb-4">
             <Col xxl={12}>
-              <MacchinaDashboard {...ribus} tenant={ribus.tenant} />
+              <MacchinaDashboard {...ribus} />
             </Col>
           </Row>
 
