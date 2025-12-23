@@ -62,11 +62,11 @@ const Ecommerce = () => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
       const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
+        "/api/fetch-excel-json?id=ANALISI&sheet=_0000"
       );
       let json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
+      data = parseDates(data, ["Data ordine"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
       setFileDate(new Date(json.lwt));
     };
@@ -84,7 +84,7 @@ const Ecommerce = () => {
       const end = endDate;
 
       filteredData = sheetData.filter((item) => {
-        const d = item["Data ord"];
+        const d = item["Data ordine"];
         return d.isSameOrAfter(start, "day") && d.isSameOrBefore(end, "day");
       });
     }
@@ -108,15 +108,15 @@ const Ecommerce = () => {
     // ----------------------- Logica per Tabella (Ordini recenti)
 
     const sortedData = filteredData.sort((a, b) =>
-      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1
     );
-    const uniqData = _.uniqBy(sortedData, "Nr.ord");
+    const uniqData = _.uniqBy(sortedData, "Nr. ord.");
     setRecentOrders(uniqData);
 
     // ----------------------- Logica per Card (Statistiche principali)
 
     // Totale ordini unici
-    let orderNumbers = extractUniques(filteredData, "Nr.ord");
+    let orderNumbers = extractUniques(filteredData, "Nr. ord.");
     setTotalUniqueOrders(orderNumbers.length); // DENOMINATORE
 
     // Totale clienti unici
@@ -286,15 +286,15 @@ const Ecommerce = () => {
                 className="custom-card sibling-card"
                 data={recentOrders}
                 title="Ordini"
-                dateColumn="Data ord"
+                dateColumn="Data ordine"
                 tableHeaders={[
                   {
                     title: "Numero ordine",
-                    column: "Nr.ord",
+                    column: "Nr. ord.",
                   },
                   {
                     title: "Sezionale",
-                    column: "Sez",
+                    column: "Ser.",
                   },
                   {
                     title: "Ragione sociale",
@@ -308,7 +308,7 @@ const Ecommerce = () => {
                   },
                   {
                     title: "Data ordine",
-                    column: "Data ord",
+                    column: "Data ordine",
                   },
                 ]}
               />
