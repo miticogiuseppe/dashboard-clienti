@@ -75,8 +75,6 @@ export default function PaginaTostini() {
     return !data || !data2;
   }, [data, data2]);
 
-  console.log("data2:", data2);
-
   // Stato per TS Azienda
   const computedDateTS = useMemo(() => {
     if (pickerDateTS) return pickerDateTS;

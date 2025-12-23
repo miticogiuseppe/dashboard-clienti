@@ -71,8 +71,6 @@ export default function PaginaRibus() {
     fetchData();
   }, []);
 
-  console.log("data2:", data2);
-
   const isLoading = useMemo(() => {
     return !data || !data2;
   }, [data, data2]);

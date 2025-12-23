@@ -66,7 +66,7 @@ const Generale = () => {
       let data = json.data;
 
       setSheetData(data);
-      setLastUpdateDate(moment().format("DD/MM/YYYY HH:mm"));
+      setLastUpdateDate(new Date(json.lwt));
 
       let products = extractUniques(data, "Descrizione famiglia");
       setProducts(products);
