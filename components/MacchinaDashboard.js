@@ -37,26 +37,23 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
     count: "Download file macchina",
     inc: (
       <>
-        <div className="d-flex flex-wrap gap-2">
-          <button
-            onClick={() => downloadFile(fileStorico)}
-            className="btn btn-primary btn-sm px-3"
-          >
-            <FaDownload /> Scarica STORICO
-          </button>
+        <button
+          onClick={() => downloadFile(fileStorico)}
+          className="btn btn-primary btn-sm px-3"
+        >
+          <FaDownload /> Scarica STORICO
+        </button>
 
-          <button
-            onClick={() => downloadFile(fileAppmerce)}
-            className="btn btn-secondary btn-sm px-3"
-          >
-            <FaDownload /> Scarica APPMERCE
-          </button>
-        </div>
+        <button
+          onClick={() => downloadFile(fileAppmerce)}
+          className="btn btn-secondary btn-sm px-3"
+        >
+          <FaDownload /> Scarica APPMERCE
+        </button>
       </>
     ),
     svgIcon: <FaRectangleList />,
     backgroundColor: "primary2 svg-white",
-    color: "success",
   };
 
   return (
@@ -70,6 +67,7 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
           card={cardData}
           badgeClass="md"
           dataClass="mb-0"
+          useFlex={true}
         />
       </Col>
     </Row>
