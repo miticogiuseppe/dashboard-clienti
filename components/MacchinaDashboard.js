@@ -34,7 +34,7 @@ const MacchinaDashboard = ({ fileStorico, fileAppmerce }) => {
   const cardData = {
     id: 1,
     title: "Storico",
-    count: "Download file macchina",
+    count: "Download file",
     inc: (
       <>
         <button

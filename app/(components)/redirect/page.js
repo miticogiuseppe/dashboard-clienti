@@ -11,6 +11,8 @@ export default async function Page() {
         redirect("/dashboard/copral/generalenew");
       case "Dibartolo":
         redirect("/dashboard/dibartolo/generale");
+      case "Rica":
+        redirect("/dashboard/rica/generale");
     }
 
   redirect("/");
