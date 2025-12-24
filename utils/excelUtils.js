@@ -224,7 +224,7 @@ const sumByKey = (
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
   const grouped = _.groupBy(jsonSheet, (x) =>
-    groupCb ? groupCb(x[groupKey]) : x[groupKey]
+    groupCb ? groupCb(x[groupKey]) ?? "" : x[groupKey] ?? ""
   );
 
   return _.map(grouped, (items, key) => {
