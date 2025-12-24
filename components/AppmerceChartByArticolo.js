@@ -20,6 +20,9 @@ export default function AppmerceChartByArticolo({
   groupCol,
   valueCol,
   dateCol,
+  groupCb,
+  noSort,
+  seriesName,
 }) {
   const t = useTranslations("Graph");
 
@@ -37,15 +40,22 @@ export default function AppmerceChartByArticolo({
     }
 
     // Somma quantità per Articolo
-    let counters = sumByKey(filteredData, groupCol, valueCol);
+    let counters = sumByKey(
+      filteredData,
+      groupCol,
+      valueCol,
+      false,
+      undefined,
+      groupCb
+    );
     let total = counters.reduce((acc, item) => acc + item.count, 0);
-    counters = counters.sort((a, b) => b.count - a.count);
+    if (!noSort) counters = counters.sort((a, b) => b.count - a.count);
     counters = counters.filter((c) => c.count > 0);
 
     // Trasforma per ApexCharts
     const seriesData = [
       {
-        name: "Quantità",
+        name: seriesName,
         data: counters.map((c) => ({
           x: c[groupCol],
           y: Number(c.count),
@@ -74,7 +84,17 @@ export default function AppmerceChartByArticolo({
       graphOptions: chartOptions,
       isEmpty: total === 0,
     };
-  }, [data, startDate, endDate, dateCol, groupCol, valueCol]);
+  }, [
+    data,
+    startDate,
+    endDate,
+    dateCol,
+    groupCol,
+    valueCol,
+    groupCb,
+    noSort,
+    seriesName,
+  ]);
 
   return (
     <>

@@ -160,6 +160,7 @@ export default function PaginaTostini() {
                     dateCol="Data"
                     groupCol="Macchina_"
                     valueCol="Quantità Caricata Kg"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>

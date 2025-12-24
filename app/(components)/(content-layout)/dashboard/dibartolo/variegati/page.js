@@ -12,6 +12,7 @@ import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import AppmerceIngredientsComparison from "@/components/AppmerceIngredientsComparison";
 
 const variegati = {
   nome: "Variegati",
@@ -25,7 +26,7 @@ const variegati = {
 };
 
 // COMPONENTE PRINCIPALE
-export default function PaginaTostini() {
+export default function PaginaVariegati() {
   // Filtri TS Azienda
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
@@ -138,7 +139,7 @@ export default function PaginaTostini() {
               <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
                 <Card.Header className="d-flex justify-content-between align-items-center py-3">
                   <Card.Title className="mb-0 fw-semibold">
-                    Produzione per Articolo
+                    Tempo lavorazione
                   </Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
@@ -161,7 +162,10 @@ export default function PaginaTostini() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="DATA"
                     groupCol="DATA"
+                    groupCb={(val) => val.format("DD/MM/YYYY")}
+                    noSort={true}
                     valueCol="TEMPO LAVORATO  (MINUTI)"
+                    seriesName="Tempo lavorato"
                   />
                 </Card.Body>
               </Card>

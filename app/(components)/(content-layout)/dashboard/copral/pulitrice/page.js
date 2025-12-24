@@ -139,6 +139,7 @@ export default function PaginaPulitrice() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
                     groupCol="descrizione"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>

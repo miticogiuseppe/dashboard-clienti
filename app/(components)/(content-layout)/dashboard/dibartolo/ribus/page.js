@@ -162,6 +162,7 @@ export default function PaginaRibus() {
                     dateCol="insert_datetime"
                     groupCol="id"
                     valueCol="worked_box"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>

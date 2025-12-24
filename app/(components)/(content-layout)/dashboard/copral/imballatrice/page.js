@@ -141,6 +141,7 @@ export default function PaginaImballatrice() {
                     dateCol="Data"
                     groupCol="Descrizione"
                     valueCol="Numero"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>

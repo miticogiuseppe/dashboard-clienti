@@ -138,7 +138,7 @@ export default function PaginaMulini() {
               <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
                 <Card.Header className="d-flex justify-content-between align-items-center py-3">
                   <Card.Title className="mb-0 fw-semibold">
-                    Produzione per Articolo
+                    Tempo lavorazione
                   </Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
@@ -161,7 +161,10 @@ export default function PaginaMulini() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="DATA"
                     groupCol="DATA"
+                    groupCb={(val) => val.format("DD/MM/YYYY")}
+                    noSort={true}
                     valueCol="TEMPO LAVORATO  (MINUTI)"
+                    seriesName="Tempo lavorato"
                   />
                 </Card.Body>
               </Card>

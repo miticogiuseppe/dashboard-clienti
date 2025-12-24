@@ -207,7 +207,8 @@ const sumByKey = (
   groupKey,
   valueKey,
   fixEmpty = false,
-  convertCb = undefined
+  convertCb = undefined,
+  groupCb = undefined
 ) => {
   const getValue = (item) => {
     let value = item ? (convertCb ? convertCb(item) : Number(item)) : 0;
@@ -222,7 +223,9 @@ const sumByKey = (
   }
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
-  const grouped = _.groupBy(jsonSheet, groupKey);
+  const grouped = _.groupBy(jsonSheet, (x) =>
+    groupCb ? groupCb(x[groupKey]) : x[groupKey]
+  );
 
   return _.map(grouped, (items, key) => {
     let computedKey = key;

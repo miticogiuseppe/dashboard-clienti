@@ -161,6 +161,7 @@ export default function PaginaConfezionatrice() {
                     dateCol="Data e Ora"
                     groupCol="Descrizione"
                     valueCol="Peso Scaricato"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>
