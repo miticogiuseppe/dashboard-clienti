@@ -72,6 +72,22 @@ export default function AppmerceChartByArticolo({
       "bar"
     );
 
+    // fix label lunghe
+    chartOptions.xaxis = {
+      ...chartOptions.xaxis,
+      labels: {
+        ...chartOptions.xaxis?.labels,
+        show: true,
+        rotate: -45,
+        rotateAlways: true,
+        minHeight: 100,
+        hideOverlappingLabels: false,
+        style: {
+          fontSize: "11px",
+        },
+      },
+    };
+
     // Colore verdino più evidente
     chartOptions.colors = ["#4CAF50"];
     chartOptions.fill = {
