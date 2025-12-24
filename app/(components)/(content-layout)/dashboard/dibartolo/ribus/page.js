@@ -7,7 +7,7 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
@@ -60,8 +60,8 @@ export default function PaginaRibus() {
       );
       const json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["planned_date"]);
-      data = orderSheet(data, ["planned_date"], ["asc"]);
+      data = parseDates(data, ["insert_datetime"]);
+      data = orderSheet(data, ["insert_datetime"], ["asc"]);
 
       setData2(data);
     }
@@ -159,9 +159,10 @@ export default function PaginaRibus() {
                     data={data2}
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
-                    dateCol="Data"
-                    groupCol="Descrizione"
-                    valueCol="Numero"
+                    dateCol="insert_datetime"
+                    groupCol="id"
+                    valueCol="worked_box"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>
@@ -217,7 +218,8 @@ export default function PaginaRibus() {
                     column: "id",
                     type: "number",
                   },
-                  { title: "Data", column: "planned_date", bold: true },
+                  { title: "Data", column: "insert_datetime", bold: true },
+                  { title: "Data pianificata", column: "planned_date" },
                   {
                     title: "Work ID",
                     column: "work_id",

@@ -7,7 +7,7 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
@@ -60,8 +60,8 @@ export default function PaginaConfezionatrice() {
       );
       const json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["Data"]);
-      data = orderSheet(data, ["Data"], ["asc"]);
+      data = parseDates(data, ["Data e Ora"]);
+      data = orderSheet(data, ["Data e Ora"], ["asc"]);
 
       setData2(data);
     }
@@ -158,9 +158,10 @@ export default function PaginaConfezionatrice() {
                     data={data2}
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
-                    dateCol="Data"
+                    dateCol="Data e Ora"
                     groupCol="Descrizione"
-                    valueCol="Numero"
+                    valueCol="Peso Scaricato"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>
@@ -174,6 +175,7 @@ export default function PaginaConfezionatrice() {
                 title="Produzione"
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord." },
@@ -200,6 +202,7 @@ export default function PaginaConfezionatrice() {
                 title="Produzione per articolo"
                 fileExcel="CONFEZIONATRICE"
                 dateColumn="Data e Ora"
+                filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
                   { title: "Indice", column: "Indice" },
                   { title: "Data e ora", column: "Data e Ora", bold: true },

@@ -164,12 +164,13 @@ const filterByWeek = (
 // Filtra righe in base a un range di date.
 // Specificare la colonna data e il range.
 const filterByRange = (sheet, column, start, end) => {
+  end.add(1, "days");
   return _.filter(sheet, (row) => {
     const cellDate = row[column];
     return (
       moment.isMoment(cellDate) &&
       cellDate.isSameOrAfter(start, "day") &&
-      cellDate.isSameOrBefore(end, "day")
+      cellDate.isBefore(end, "day")
     );
   });
 };
@@ -206,7 +207,8 @@ const sumByKey = (
   groupKey,
   valueKey,
   fixEmpty = false,
-  convertCb = undefined
+  convertCb = undefined,
+  groupCb = undefined
 ) => {
   const getValue = (item) => {
     let value = item ? (convertCb ? convertCb(item) : Number(item)) : 0;
@@ -221,7 +223,9 @@ const sumByKey = (
   }
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
-  const grouped = _.groupBy(jsonSheet, groupKey);
+  const grouped = _.groupBy(jsonSheet, (x) =>
+    groupCb ? groupCb(x[groupKey]) : x[groupKey]
+  );
 
   return _.map(grouped, (items, key) => {
     let computedKey = key;

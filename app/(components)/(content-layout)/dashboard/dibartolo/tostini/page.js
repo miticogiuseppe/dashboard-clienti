@@ -7,7 +7,7 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
@@ -15,7 +15,7 @@ import { Card, Col, Row } from "react-bootstrap";
 
 const tostini = {
   nome: "Tostini",
-  fileStorico: "/api/download-resource?id=DATI_TOSTINI",
+  fileStorico: "/api/download-resource?id=TOSTINI",
   fileAppmerce: "/api/download-resource?id=ANALISI",
   appmerce: {
     ordini: 90,
@@ -120,15 +120,13 @@ export default function PaginaTostini() {
                   />
 
                   {/* CHART */}
-                  <div className="mt-3">
-                    <AppmerceChart
-                      data={data}
-                      startDate={fmt(pickerDateTS, periodoTS, 0)}
-                      endDate={fmt(pickerDateTS, periodoTS, 1)}
-                      dateCol="Data ordine"
-                      qtyCol="Qta/kg da ev."
-                    />
-                  </div>
+                  <AppmerceChart
+                    data={data}
+                    startDate={fmt(pickerDateTS, periodoTS, 0)}
+                    endDate={fmt(pickerDateTS, periodoTS, 1)}
+                    dateCol="Data ordine"
+                    qtyCol="Qta/kg da ev."
+                  />
                 </Card.Body>
               </Card>
             </Col>
@@ -160,8 +158,9 @@ export default function PaginaTostini() {
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
-                    groupCol="Descrizione"
-                    valueCol="Numero"
+                    groupCol="Macchina_"
+                    valueCol="Quantità Caricata Kg"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>
@@ -175,6 +174,7 @@ export default function PaginaTostini() {
                 title="Produzione"
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord.", type: "number" },
@@ -211,6 +211,7 @@ export default function PaginaTostini() {
                 title="Produzione per articolo"
                 fileExcel="TOSTINI"
                 dateColumn="Data"
+                filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
                   {
                     title: "Num. Form.",

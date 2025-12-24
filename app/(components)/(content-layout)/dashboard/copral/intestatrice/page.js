@@ -142,6 +142,7 @@ export default function PaginaIntestatrice() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Data"
                     groupCol="Descrizione"
+                    seriesName="Quantità"
                   />
                 </Card.Body>
               </Card>

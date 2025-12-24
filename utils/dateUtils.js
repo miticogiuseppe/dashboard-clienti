@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 // Utility per calcolare range date da periodo
 const calcolaRange = (periodo) => {
-  const oggi = dayjs();
+  const oggi = dayjs().add(1, "day");
   const inizio = {
     settimana: oggi.subtract(7, "day"),
     mese: oggi.subtract(1, "month"),

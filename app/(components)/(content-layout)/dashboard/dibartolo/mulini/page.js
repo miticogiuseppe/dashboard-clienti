@@ -7,7 +7,7 @@ import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { fmt } from "@/utils/dateUtils";
+import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
@@ -60,8 +60,8 @@ export default function PaginaMulini() {
       );
       const json = await response.json();
       let data = json.data;
-      data = parseDates(data, ["Data"]);
-      data = orderSheet(data, ["Data"], ["asc"]);
+      data = parseDates(data, ["DATA"]);
+      data = orderSheet(data, ["DATA"], ["asc"]);
 
       setData2(data);
     }
@@ -138,7 +138,7 @@ export default function PaginaMulini() {
               <Card className="custom-card shadow-sm rounded-3 h-100 border-0">
                 <Card.Header className="d-flex justify-content-between align-items-center py-3">
                   <Card.Title className="mb-0 fw-semibold">
-                    Produzione per Articolo
+                    Tempo lavorazione
                   </Card.Title>
                   <PeriodDropdown
                     onChange={(period) => {
@@ -159,9 +159,12 @@ export default function PaginaMulini() {
                     data={data2}
                     startDate={fmt(pickerDateArt, periodoArt, 0)}
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
-                    dateCol="Data"
-                    groupCol="Descrizione"
-                    valueCol="Numero"
+                    dateCol="DATA"
+                    groupCol="DATA"
+                    groupCb={(val) => val.format("DD/MM/YYYY")}
+                    noSort={true}
+                    valueCol="TEMPO LAVORATO  (MINUTI)"
+                    seriesName="Tempo lavorato"
                   />
                 </Card.Body>
               </Card>
@@ -175,6 +178,7 @@ export default function PaginaMulini() {
                 title="Produzione"
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
+                filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord." },
@@ -201,9 +205,9 @@ export default function PaginaMulini() {
                 title="Produzione per articolo"
                 fileExcel="MULINI"
                 dateColumn="DATA"
+                filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
-                  { title: "Orario", column: "ORARIO" },
-                  { title: "Data", column: "DATA    ", bold: true },
+                  { title: "Data", column: "DATA", bold: true },
                   {
                     title: "Codice Ricetta",
                     column: "CODICE IDENTIFICATIVO RICETTA",
