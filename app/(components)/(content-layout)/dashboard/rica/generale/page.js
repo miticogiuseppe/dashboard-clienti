@@ -91,19 +91,21 @@ const Ecommerce = () => {
 
     // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Importi)
 
-    let grouped = sumByKey(filteredData, "descfam", "ValoreTotale", true);
-    grouped = grouped.filter((x) => x["descfam"] !== "0");
+    let grouped = sumByKey(filteredData, "Des Area/Zon", "Qta da ev.", true);
+    grouped = grouped.filter(
+      (x) => x["Des Area/Zon"] && x["Des Area/Zon"] !== "0"
+    );
     setChartOptions(
       createOptions(
         grouped,
-        "descfam",
+        "Des Area/Zon",
         undefined,
-        currencyFormatter,
+        (val) => val.toLocaleString("it-IT"),
         "bar",
         "#b94eed"
       )
     );
-    setChartSeries(createSeries(grouped, "Importo"));
+    setChartSeries(createSeries(grouped, "Qta da ev."));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
@@ -213,7 +215,7 @@ const Ecommerce = () => {
 
   return (
     <>
-      <Seo title="Copral Generale" />
+      <Seo title="Rica Generale" />
 
       {isLoading ? (
         <Preloader show={true} />
@@ -247,9 +249,7 @@ const Ecommerce = () => {
             <Col xl={12}>
               <Card className="custom-card">
                 <Card.Header className="justify-content-between">
-                  <div className="card-title">
-                    Incidenza degli importi sulle famiglie (€)
-                  </div>
+                  <div className="card-title">Quantità da evadere per Area</div>
                   <div className="d-flex align-items-center">
                     <PeriodDropdown
                       onChange={(period) => {
