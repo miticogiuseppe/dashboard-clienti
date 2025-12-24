@@ -1,5 +1,6 @@
 {
   "Graph": {
-    "NoData": "Nessun dato nel periodo selezionato."
+    "NoData": "Nessun dato nel periodo selezionato.",
+    "Quantity": "Quantità"
   }
 }
