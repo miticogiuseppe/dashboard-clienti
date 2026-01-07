@@ -47,6 +47,8 @@ const Venduto = () => {
               2024: formatCurrency(item["2024"]),
               2025: formatCurrency(item["2025"]),
               "PREV 2025": formatCurrency(item["PREV 2025"]),
+              2026: formatCurrency(item["2026"]),
+              "PREV 2026": formatCurrency(item["PREV 2026"]),
 
               // Colonna Delta 25/24 con JSX per colore e icona
               "DELTA 25/24": (
@@ -136,6 +138,14 @@ const Venduto = () => {
                   {
                     title: "Prev. 2025",
                     column: "PREV 2025",
+                  },
+                  {
+                    title: "Fatturato 2026",
+                    column: "2026",
+                  },
+                  {
+                    title: "Prev. 2026",
+                    column: "PREV 2026",
                   },
                   {
                     title: "Delta 25/24",
