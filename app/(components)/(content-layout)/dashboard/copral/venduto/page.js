@@ -6,10 +6,12 @@ import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
 import { formatCurrency } from "@/utils/currency";
+import VendutoChart from "@/components/VendutoChart";
 
 const Venduto = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [top20Data, setTop20Data] = useState([]);
+  const [rawChartData, setRawChartData] = useState([]);
 
   useEffect(() => {
     const fetchTop20Data = async () => {
@@ -22,23 +24,61 @@ const Venduto = () => {
         const json = await response.json();
 
         if (json.data) {
-          const processedData = json.data
+          const filtered = json.data
             .filter(
-              (item) =>
-                item["CLIENTI"] &&
-                !["TOTALE", ""].includes(String(item["CLIENTI"]).toUpperCase())
+              (item) => item["CLIENTI"] && String(item["CLIENTI"]).trim() !== ""
             )
-            .slice(0, 20)
-            .reverse()
-            .map((item) => ({
+            .slice(0, 20);
+
+          setRawChartData(filtered);
+
+          const tableData = [...filtered].reverse().map((item) => {
+            // Valori numerici per la logica dei colori
+            const d24 = Number(item["DELTA 25/24"]) || 0;
+            const d23 = Number(item["DELTA 25/23"]) || 0;
+
+            // Testo formattato (es: 11,90%)
+            const d24Text = (d24 * 100).toFixed(2).replace(".", ",") + "%";
+            const d23Text = (d23 * 100).toFixed(2).replace(".", ",") + "%";
+
+            return {
               ...item,
               2023: formatCurrency(item["2023"]),
               2024: formatCurrency(item["2024"]),
               2025: formatCurrency(item["2025"]),
               "PREV 2025": formatCurrency(item["PREV 2025"]),
-            }));
 
-          setTop20Data(processedData);
+              // Colonna Delta 25/24 con JSX per colore e icona
+              "DELTA 25/24": (
+                <span className={d24 >= 0 ? "text-success" : "text-danger"}>
+                  {d24Text}
+                  <i
+                    className={
+                      d24 >= 0
+                        ? "ri-arrow-up-fill ms-1"
+                        : "ri-arrow-down-fill ms-1"
+                    }
+                  ></i>
+                </span>
+              ),
+
+              // Colonna Delta 25/23 con JSX per colore e icona
+              "DELTA 25/23": (
+                <span className={d23 >= 0 ? "text-success" : "text-danger"}>
+                  {d23Text}
+                  <i
+                    className={
+                      d23 >= 0
+                        ? "ri-arrow-up-fill ms-1"
+                        : "ri-arrow-down-fill ms-1"
+                    }
+                  ></i>
+                </span>
+              ),
+            };
+          });
+
+          setTop20Data(tableData);
         }
       } catch (error) {
         console.error(error);
@@ -48,7 +88,6 @@ const Venduto = () => {
     };
     fetchTop20Data();
   }, []);
-
   return (
     <>
       <Seo title="Analisi Venduto - Top 20" />
@@ -62,6 +101,12 @@ const Venduto = () => {
             currentpage="Top 20 Clienti"
             activepage="Analisi"
           />
+          <Row>
+            <Col xl={12}>
+              {/* Grafico */}
+              <VendutoChart data={rawChartData} />
+            </Col>
+          </Row>
 
           <Row>
             <Col xl={12}>
@@ -70,7 +115,6 @@ const Venduto = () => {
                 data={top20Data}
                 title="Classifica Top 20 Clienti"
                 enableSearch={true}
-                // Utilizziamo le colonne reali del tuo foglio Excel
                 tableHeaders={[
                   {
                     title: "Cliente",
@@ -92,6 +136,16 @@ const Venduto = () => {
                   {
                     title: "Prev. 2025",
                     column: "PREV 2025",
+                  },
+                  {
+                    title: "Delta 25/24",
+                    column: "DELTA 25/24",
+                    type: "number",
+                  },
+                  {
+                    title: "Delta 25/23",
+                    column: "DELTA 25/23",
+                    type: "number",
                   },
                 ]}
               />
