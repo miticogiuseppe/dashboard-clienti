@@ -15,7 +15,7 @@ const Venduto = () => {
     const fetchTop20Data = async () => {
       try {
         setIsLoading(true);
-        // Chiamata specifica al foglio TOP20_2025
+
         const response = await fetch(
           "/api/fetch-excel-json?id=TOP20_VENDUTO&sheet=TOP20_2025"
         );
