@@ -15,6 +15,12 @@ export const menuCopral = [
         type: "link",
         ready: true,
       },
+      {
+        path: "/dashboard/copral/venduto",
+        title: "Venduto",
+        type: "link",
+        ready: true,
+      },
     ],
   },
   {
