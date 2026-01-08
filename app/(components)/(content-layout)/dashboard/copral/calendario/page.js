@@ -1,6 +1,6 @@
 "use client";
 import OrderCalendar from "@/components/OrderCalendar";
-import { loadFirstSheet, parseDates } from "@/utils/excelUtils";
+import { parseDates } from "@/utils/excelUtils";
 import { useEffect, useState } from "react";
 
 export default function Home() {
