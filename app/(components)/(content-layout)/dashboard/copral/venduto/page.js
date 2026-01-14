@@ -117,6 +117,7 @@ const Venduto = () => {
                 data={top20Data}
                 title="Classifica Top 20 Clienti"
                 enableSearch={true}
+                searchPlaceholder="Cerca Clienti..."
                 tableHeaders={[
                   {
                     title: "Cliente",
