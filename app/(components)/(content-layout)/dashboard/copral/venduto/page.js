@@ -126,26 +126,32 @@ const Venduto = () => {
                   {
                     title: "Fatturato 2023",
                     column: "2023",
+                    type: "number",
                   },
                   {
                     title: "Fatturato 2024",
                     column: "2024",
+                    type: "number",
                   },
                   {
                     title: "Fatturato 2025",
                     column: "2025",
+                    type: "number",
                   },
                   {
                     title: "Prev. 2025",
                     column: "PREV 2025",
+                    type: "number",
                   },
                   {
                     title: "Fatturato 2026",
                     column: "2026",
+                    type: "number",
                   },
                   {
                     title: "Prev. 2026",
                     column: "PREV 2026",
+                    type: "number",
                   },
                   {
                     title: "Delta 25/24",
