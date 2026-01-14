@@ -292,10 +292,12 @@ const Ecommerce = () => {
                   {
                     title: "Numero ordine",
                     column: "Nr.ord",
+                    type: "number",
                   },
                   {
                     title: "Sezionale",
                     column: "Sez",
+                    type: "number",
                   },
                   {
                     title: "Ragione sociale",
