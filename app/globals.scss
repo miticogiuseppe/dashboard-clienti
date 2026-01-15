@@ -85,6 +85,20 @@ body {
     flex-direction: column;
   }
 }
+
+.card-dashboard-height {
+  height: calc(100% - 1.5rem);
+  min-height: 450px;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.fs-11 {
+  font-size: 11px;
+}
+
 .table-break-word td,
 .table-break-word th {
   white-space: normal;

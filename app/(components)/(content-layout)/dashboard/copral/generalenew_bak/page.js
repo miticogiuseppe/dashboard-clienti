@@ -244,8 +244,8 @@ const Ecommerce = () => {
           </Row>
           <Row>
             {/* Grafico a Barre (Report indice importi famiglie) */}
-            <Col xl={8} lg={8} className="stretch-column">
-              <Card className="custom-card stretch-card">
+            <Col xl={12}>
+              <Card className="custom-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
                     Incidenza degli importi sulle famiglie (€)
@@ -260,7 +260,7 @@ const Ecommerce = () => {
                     />
                   </div>
                 </Card.Header>
-                <Card.Body className="fill">
+                <Card.Body className="p-0">
                   {chartSeries &&
                   chartSeries.length > 0 &&
                   chartOptions?.xaxis?.categories.length > 0 ? (
@@ -275,56 +275,6 @@ const Ecommerce = () => {
                     <div className="no-data text-muted">{t("NoData")}</div>
                   )}
                 </Card.Body>
-              </Card>
-            </Col>
-
-            <Col xl={4} lg={12} className="stretch-column">
-              <Card className="custom-card stretch-card">
-                <Card.Header>
-                  <div className="card-title">Classifica famiglie</div>
-                </Card.Header>
-                <Card.Body className="p-0">
-                  <div className="table-responsive">
-                    <table className="table table-hover mb-0 text-nowrap">
-                      <tbody>
-                        {chartOptions?.xaxis?.categories
-                          .map((label, idx) => ({
-                            label,
-                            value: chartSeries[0]?.data[idx] || 0,
-                          }))
-                          .sort((a, b) => b.value - a.value) // Ordine decrescente
-                          .map((item, idx) => (
-                            <tr key={idx}>
-                              <td className="border-top-0">
-                                <div className="d-flex align-items-center">
-                                  <span className="avatar avatar-xs bg-primary-transparent fw-bold me-2">
-                                    {idx + 1}
-                                  </span>
-                                  <div
-                                    className="fw-medium fs-13 text-truncate"
-                                    style={{ maxWidth: "160px" }}
-                                  >
-                                    {item.label}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="text-end border-top-0">
-                                <span className="fw-semibold">
-                                  {currencyFormatter(item.value)} €
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </Card.Body>
-                <Card.Footer className="bg-light p-2 text-center">
-                  <small className="text-muted">
-                    Totale ripartito su {chartOptions?.xaxis?.categories.length}{" "}
-                    categorie
-                  </small>
-                </Card.Footer>
               </Card>
             </Col>
           </Row>
