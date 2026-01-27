@@ -30,7 +30,7 @@ import AppmerceTable from "@/components/AppmerceTable";
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
+  { ssr: false },
 );
 
 const Ecommerce = () => {
@@ -62,7 +62,7 @@ const Ecommerce = () => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
       const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
       );
       let json = await response.json();
       let data = json.data;
@@ -91,7 +91,7 @@ const Ecommerce = () => {
 
     // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Importi)
 
-    let grouped = sumByKey(filteredData, "descfam", "ValoreTotale", true);
+    let grouped = sumByKey(filteredData, "descfam", "Totale gen", true);
     grouped = grouped.filter((x) => x["descfam"] !== "0");
     setChartOptions(
       createOptions(
@@ -100,15 +100,15 @@ const Ecommerce = () => {
         undefined,
         currencyFormatter,
         "bar",
-        "#b94eed"
-      )
+        "#b94eed",
+      ),
     );
-    setChartSeries(createSeries(grouped, "Importo"));
+    setChartSeries(createSeries(grouped, "count"));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
     const sortedData = filteredData.sort((a, b) =>
-      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1,
     );
     const uniqData = _.uniqBy(sortedData, "Nr.ord");
     setRecentOrders(uniqData);
@@ -122,7 +122,7 @@ const Ecommerce = () => {
     // Totale clienti unici
     const uniqueCustomersCount = extractUniques(
       filteredData,
-      "Ragione sociale"
+      "Ragione sociale",
     ).length;
     setTotalUniqueCustomers(uniqueCustomersCount);
 
@@ -174,7 +174,7 @@ const Ecommerce = () => {
           originalIndex: index,
         }))
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 3),
     );
 
     // ----------------------- fine caricamento

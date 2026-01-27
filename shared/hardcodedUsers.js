@@ -11,4 +11,12 @@ export const hardcodedUsers = [
     route: "/dashboard/dibartolo/generale",
     name: "Dibartolo",
   },
+
+  {
+    id: "1",
+    username: "agente08",
+    role: "AGENTE",
+    codiceAgente: "08", // Questo è il "gancio" per il filtro
+    password: "password123",
+  },
 ];
