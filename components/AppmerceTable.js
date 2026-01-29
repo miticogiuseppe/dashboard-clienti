@@ -18,6 +18,7 @@ function AppmerceTable({
   filterDate,
   className,
   enableSearch,
+  searchPlaceholder,
 }) {
   const t = useTranslations("Graph");
 
@@ -110,7 +111,7 @@ function AppmerceTable({
             <input
               type="text"
               className="form-control"
-              placeholder="Cerca Ordini..."
+              placeholder={searchPlaceholder || "Cerca Ordini..."}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />

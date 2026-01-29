@@ -85,6 +85,15 @@ body {
     flex-direction: column;
   }
 }
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+.fs-11 {
+  font-size: 11px;
+}
+
 .table-break-word td,
 .table-break-word th {
   white-space: normal;
@@ -166,7 +175,9 @@ body {
   align-items: center;
 
   background-color: #f7f7f9;
-  transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+  transition:
+    opacity 0.4s ease-in-out,
+    visibility 0.4s ease-in-out;
   opacity: 1;
 
   // Mobile (sotto i 768px)

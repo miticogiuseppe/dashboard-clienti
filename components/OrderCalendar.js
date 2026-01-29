@@ -8,8 +8,21 @@ import Pageheader from "../shared/layouts-components/page-header/pageheader";
 import { Card, Col, Row } from "react-bootstrap";
 import Seo from "../shared/layouts-components/seo/seo";
 import SearchBox from "@/components/SearchBox";
+import { formatDate, formatTime } from "@/utils/format";
+import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import { IoIosCalendar } from "react-icons/io";
 
-const OrderCalendar = ({ data }) => {
+const OrderCalendar = ({ data, fileDate }) => {
+  const updateCard = {
+    id: 1,
+    title: "Ultimo aggiornamento",
+    count: formatDate(fileDate),
+    inc: formatTime(fileDate),
+    svgIcon: <IoIosCalendar />,
+    backgroundColor: "info svg-white",
+    color: "success",
+  };
+
   const [selectedOrders, setSelectedOrders] = useState([]);
 
   const [agentSearch, setAgentSearch] = useState({});
@@ -152,6 +165,21 @@ const OrderCalendar = ({ data }) => {
     <Fragment>
       <Seo title="Calendario consegne" />
       <Pageheader title="Apps" currentpage="Calendario" />
+
+      <Row className="mb-3">
+        <Col xxl={3} xl={4} lg={6} md={6}>
+          <Spkcardscomponent
+            cardClass="overflow-hidden main-content-card"
+            headingClass="d-block mb-1"
+            mainClass="d-flex align-items-start justify-content-between mb-2"
+            svgIcon={updateCard.svgIcon}
+            card={updateCard}
+            badgeClass="md"
+            dataClass="mb-0"
+          />
+        </Col>
+      </Row>
+
       <Row>
         <Col xl={12}>
           <Card className="custom-card overflow-hidden">

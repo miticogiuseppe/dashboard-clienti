@@ -1,6 +1,7 @@
 import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { LuFactory } from "react-icons/lu";
+import { act } from "react";
 
 export const menuCopral = [
   { menutitle: "MENU" },
@@ -8,12 +9,36 @@ export const menuCopral = [
     title: "Dashboard",
     icon: <RiDashboardHorizontalFill className="side-menu__icon" />,
     type: "sub",
+    active: false,
+    selected: false,
     children: [
       {
         path: "/dashboard/copral/generalenew",
         title: "Generale",
         type: "link",
         ready: true,
+      },
+      {
+        title: "Statistiche",
+        type: "sub",
+        active: false,
+        selected: false,
+        children: [
+          {
+            path: "/dashboard/copral/venduto",
+            title: "Venduto",
+            type: "link",
+            ready: true,
+          },
+          {
+            //path: "/dashboard/copral/acquistato",
+            path: "",
+            title: "Acquistato",
+            type: "empty",
+            //type: "link",
+            ready: true,
+          },
+        ],
       },
     ],
   },
