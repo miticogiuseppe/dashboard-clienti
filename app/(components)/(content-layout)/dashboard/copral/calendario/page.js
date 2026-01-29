@@ -11,13 +11,11 @@ export default function Home() {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
       const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
       );
       const json = await response.json();
 
-      if (json.lwt) {
-        setFileDate(new Date(json.lwt));
-      }
+      setFileDate(new Date(json.lwt));
 
       let newOrders = json.data;
       newOrders = parseDates(newOrders, ["Data Cons."]);

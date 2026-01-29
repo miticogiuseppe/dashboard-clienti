@@ -15,78 +15,74 @@ const Venduto = () => {
 
   useEffect(() => {
     const fetchTop20Data = async () => {
-      try {
-        setIsLoading(true);
+      setIsLoading(true);
 
-        const response = await fetch(
-          "/api/fetch-excel-json?id=TOP20_VENDUTO&sheet=TOP20_2025"
-        );
-        const json = await response.json();
+      const response = await fetch(
+        "/api/fetch-excel-json?id=TOP20_VENDUTO&sheet=TOP20_2025",
+      );
+      const json = await response.json();
 
-        if (json.data) {
-          const filtered = json.data
-            .filter(
-              (item) => item["CLIENTI"] && String(item["CLIENTI"]).trim() !== ""
-            )
-            .slice(0, 20);
+      if (json.data) {
+        const filtered = json.data
+          .filter(
+            (item) => item["CLIENTI"] && String(item["CLIENTI"]).trim() !== "",
+          )
+          .slice(0, 20);
 
-          setRawChartData(filtered);
+        setRawChartData(filtered);
 
-          const tableData = [...filtered].reverse().map((item) => {
-            // Valori numerici per la logica dei colori
-            const d24 = Number(item["DELTA 25/24"]) || 0;
-            const d23 = Number(item["DELTA 25/23"]) || 0;
+        const tableData = [...filtered].reverse().map((item) => {
+          // Valori numerici per la logica dei colori
+          const d24 = Number(item["DELTA 25/24"]) || 0;
+          const d23 = Number(item["DELTA 25/23"]) || 0;
 
-            // Testo formattato (es: 11,90%)
-            const d24Text = (d24 * 100).toFixed(2).replace(".", ",") + "%";
-            const d23Text = (d23 * 100).toFixed(2).replace(".", ",") + "%";
+          // Testo formattato (es: 11,90%)
+          const d24Text = (d24 * 100).toFixed(2).replace(".", ",") + "%";
+          const d23Text = (d23 * 100).toFixed(2).replace(".", ",") + "%";
 
-            return {
-              ...item,
-              2023: formatCurrency(item["2023"]),
-              2024: formatCurrency(item["2024"]),
-              2025: formatCurrency(item["2025"]),
-              "PREV 2025": formatCurrency(item["PREV 2025"]),
-              2026: formatCurrency(item["2026"]),
-              "PREV 2026": formatCurrency(item["PREV 2026"]),
+          return {
+            ...item,
+            2023: formatCurrency(item["2023"]),
+            2024: formatCurrency(item["2024"]),
+            2025: formatCurrency(item["2025"]),
+            "PREV 2025": formatCurrency(item["PREV 2025"]),
+            2026: formatCurrency(item["2026"]),
+            "PREV 2026": formatCurrency(item["PREV 2026"]),
 
-              // Colonna Delta 25/24 con JSX per colore e icona
-              "DELTA 25/24": (
-                <span className={d24 >= 0 ? "text-success" : "text-danger"}>
-                  {d24Text}
-                  <i
-                    className={
-                      d24 >= 0
-                        ? "ri-arrow-up-fill ms-1"
-                        : "ri-arrow-down-fill ms-1"
-                    }
-                  ></i>
-                </span>
-              ),
+            // Colonna Delta 25/24 con JSX per colore e icona
+            "DELTA 25/24": (
+              <span className={d24 >= 0 ? "text-success" : "text-danger"}>
+                {d24Text}
+                <i
+                  className={
+                    d24 >= 0
+                      ? "ri-arrow-up-fill ms-1"
+                      : "ri-arrow-down-fill ms-1"
+                  }
+                ></i>
+              </span>
+            ),
 
-              // Colonna Delta 25/23 con JSX per colore e icona
-              "DELTA 25/23": (
-                <span className={d23 >= 0 ? "text-success" : "text-danger"}>
-                  {d23Text}
-                  <i
-                    className={
-                      d23 >= 0
-                        ? "ri-arrow-up-fill ms-1"
-                        : "ri-arrow-down-fill ms-1"
-                    }
-                  ></i>
-                </span>
-              ),
-            };
-          });
+            // Colonna Delta 25/23 con JSX per colore e icona
+            "DELTA 25/23": (
+              <span className={d23 >= 0 ? "text-success" : "text-danger"}>
+                {d23Text}
+                <i
+                  className={
+                    d23 >= 0
+                      ? "ri-arrow-up-fill ms-1"
+                      : "ri-arrow-down-fill ms-1"
+                  }
+                ></i>
+              </span>
+            ),
+          };
+        });
 
-          setTop20Data(tableData);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
+        setTop20Data(tableData);
       }
+
+      setIsLoading(false);
     };
     fetchTop20Data();
   }, []);

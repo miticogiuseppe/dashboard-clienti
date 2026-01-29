@@ -103,7 +103,7 @@ const Ecommerce = () => {
         "#b94eed",
       ),
     );
-    setChartSeries(createSeries(grouped, "count"));
+    setChartSeries(createSeries(grouped, "Importo"));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
