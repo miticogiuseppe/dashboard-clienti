@@ -30,7 +30,7 @@ import AppmerceTable from "@/components/AppmerceTable";
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
+  { ssr: false },
 );
 
 const Ecommerce = () => {
@@ -62,7 +62,7 @@ const Ecommerce = () => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
       const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1"
+        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
       );
       let json = await response.json();
       let data = json.data;
@@ -91,7 +91,7 @@ const Ecommerce = () => {
 
     // ----------------------- Logica per Grafico a Barre (Famiglie di prodotti - Importi)
 
-    let grouped = sumByKey(filteredData, "descfam", "ValoreTotale", true);
+    let grouped = sumByKey(filteredData, "descfam", "Totale gen", true);
     grouped = grouped.filter((x) => x["descfam"] !== "0");
     setChartOptions(
       createOptions(
@@ -100,15 +100,15 @@ const Ecommerce = () => {
         undefined,
         currencyFormatter,
         "bar",
-        "#b94eed"
-      )
+        "#b94eed",
+      ),
     );
     setChartSeries(createSeries(grouped, "Importo"));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
     const sortedData = filteredData.sort((a, b) =>
-      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1
+      a["Data ord"].isBefore(b["Data ord"]) ? 1 : -1,
     );
     const uniqData = _.uniqBy(sortedData, "Nr.ord");
     setRecentOrders(uniqData);
@@ -122,7 +122,7 @@ const Ecommerce = () => {
     // Totale clienti unici
     const uniqueCustomersCount = extractUniques(
       filteredData,
-      "Ragione sociale"
+      "Ragione sociale",
     ).length;
     setTotalUniqueCustomers(uniqueCustomersCount);
 
@@ -174,7 +174,7 @@ const Ecommerce = () => {
           originalIndex: index,
         }))
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 3),
     );
 
     // ----------------------- fine caricamento
@@ -244,8 +244,8 @@ const Ecommerce = () => {
           </Row>
           <Row>
             {/* Grafico a Barre (Report indice importi famiglie) */}
-            <Col xl={12}>
-              <Card className="custom-card">
+            <Col xl={8} lg={8} className="stretch-column">
+              <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
                   <div className="card-title">
                     Incidenza degli importi sulle famiglie (€)
@@ -260,7 +260,7 @@ const Ecommerce = () => {
                     />
                   </div>
                 </Card.Header>
-                <Card.Body className="p-0">
+                <Card.Body className="fill">
                   {chartSeries &&
                   chartSeries.length > 0 &&
                   chartOptions?.xaxis?.categories.length > 0 ? (
@@ -275,6 +275,56 @@ const Ecommerce = () => {
                     <div className="no-data text-muted">{t("NoData")}</div>
                   )}
                 </Card.Body>
+              </Card>
+            </Col>
+
+            <Col xl={4} lg={12} className="stretch-column">
+              <Card className="custom-card stretch-card">
+                <Card.Header>
+                  <div className="card-title">Classifica famiglie</div>
+                </Card.Header>
+                <Card.Body className="p-0">
+                  <div className="table-responsive">
+                    <table className="table table-hover mb-0 text-nowrap">
+                      <tbody>
+                        {chartOptions?.xaxis?.categories
+                          .map((label, idx) => ({
+                            label,
+                            value: chartSeries[0]?.data[idx] || 0,
+                          }))
+                          .sort((a, b) => b.value - a.value) // Ordine decrescente
+                          .map((item, idx) => (
+                            <tr key={idx}>
+                              <td className="border-top-0">
+                                <div className="d-flex align-items-center">
+                                  <span className="avatar avatar-xs bg-primary-transparent fw-bold me-2">
+                                    {idx + 1}
+                                  </span>
+                                  <div
+                                    className="fw-medium fs-13 text-truncate"
+                                    style={{ maxWidth: "160px" }}
+                                  >
+                                    {item.label}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="text-end border-top-0">
+                                <span className="fw-semibold">
+                                  {currencyFormatter(item.value)} €
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card.Body>
+                <Card.Footer className="bg-light p-2 text-center">
+                  <small className="text-muted">
+                    Totale ripartito su {chartOptions?.xaxis?.categories.length}{" "}
+                    categorie
+                  </small>
+                </Card.Footer>
               </Card>
             </Col>
           </Row>
