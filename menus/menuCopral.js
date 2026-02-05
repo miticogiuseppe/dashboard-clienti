@@ -9,6 +9,7 @@ export const menuCopral = [
     title: "Dashboard",
     icon: <RiDashboardHorizontalFill className="side-menu__icon" />,
     type: "sub",
+    permission: "dash_generale",
     active: false,
     selected: false,
     children: [
@@ -16,6 +17,7 @@ export const menuCopral = [
         path: "/dashboard/copral/generalenew",
         title: "Generale",
         type: "link",
+        permission: "dash_generale",
         ready: true,
       },
       {
@@ -28,6 +30,7 @@ export const menuCopral = [
             path: "/dashboard/copral/venduto",
             title: "Venduto",
             type: "link",
+            permission: "venduto_agente",
             ready: true,
           },
           {
@@ -35,6 +38,7 @@ export const menuCopral = [
             path: "",
             title: "Acquistato",
             type: "empty",
+            permission: "dash_generale",
             //type: "link",
             ready: true,
           },
@@ -51,12 +55,14 @@ export const menuCopral = [
         path: "/dashboard/copral/imballatrice",
         title: "Imballatrice",
         type: "link",
+        permission: "macchine_imballatrice",
         ready: true,
       },
       {
         path: "/dashboard/copral/troncatrice",
         title: "Troncatrice (Mecal)",
         type: "link",
+        permission: "macchine_troncatrice",
         ready: true,
       },
 
@@ -64,12 +70,14 @@ export const menuCopral = [
         path: "/dashboard/copral/pulitrice",
         title: "Pulitrice",
         type: "link",
+        permission: "macchine_pulitrice",
         ready: true,
       },
       {
         path: "/dashboard/copral/intestatrice",
         title: "Intestatrice 90°",
         type: "link",
+        permission: "macchine_intestatrice",
         ready: true,
       },
     ],
@@ -78,11 +86,13 @@ export const menuCopral = [
     title: "App",
     icon: Appsicon,
     type: "sub",
+    permission: "app_calendario",
     children: [
       {
         title: "Calendario",
         path: "/dashboard/copral/calendario",
         type: "link",
+        permission: "app_calendario",
         ready: true,
       },
     ],

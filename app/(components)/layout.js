@@ -5,9 +5,9 @@ import ClientLayout from "./layout-client";
 const ServerLayout = async ({ children }) => {
   const token = await getTokenData();
   let menu = getMenu(token.tenant);
-  menu = filterMenu(menu);
+  menu = filterMenu(menu, token.role);
 
-  let globalData = { menu, tenant: token.tenant };
+  let globalData = { menu, tenant: token.tenant, role: token.role };
 
   return <ClientLayout globalData={globalData}>{children}</ClientLayout>;
 };

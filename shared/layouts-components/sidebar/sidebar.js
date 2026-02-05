@@ -164,10 +164,10 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     const mainContainer1 = document.querySelector(".main-sidebar");
 
     const marginLeftValue = Math.ceil(
-      Number(window.getComputedStyle(menuNav).marginLeft.split("px")[0])
+      Number(window.getComputedStyle(menuNav).marginLeft.split("px")[0]),
     );
     const marginRightValue = Math.ceil(
-      Number(window.getComputedStyle(menuNav).marginRight.split("px")[0])
+      Number(window.getComputedStyle(menuNav).marginRight.split("px")[0]),
     );
     const check = menuNav.scrollWidth - mainContainer1.offsetWidth;
 
@@ -203,11 +203,11 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     if (menuNav && mainContainer1) {
       const marginLeftValue = Math.ceil(
         Number(
-          window.getComputedStyle(menuNav).marginInlineStart.split("px")[0]
-        )
+          window.getComputedStyle(menuNav).marginInlineStart.split("px")[0],
+        ),
       );
       const marginRightValue = Math.ceil(
-        Number(window.getComputedStyle(menuNav).marginInlineEnd.split("px")[0])
+        Number(window.getComputedStyle(menuNav).marginInlineEnd.split("px")[0]),
       );
       const check = menuNav.scrollWidth - mainContainer1.offsetWidth;
       let mainContainer1Width = mainContainer1.offsetWidth;
@@ -292,11 +292,11 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     if (menuNav && mainContainer1) {
       const marginLeftValue = Math.ceil(
         Number(
-          window.getComputedStyle(menuNav).marginInlineStart.split("px")[0]
-        )
+          window.getComputedStyle(menuNav).marginInlineStart.split("px")[0],
+        ),
       );
       const marginRightValue = Math.ceil(
-        Number(window.getComputedStyle(menuNav).marginInlineEnd.split("px")[0])
+        Number(window.getComputedStyle(menuNav).marginInlineEnd.split("px")[0]),
       );
       const check = menuNav.scrollWidth - mainContainer1.offsetWidth;
       let mainContainer1Width = mainContainer1.offsetWidth;
@@ -813,8 +813,8 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
                                                    ? "slide has-sub"
                                                    : ""
                                                } ${
-                      levelone?.active ? "open" : ""
-                    } ${levelone?.selected ? "active" : ""}`}
+                                                 levelone?.active ? "open" : ""
+                                               } ${levelone?.selected ? "active" : ""}`}
                   >
                     {levelone.menutitle ? (
                       <span className="category-name">
