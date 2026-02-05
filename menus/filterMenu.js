@@ -26,7 +26,7 @@ export function filterMenu(items, role) {
       }
 
       // RUOLI
-      // Se è un titolo di sezione (es. "MENU") lo teniamo sempre
+      // Se è un titolo di sezione lo teniamo
       if (newItem.menutitle) return newItem;
 
       // Se ha un permesso, controlliamo se il ruolo può vederlo
