@@ -2,8 +2,6 @@ import { menuCopral } from "./menuCopral";
 import { menuDibartolo } from "./menuDibartolo";
 import { menuRica } from "./menuRica";
 
-import { filterMenu } from "./index";
-
 export function getMenu(tenant) {
   let menuBase = [];
 

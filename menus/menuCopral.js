@@ -1,7 +1,6 @@
-import { Appsicon, Dashboardicon, Pagesicon } from "./icons";
-import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { LuFactory } from "react-icons/lu";
-import { act } from "react";
+import { RiDashboardHorizontalFill } from "react-icons/ri";
+import { Appsicon } from "./icons";
 
 export const menuCopral = [
   { menutitle: "MENU" },
@@ -40,6 +39,7 @@ export const menuCopral = [
             type: "empty",
             permission: "dash_generale",
             //type: "link",
+            //permission: "dash_generale",
             ready: true,
           },
         ],
