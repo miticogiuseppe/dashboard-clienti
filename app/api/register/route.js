@@ -54,7 +54,7 @@ export async function POST(request) {
 
     const result = await pool.query(query, values);
 
-    // 4. Risposta di successo
+    // Risposta di successo
     return NextResponse.json(
       {
         success: true,
