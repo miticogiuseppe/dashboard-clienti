@@ -80,6 +80,14 @@ export const menuCopral = [
         permission: "macchine_intestatrice",
         ready: true,
       },
+
+      {
+        path: "/dashboard/copral/plotter",
+        title: "Plotter HP T2600",
+        type: "link",
+        permission: "macchine_plotter",
+        ready: true,
+      },
     ],
   },
   {
