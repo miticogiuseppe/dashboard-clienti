@@ -45,7 +45,7 @@ export default function PaginaPlotter() {
     fetchOrders();
   }, []);
 
-  // 2. FETCH PRODUZIONE ROBOT (Sorgente Plotter CSV)
+  // 2. FETCH PRODUZIONE (Sorgente Plotter CSV)
   useEffect(() => {
     async function fetchRobotData() {
       try {
@@ -69,19 +69,41 @@ export default function PaginaPlotter() {
 
             return {
               ...row,
-              // Usiamo questi alias corretti (divisi per 100)
+              // Valori numerici corretti (divisi per 100)
               areaNum: areaNum,
               inkNum: inkNum,
+
+              // Gestione campi vuoti o mancanti nel CSV
+              // Se "Tipo di carta" è vuoto nel CSV, mettiamo un trattino "-"
+              "Tipo di carta":
+                row["Tipo di carta"] && row["Tipo di carta"].trim() !== ""
+                  ? row["Tipo di carta"]
+                  : "-",
+
+              "Qualità di stampa":
+                row["Qualità di stampa"] &&
+                row["Qualità di stampa"].trim() !== ""
+                  ? row["Qualità di stampa"]
+                  : "-",
+
+              Utente:
+                row["Utente"] && row["Utente"].trim() !== ""
+                  ? row["Utente"]
+                  : "Generico",
+
+              // Logica per il tipo di operazione
               tipoOperazione:
                 areaNum > 0
                   ? "Stampa"
                   : nomeLower.includes("maintenance")
                     ? "Manutenzione"
                     : "Servizio",
+
+              // Formattazione data leggibile
               oraLeggibile:
                 row.Ora && row.Ora.isValid()
                   ? row.Ora.format("DD/MM/YYYY HH:mm")
-                  : "Data non valida",
+                  : "-",
             };
           })
           .filter((row) => row["Stato"] && row["Stato"] !== "");
@@ -146,11 +168,11 @@ export default function PaginaPlotter() {
               </Card>
             </Col>
 
-            {/* GRAFICO PRODUZIONE REALE */}
+            {/* GRAFICO PRODUZIONE */}
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Produzione Effettiva (mq)</Card.Title>
+                  <Card.Title>Produzione (mq)</Card.Title>
                   <PeriodDropdown
                     onChange={(p) => {
                       setPeriodoArt(p);
@@ -223,8 +245,7 @@ export default function PaginaPlotter() {
               />
             </Col>
 
-            {/* TABELLA LOG HP (Migliorata) */}
-            {/* TABELLA LOG HP (Migliorata con nuove colonne) */}
+            {/* TABELLA LOG HP */}
             <Col xxl={6}>
               <AppmerceTable
                 data={data2}
@@ -235,19 +256,19 @@ export default function PaginaPlotter() {
                 tableHeaders={[
                   { title: "Inizio", column: "oraLeggibile", bold: true },
                   { title: "Documento", column: "Nome" },
-                  { title: "Materiale", column: "Tipo di carta" }, // AGGIUNTA
-                  { title: "Qualità", column: "Qualità di stampa" }, // AGGIUNTA
+                  { title: "Materiale", column: "Tipo di carta" },
+                  { title: "Qualità", column: "Qualità di stampa" },
                   {
                     title: "Area (m²)",
-                    column: "areaNum", // USIAMO L'ALIAS PULITO
+                    column: "areaNum",
                     type: "number",
                   },
                   {
                     title: "Inchiostro (ml)",
-                    column: "inkNum", // USIAMO L'ALIAS PULITO
+                    column: "inkNum",
                     type: "number",
                   },
-                  { title: "Stato", column: "Stato" }, // AGGIUNTA
+                  { title: "Stato", column: "Stato" },
                   { title: "Utente", column: "Utente" },
                 ]}
               />
