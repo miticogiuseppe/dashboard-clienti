@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function AppmerceChartByArticolo({
@@ -35,7 +35,7 @@ export default function AppmerceChartByArticolo({
         filteredData,
         dateCol,
         moment(startDate),
-        moment(endDate)
+        moment(endDate),
       );
     }
 
@@ -46,7 +46,7 @@ export default function AppmerceChartByArticolo({
       valueCol,
       false,
       undefined,
-      groupCb
+      groupCb,
     );
     let total = counters.reduce((acc, item) => acc + item.count, 0);
     if (!noSort) counters = counters.sort((a, b) => b.count - a.count);
@@ -69,7 +69,7 @@ export default function AppmerceChartByArticolo({
       groupCol,
       undefined,
       undefined,
-      "bar"
+      "bar",
     );
 
     // fix label lunghe
@@ -94,6 +94,32 @@ export default function AppmerceChartByArticolo({
       ...chartOptions.fill,
       opacity: 1,
     };
+
+    // --- LOGICA INTELLIGENTE PER DECIMALI E UNITÀ DI MISURA ---
+    chartOptions.yaxis = {
+      ...chartOptions.yaxis,
+      labels: {
+        formatter: (val) => {
+          // Se sono metri quadri (Plotter), mostra 2 decimali
+          return seriesName === "Mq Stampati"
+            ? val.toFixed(2)
+            : Math.round(val);
+        },
+      },
+    };
+
+    chartOptions.tooltip = {
+      ...chartOptions.tooltip,
+      y: {
+        formatter: (val) => {
+          // Se sono metri quadri, aggiungi "mq", altrimenti solo il numero
+          return seriesName === "Mq Stampati"
+            ? val.toFixed(2) + " mq"
+            : Math.round(val).toString();
+        },
+      },
+    };
+    // -------------------------------------------------------
 
     return {
       graphSeries: seriesData,

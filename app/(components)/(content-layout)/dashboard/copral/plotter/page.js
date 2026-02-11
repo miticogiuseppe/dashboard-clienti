@@ -24,10 +24,10 @@ export default function PaginaPlotter() {
   const [pickerDateArt, setPickerDateArt] = useState(undefined);
   const [periodoArt, setPeriodoArt] = useState("mese");
 
-  const [data, setData] = useState(undefined); // Ordini
-  const [data2, setData2] = useState(undefined); // Produzione Robot
+  const [data, setData] = useState(undefined); // Ordini (Excel)
+  const [data2, setData2] = useState(undefined); // Produzione (Plotter CSV)
 
-  // FETCH ORDINI
+  // 1. FETCH ORDINI (Sorgente Excel standard)
   useEffect(() => {
     async function fetchOrders() {
       try {
@@ -44,58 +44,61 @@ export default function PaginaPlotter() {
     }
     fetchOrders();
   }, []);
-  // FETCH PRODUZIONE ROBOT
+
+  // 2. FETCH PRODUZIONE ROBOT (Sorgente Plotter CSV)
   useEffect(() => {
     async function fetchRobotData() {
       try {
         const response = await fetch("/api/fetch-plotter-data");
         const json = await response.json();
 
-        // 1. Usiamo la tua parseCustom per le date
-        let rawData = parseCustom(json.data, ["Ora"], (x) => moment(x));
+        // Trasformiamo le date
+        const withDates = parseCustom(json.data, ["Ora"], (x) => moment(x));
 
-        // 2. Sanitizzazione dati
-        const sanitized = rawData
+        const processed = withDates
           .map((row) => {
-            const areaRaw = row["Area carta (m2)"] || "0";
-            const parsedArea =
-              parseFloat(areaRaw.toString().replace(",", ".")) || 0;
+            // --- CORREZIONE ERRORE VIRGOLA ---
+            // Il server ci dà 43 invece di 0.43 e 50 invece di 0.5
+            // Dobbiamo dividere per 100 i valori che arrivano dal CSV
+
+            const areaNum = Number(row["Carta Totale usata (m2)"]) / 100 || 0;
+            const inkNum =
+              Number(row["Inchiostro Totale usato (ml)"]) / 100 || 0;
+
+            const nomeLower = row["Nome"]?.toLowerCase() || "";
 
             return {
               ...row,
-              "Area carta (m2)": parsedArea,
-              areaNum: parsedArea,
-              oraLeggibile: row.Ora.format("DD/MM/YYYY HH:mm"), // Per vedere l'ora in tabella
+              // Usiamo questi alias corretti (divisi per 100)
+              areaNum: areaNum,
+              inkNum: inkNum,
+              tipoOperazione:
+                areaNum > 0
+                  ? "Stampa"
+                  : nomeLower.includes("maintenance")
+                    ? "Manutenzione"
+                    : "Servizio",
+              oraLeggibile:
+                row.Ora && row.Ora.isValid()
+                  ? row.Ora.format("DD/MM/YYYY HH:mm")
+                  : "Data non valida",
             };
           })
-          // 3. FILTRO AGGIORNATO:
-          // Teniamo tutto ciò che è "Stampato" (incluse manutenzioni con area 0)
-          // Oppure tutto ciò che contiene la parola "maintenance" o "Service"
-          .filter((row) => {
-            const stato = row["Stato"]?.trim();
-            const nome = row["Nome"]?.toLowerCase() || "";
-            return (
-              stato === "Stampato" ||
-              nome.includes("maintenance") ||
-              nome.includes("service")
-            );
-          });
+          .filter((row) => row["Stato"] && row["Stato"] !== "");
 
-        setData2(sanitized);
+        setData2(processed);
       } catch (error) {
-        console.error("Errore fetchPlotterData:", error);
+        console.error("Errore Robot Plotter:", error);
         setData2([]);
       }
     }
     fetchRobotData();
   }, []);
-
   const isLoading = useMemo(() => !data || !data2, [data, data2]);
 
   return (
     <>
       <Seo title="Macchina - Plotter" />
-
       {isLoading ? (
         <Preloader show={true} />
       ) : (
@@ -118,7 +121,7 @@ export default function PaginaPlotter() {
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Ordini</Card.Title>
+                  <Card.Title>Ordini Ricevuti</Card.Title>
                   <PeriodDropdown
                     onChange={(p) => {
                       setPeriodoTS(p);
@@ -147,7 +150,7 @@ export default function PaginaPlotter() {
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Produzione Metri Quadri</Card.Title>
+                  <Card.Title>Produzione Effettiva (mq)</Card.Title>
                   <PeriodDropdown
                     onChange={(p) => {
                       setPeriodoArt(p);
@@ -167,8 +170,8 @@ export default function PaginaPlotter() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Ora"
                     groupCol="Nome"
-                    valueCol="Area carta (m2)"
-                    seriesName="Mq Prodotti"
+                    valueCol="areaNum"
+                    seriesName="Mq Stampati"
                   />
                 </Card.Body>
               </Card>
@@ -180,38 +183,72 @@ export default function PaginaPlotter() {
             <Col xxl={6}>
               <AppmerceTable
                 data={data}
-                title="Dettaglio Ordini"
+                title="Ordini"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ord" },
-                  { title: "N. ord.", column: "Nr.ord", type: "number" },
-                  { title: "Rag. soc.", column: "Ragione sociale", bold: true },
-                  { title: "Articolo", column: "Articolo" },
-                  { title: "Qta ev.", column: "QTAev II UM", type: "number" },
+                  {
+                    title: "N. ord.",
+                    column: "Nr.ord",
+                    type: "number",
+                  },
+                  { title: "Sez.", column: "Sez", type: "number" },
+                  {
+                    title: "Rag. soc.",
+                    column: "Ragione sociale",
+                    default: "Cliente generico",
+                    bold: true,
+                  },
+                  { title: "Agente", column: "Des. Agente" },
+                  {
+                    title: "Cod. art.",
+                    className: "text-center",
+                    column: "Articolo",
+                  },
+                  {
+                    title: "Qta da ev.",
+                    column: "Qta da ev",
+                    type: "number",
+                    allowZero: true,
+                  },
+                  {
+                    title: "Qta ev.",
+                    column: "QTAev II UM",
+                    type: "number",
+                    allowZero: true,
+                  },
                 ]}
               />
             </Col>
 
-            {/* TABELLA PRODUZIONE REALE */}
+            {/* TABELLA LOG HP (Migliorata) */}
+            {/* TABELLA LOG HP (Migliorata con nuove colonne) */}
             <Col xxl={6}>
               <AppmerceTable
                 data={data2}
-                title="Log HP T2600"
+                title="Log Attività HP T2600"
                 fileExcel="Usage"
                 dateColumn="Ora"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
-                  { title: "ID", column: "Ordina" },
-                  { title: "Inizio Stampa", column: "Ora", bold: true },
+                  { title: "Inizio", column: "oraLeggibile", bold: true },
                   { title: "Documento", column: "Nome" },
+                  { title: "Materiale", column: "Tipo di carta" }, // AGGIUNTA
+                  { title: "Qualità", column: "Qualità di stampa" }, // AGGIUNTA
                   {
                     title: "Area (m²)",
-                    column: "Area carta (m2)",
+                    column: "areaNum", // USIAMO L'ALIAS PULITO
                     type: "number",
                   },
-                  { title: "Status", column: "Stato" },
+                  {
+                    title: "Inchiostro (ml)",
+                    column: "inkNum", // USIAMO L'ALIAS PULITO
+                    type: "number",
+                  },
+                  { title: "Stato", column: "Stato" }, // AGGIUNTA
+                  { title: "Utente", column: "Utente" },
                 ]}
               />
             </Col>
