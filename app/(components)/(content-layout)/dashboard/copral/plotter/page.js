@@ -8,42 +8,15 @@ import PeriodDropdown from "@/components/PeriodDropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate, fmt } from "@/utils/dateUtils";
-import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
+import { orderSheet, parseDates, parseCustom } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
+import moment from "moment";
 
 const resources = {
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
 };
-
-// --- DATI MOCK PER PRODUZIONE PLOTTER (In attesa del CSV) ---
-const MOCK_PLOTTER = [
-  {
-    Numero: 404,
-    Ora: "2026/01/13 03:34",
-    Nome: "Service - maintenance",
-    Utente: "Service",
-    "Area carta (m²)": 0.0,
-    Stato: "Stampato",
-  },
-  {
-    Numero: 405,
-    Ora: "2026/01/13 09:35",
-    Nome: "Progetto_Esecutivo.pdf",
-    Utente: "Admin",
-    "Area carta (m²)": 1.25,
-    Stato: "Stampato",
-  },
-  {
-    Numero: 406,
-    Ora: "2026/01/14 15:35",
-    Nome: "Locandina_Cantiere.png",
-    Utente: "User1",
-    "Area carta (m²)": 0.45,
-    Stato: "Stampato",
-  },
-];
 
 export default function PaginaPlotter() {
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
@@ -51,42 +24,73 @@ export default function PaginaPlotter() {
   const [pickerDateArt, setPickerDateArt] = useState(undefined);
   const [periodoArt, setPeriodoArt] = useState("mese");
 
-  const [data, setData] = useState(undefined); // Dati REALI Ordini
-  const [data2, setData2] = useState(undefined); // Dati MOCK Produzione
+  const [data, setData] = useState(undefined); // Ordini
+  const [data2, setData2] = useState(undefined); // Produzione Robot
 
-  // FETCH REALE ORDINI (APPMERCE-000)
+  // FETCH ORDINI
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const res = await fetch(
+        const response = await fetch(
           "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
         );
-        const resp = await res.json();
-        let fetchedData = resp.data;
-
-        fetchedData = parseDates(fetchedData, ["Data ord"]);
-        fetchedData = orderSheet(fetchedData, ["Data ord"], ["asc"]);
-
-        setData(fetchedData);
+        const json = await response.json();
+        let fetchedData = parseDates(json.data, ["Data ord"]);
+        setData(orderSheet(fetchedData, ["Data ord"], ["asc"]));
       } catch (error) {
-        console.error("Errore caricamento ordini:", error);
-        setData([]); // Fallback array vuoto in caso di errore
+        console.error("Errore ordini:", error);
+        setData([]);
       }
     }
     fetchOrders();
   }, []);
-
-  // CARICAMENTO MOCK PRODUZIONE
+  // FETCH PRODUZIONE ROBOT
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setData2(parseDates(MOCK_PLOTTER, ["Ora"]));
-    }, 500);
-    return () => clearTimeout(timer);
+    async function fetchRobotData() {
+      try {
+        const response = await fetch("/api/fetch-plotter-data");
+        const json = await response.json();
+
+        // 1. Usiamo la tua parseCustom per le date
+        let rawData = parseCustom(json.data, ["Ora"], (x) => moment(x));
+
+        // 2. Sanitizzazione dati
+        const sanitized = rawData
+          .map((row) => {
+            const areaRaw = row["Area carta (m2)"] || "0";
+            const parsedArea =
+              parseFloat(areaRaw.toString().replace(",", ".")) || 0;
+
+            return {
+              ...row,
+              "Area carta (m2)": parsedArea,
+              areaNum: parsedArea,
+              oraLeggibile: row.Ora.format("DD/MM/YYYY HH:mm"), // Per vedere l'ora in tabella
+            };
+          })
+          // 3. FILTRO AGGIORNATO:
+          // Teniamo tutto ciò che è "Stampato" (incluse manutenzioni con area 0)
+          // Oppure tutto ciò che contiene la parola "maintenance" o "Service"
+          .filter((row) => {
+            const stato = row["Stato"]?.trim();
+            const nome = row["Nome"]?.toLowerCase() || "";
+            return (
+              stato === "Stampato" ||
+              nome.includes("maintenance") ||
+              nome.includes("service")
+            );
+          });
+
+        setData2(sanitized);
+      } catch (error) {
+        console.error("Errore fetchPlotterData:", error);
+        setData2([]);
+      }
+    }
+    fetchRobotData();
   }, []);
 
-  const isLoading = useMemo(() => {
-    return !data || !data2;
-  }, [data, data2]);
+  const isLoading = useMemo(() => !data || !data2, [data, data2]);
 
   return (
     <>
@@ -110,7 +114,7 @@ export default function PaginaPlotter() {
           </Row>
 
           <Row className="stretch-row">
-            {/* GRAFICO ORDINI (REALE) */}
+            {/* GRAFICO ORDINI */}
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
@@ -139,11 +143,11 @@ export default function PaginaPlotter() {
               </Card>
             </Col>
 
-            {/* GRAFICO MQ STAMPATI (MOCK) */}
+            {/* GRAFICO PRODUZIONE REALE */}
             <Col xxl={6} className="stretch-column">
               <Card className="custom-card stretch-card">
                 <Card.Header className="justify-content-between">
-                  <Card.Title>Produzione Mq (Mock)</Card.Title>
+                  <Card.Title>Produzione Metri Quadri</Card.Title>
                   <PeriodDropdown
                     onChange={(p) => {
                       setPeriodoArt(p);
@@ -163,8 +167,8 @@ export default function PaginaPlotter() {
                     endDate={fmt(pickerDateArt, periodoArt, 1)}
                     dateCol="Ora"
                     groupCol="Nome"
-                    valueCol="Area carta (m²)"
-                    seriesName="Metri Quadri"
+                    valueCol="Area carta (m2)"
+                    seriesName="Mq Prodotti"
                   />
                 </Card.Body>
               </Card>
@@ -172,11 +176,11 @@ export default function PaginaPlotter() {
           </Row>
 
           <Row>
-            {/* TABELLA ORDINI (REALE) */}
+            {/* TABELLA ORDINI */}
             <Col xxl={6}>
               <AppmerceTable
                 data={data}
-                title="Ordini"
+                title="Dettaglio Ordini"
                 fileExcel="APPMERCE-000"
                 dateColumn="Data ord"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
@@ -190,21 +194,21 @@ export default function PaginaPlotter() {
               />
             </Col>
 
-            {/* TABELLA PRODUZIONE (MOCK) */}
+            {/* TABELLA PRODUZIONE REALE */}
             <Col xxl={6}>
               <AppmerceTable
                 data={data2}
-                title="Log HP T2600 (Mock)"
-                fileExcel="MOCK_HP"
+                title="Log HP T2600"
+                fileExcel="Usage"
                 dateColumn="Ora"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
-                  { title: "ID", column: "Numero" },
+                  { title: "ID", column: "Ordina" },
                   { title: "Inizio Stampa", column: "Ora", bold: true },
                   { title: "Documento", column: "Nome" },
                   {
                     title: "Area (m²)",
-                    column: "Area carta (m²)",
+                    column: "Area carta (m2)",
                     type: "number",
                   },
                   { title: "Status", column: "Stato" },
