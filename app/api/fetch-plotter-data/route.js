@@ -25,10 +25,10 @@ export async function GET(req) {
         status: 404,
       });
 
-    // 1. Leggiamo il file come testo
+    // Legge il file come testo
     let fileContent = fs.readFileSync(filePath, "utf-8");
 
-    // 2. Pulizia: Cerchiamo la riga dove iniziano i dati veri
+    // Pulizia: Cerca la riga dove iniziano i dati veri
     const lines = fileContent.split(/\r?\n/);
     const headerIndex = lines.findIndex((line) =>
       line.startsWith("Nome;Ordina;Ora"),
@@ -44,7 +44,7 @@ export async function GET(req) {
     // Prendiamo solo dalla riga dell'intestazione in poi
     const cleanCsv = lines.slice(headerIndex).join("\n");
 
-    // 3. Parsing con XLSX: ora riconoscerà le colonne correttamente!
+    // Parsing con XLSX: ora riconoscerà le colonne correttamente!
     const workbook = XLSX.read(cleanCsv, { type: "string", FS: ";" });
     const jsonSheet = XLSX.utils.sheet_to_json(
       workbook.Sheets[workbook.SheetNames[0]],
