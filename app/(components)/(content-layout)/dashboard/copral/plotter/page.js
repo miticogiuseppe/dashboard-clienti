@@ -250,7 +250,7 @@ export default function PaginaPlotter() {
               <AppmerceTable
                 data={data2}
                 title="Log Attività HP T2600"
-                fileExcel="Usage"
+                fileExcel="USAGE-HP"
                 dateColumn="Ora"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
                 tableHeaders={[
