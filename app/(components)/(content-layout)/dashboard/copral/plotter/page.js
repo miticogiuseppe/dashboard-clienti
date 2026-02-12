@@ -16,6 +16,7 @@ import moment from "moment";
 
 const resources = {
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
+  filePlotter: "/api/download-resource?id=USAGE-HP",
 };
 
 export default function PaginaPlotter() {
@@ -27,7 +28,7 @@ export default function PaginaPlotter() {
   const [data, setData] = useState(undefined); // Ordini (Excel)
   const [data2, setData2] = useState(undefined); // Produzione (Plotter CSV)
 
-  // 1. FETCH ORDINI (Sorgente Excel standard)
+  // FETCH ORDINI (Sorgente Excel)
   useEffect(() => {
     async function fetchOrders() {
       try {
