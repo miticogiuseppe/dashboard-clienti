@@ -1,33 +1,54 @@
 "use client";
+
 import React, {
   useEffect,
   useState,
   useMemo,
-  useCallback,
   Fragment,
+  useCallback,
 } from "react";
-import { Row, Col, Card, Table, Badge } from "react-bootstrap";
+import { Row, Col, Card, Badge } from "react-bootstrap";
 import { useRouter } from "next/navigation";
+
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-import SearchBox from "@/components/SearchBox";
-import { checkRow } from "@/utils/filters";
 import { formatCurrency } from "@/utils/currency";
+
+import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import { FaEuroSign } from "react-icons/fa";
+import { PiTrendUp, PiPackage } from "react-icons/pi";
+
+import AppmerceTable from "@/components/AppmerceTable";
 
 const VendutoAgente = () => {
   const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
   const [user, setUser] = useState(null);
-  const [filters, setFilters] = useState({
-    cliente: { search: "", selected: undefined },
-  });
+  const [filteredTableData, setFilteredTableData] = useState(null);
 
-  // 1. Caricamento Sessione e Dati (Filtro automatico lato server tramite API)
+  const handleFilteredChange = useCallback((rows) => {
+    setFilteredTableData((prev) => {
+      if (
+        prev &&
+        prev.length === rows.length &&
+        prev.every((item, i) => item === rows[i])
+      ) {
+        return prev;
+      }
+      return rows;
+    });
+  }, []);
+
+  // ==============================
+  // Caricamento Sessione + Dati
+  // ==============================
   useEffect(() => {
     const initPage = async () => {
       setIsLoading(true);
+
       try {
         const sessionRes = await fetch("/api/auth/session");
         const session = await sessionRes.json();
@@ -39,10 +60,10 @@ const VendutoAgente = () => {
 
         setUser(session.user);
 
-        // Chiamata all'ID centralizzato definito nel tuo filedb.json
         const response = await fetch(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
         );
+
         const json = await response.json();
 
         if (json.data) {
@@ -58,39 +79,23 @@ const VendutoAgente = () => {
     initPage();
   }, [router]);
 
-  // 2. Logica dei filtri (Puntiamo sulla Descrizione per la ricerca)
-  const handleFilter = useCallback((val) => {
-    setFilters((prev) => ({ ...prev, cliente: val }));
-  }, []);
-
-  const listaClienti = useMemo(() => {
-    return Array.from(
-      new Set(
-        data?.map((d) => d["Descrizione Cliente/Fornitore"]).filter(Boolean) ||
-          [],
-      ),
-    );
-  }, [data]);
-
-  const filteredData = useMemo(() => {
-    return (
-      data?.filter((item) =>
-        checkRow(item, "Descrizione Cliente/Fornitore", filters.cliente),
-      ) ?? []
-    );
-  }, [data, filters]);
-
-  // 3. Calcolo statistiche basate sulla colonna "Valore" dell'Excel attuale
+  // ==============================
+  // Calcolo Statistiche dinamiche
+  // ==============================
   const stats = useMemo(() => {
-    const totaleValore = filteredData.reduce(
+    const source = filteredTableData !== null ? filteredTableData : data;
+
+    const totaleValore = source.reduce(
       (acc, curr) => acc + (Number(curr["Valore"]) || 0),
       0,
     );
-    const totaleUtile = filteredData.reduce(
+
+    const totaleUtile = source.reduce(
       (acc, curr) => acc + (Number(curr["Utile totale"]) || 0),
       0,
     );
-    const totaleQuantita = filteredData.reduce(
+
+    const totaleQuantita = source.reduce(
       (acc, curr) => acc + (Number(curr["Quantita'"]) || 0),
       0,
     );
@@ -99,9 +104,40 @@ const VendutoAgente = () => {
       valore: formatCurrency(totaleValore),
       utile: formatCurrency(totaleUtile),
       quantita: totaleQuantita.toLocaleString("it-IT"),
-      count: filteredData.length,
+      count: source.length,
     };
-  }, [filteredData]);
+  }, [filteredTableData, data]);
+
+  // ==============================
+  // Card dinamiche Xintra style
+  // ==============================
+  const dynamicCards = [
+    {
+      id: 1,
+      title: "Totale Valore",
+      count: stats.valore,
+      svgIcon: <FaEuroSign />,
+      backgroundColor: "primary svg-white",
+    },
+    {
+      id: 2,
+      title: "Totale Utile",
+      count: stats.utile,
+      svgIcon: <PiTrendUp />,
+      backgroundColor: "success svg-white",
+    },
+    {
+      id: 3,
+      title: "Volume Quantità",
+      count: stats.quantita,
+      svgIcon: <PiPackage />,
+      backgroundColor: "info svg-white",
+    },
+  ];
+
+  const agenteLabel = user
+    ? `${user.username}${user.codice_agente ? ` (${user.codice_agente})` : ""}`
+    : "Utente";
 
   return (
     <Fragment>
@@ -113,116 +149,67 @@ const VendutoAgente = () => {
         <Fragment>
           <Pageheader
             title="Area Agente"
-            currentpage={`Benvenuto, ${user?.username || "Utente"}`}
+            currentpage={`Benvenuto, ${agenteLabel}`}
             activepage="Analisi Vendite"
           />
 
-          {/* --- CARDS RIEPILOGATIVE --- */}
+          {/* ============================== */}
+          {/* CARD DASHBOARD */}
+          {/* ============================== */}
           <Row className="mb-4">
-            <Col xl={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-primary">
-                <Card.Body>
-                  <p className="text-muted mb-1 fs-12 uppercase fw-semibold">
-                    Totale Valore Filtrato
-                  </p>
-                  <h4 className="fw-bold mb-0">{stats.valore}</h4>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col xl={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-success">
-                <Card.Body>
-                  <p className="text-success mb-1 fs-12 uppercase fw-semibold">
-                    Totale Utile
-                  </p>
-                  <h4 className="fw-bold mb-0">{stats.utile}</h4>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col xl={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-info">
-                <Card.Body>
-                  <p className="text-muted mb-1 fs-12 uppercase fw-semibold">
-                    Volume Quantità
-                  </p>
-                  <h4 className="fw-bold mb-0">{stats.quantita}</h4>
-                </Card.Body>
-              </Card>
-            </Col>
+            {dynamicCards.map((card) => (
+              <Col xxl={3} xl={3} lg={6} key={card.id}>
+                <Spkcardscomponent
+                  cardClass="overflow-hidden main-content-card"
+                  headingClass="d-block mb-1"
+                  mainClass="d-flex align-items-start justify-content-between mb-2"
+                  svgIcon={card.svgIcon}
+                  card={card}
+                  badgeClass="md"
+                  dataClass="mb-0"
+                />
+              </Col>
+            ))}
           </Row>
 
-          {/* BOX RICERCA */}
-          <Card className="custom-card mb-4 shadow-sm">
-            <Card.Body>
-              <SearchBox
-                data={listaClienti}
-                name="Cerca Cliente"
-                onSearch={handleFilter}
-                placeholder="Scrivi la ragione sociale..."
-              />
-            </Card.Body>
-          </Card>
-
+          {/* ============================== */}
           {/* TABELLA DATI */}
-          <Card className="custom-card shadow-sm">
-            <Card.Header className="justify-content-between">
-              <Card.Title>Dettaglio Portafoglio: {user?.username}</Card.Title>
-              <Badge bg="primary-transparent">
-                {stats.count} Clienti visualizzati
-              </Badge>
-            </Card.Header>
-            <Card.Body className="p-0">
-              <div className="table-responsive">
-                <Table hover className="mb-0 align-middle">
-                  <thead>
-                    <tr className="table-light">
-                      <th className="ps-3" style={{ width: "120px" }}>
-                        Codice
-                      </th>
-                      <th>Ragione Sociale</th>
-                      <th className="text-end">Quantità</th>
-                      <th className="text-end text-primary">Valore</th>
-                      <th className="text-end pe-3">Utile Totale</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((row, i) => (
-                        <tr key={i}>
-                          {/* Codice */}
-                          <td className="ps-3 text-muted fs-11 fw-semibold">
-                            {row["Cliente/Fornitore"]}
-                          </td>
-                          {/* Ragione Sociale */}
-                          <td className="fw-medium">
-                            {row["Descrizione Cliente/Fornitore"]}
-                          </td>
-                          {/* Quantità */}
-                          <td className="text-end">
-                            {Number(row["Quantita'"]).toLocaleString("it-IT")}
-                          </td>
-                          {/* Valore */}
-                          <td className="text-end text-primary fw-bold">
-                            {formatCurrency(row["Valore"])}
-                          </td>
-                          {/* Utile */}
-                          <td className="text-end pe-3 fw-bold">
-                            {formatCurrency(row["Utile totale"])}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center p-4 text-muted">
-                          Nessun dato trovato per la ricerca effettuata.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </div>
-            </Card.Body>
-          </Card>
+          {/* ============================== */}
+
+          <AppmerceTable
+            data={data}
+            title={`Dettaglio Vendite: ${agenteLabel}`}
+            tableHeaders={[
+              {
+                title: "Codice",
+                column: "Cliente/Fornitore",
+                bold: true,
+              },
+              {
+                title: "Ragione Sociale",
+                column: "Descrizione Cliente/Fornitore",
+              },
+              {
+                title: "Quantità",
+                column: "Quantita'",
+                type: "number",
+              },
+              {
+                title: "Valore",
+                column: "Valore",
+                type: "number",
+              },
+              {
+                title: "Utile Totale",
+                column: "Utile totale",
+                type: "number",
+              },
+            ]}
+            enableSearch={true}
+            searchPlaceholder="Cerca cliente..."
+            className="custom-card"
+            onFilteredDataChange={handleFilteredChange}
+          />
         </Fragment>
       )}
     </Fragment>
