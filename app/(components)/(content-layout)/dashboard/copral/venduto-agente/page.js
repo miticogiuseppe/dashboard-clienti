@@ -7,6 +7,7 @@ import React, {
   Fragment,
 } from "react";
 import { Row, Col, Card, Table, Badge } from "react-bootstrap";
+import { useRouter } from "next/navigation";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
@@ -15,197 +16,211 @@ import { checkRow } from "@/utils/filters";
 import { formatCurrency } from "@/utils/currency";
 
 const VendutoAgente = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [user, setUser] = useState(null);
   const [filters, setFilters] = useState({
     cliente: { search: "", selected: undefined },
   });
 
-  // 1. Caricamento dati dall'API
+  // 1. Caricamento Sessione e Dati (Filtro automatico lato server tramite API)
   useEffect(() => {
-    const fetchData = async () => {
+    const initPage = async () => {
       setIsLoading(true);
       try {
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+
+        if (!session.user) {
+          router.push("/login");
+          return;
+        }
+
+        setUser(session.user);
+
+        // Chiamata all'ID centralizzato definito nel tuo filedb.json
         const response = await fetch(
-          "/api/fetch-excel-json?id=STATISTICA_VENDUTO_1",
+          "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
         );
         const json = await response.json();
+
         if (json.data) {
           setData(json.data);
         }
       } catch (error) {
-        console.error("Errore nel caricamento dei dati Agente 1:", error);
+        console.error("Errore nel caricamento dati:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-    fetchData();
-  }, []);
 
-  // 2. Logica dei filtri stabilizzata
+    initPage();
+  }, [router]);
+
+  // 2. Logica dei filtri (Puntiamo sulla Descrizione per la ricerca)
   const handleFilter = useCallback((val) => {
     setFilters((prev) => ({ ...prev, cliente: val }));
   }, []);
 
   const listaClienti = useMemo(() => {
     return Array.from(
-      new Set(data?.map((d) => d["CLIENTI"]).filter(Boolean) || []),
+      new Set(
+        data?.map((d) => d["Descrizione Cliente/Fornitore"]).filter(Boolean) ||
+          [],
+      ),
     );
   }, [data]);
 
   const filteredData = useMemo(() => {
     return (
-      data?.filter((item) => checkRow(item, "CLIENTI", filters.cliente)) ?? []
+      data?.filter((item) =>
+        checkRow(item, "Descrizione Cliente/Fornitore", filters.cliente),
+      ) ?? []
     );
   }, [data, filters]);
 
-  // 3. Calcolo statistiche per le Card (basate sui dati filtrati)
+  // 3. Calcolo statistiche basate sulla colonna "Valore" dell'Excel attuale
   const stats = useMemo(() => {
-    const v24 = filteredData.reduce(
-      (acc, curr) => acc + (Number(curr["2024"]) || 0),
+    const totaleValore = filteredData.reduce(
+      (acc, curr) => acc + (Number(curr["Valore"]) || 0),
       0,
     );
-    const v25 = filteredData.reduce(
-      (acc, curr) => acc + (Number(curr["2025"]) || 0),
+    const totaleUtile = filteredData.reduce(
+      (acc, curr) => acc + (Number(curr["Utile totale"]) || 0),
       0,
     );
-    const delta = v24 !== 0 ? ((v25 - v24) / v24) * 100 : 0;
+    const totaleQuantita = filteredData.reduce(
+      (acc, curr) => acc + (Number(curr["Quantita'"]) || 0),
+      0,
+    );
 
     return {
-      v24: formatCurrency(v24),
-      v25: formatCurrency(v25),
-      delta: delta.toFixed(1),
-      isPositive: delta >= 0,
+      valore: formatCurrency(totaleValore),
+      utile: formatCurrency(totaleUtile),
+      quantita: totaleQuantita.toLocaleString("it-IT"),
       count: filteredData.length,
     };
   }, [filteredData]);
 
   return (
     <Fragment>
-      <Seo title="Venduto Agente 1 - STAVEN-1" />
+      <Seo title={`Vendite - ${user?.username || "Agente"}`} />
 
       {isLoading ? (
         <Preloader show={true} />
       ) : (
         <Fragment>
           <Pageheader
-            title="Vendite Agente"
-            currentpage="Agente 1 (STAVEN-1)"
-            activepage="Analisi"
+            title="Area Agente"
+            currentpage={`Benvenuto, ${user?.username || "Utente"}`}
+            activepage="Analisi Vendite"
           />
 
-          {/* --- CARD DEI TOTALI --- */}
+          {/* --- CARDS RIEPILOGATIVE --- */}
           <Row className="mb-4">
-            <Col xl={4} md={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-light">
+            <Col xl={4}>
+              <Card className="custom-card shadow-sm border-top border-4 border-primary">
                 <Card.Body>
                   <p className="text-muted mb-1 fs-12 uppercase fw-semibold">
-                    Fatturato Filtrato 2024
+                    Totale Valore Filtrato
                   </p>
-                  <h4 className="fw-bold mb-0">{stats.v24}</h4>
+                  <h4 className="fw-bold mb-0">{stats.valore}</h4>
                 </Card.Body>
               </Card>
             </Col>
-            <Col xl={4} md={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-light">
+            <Col xl={4}>
+              <Card className="custom-card shadow-sm border-top border-4 border-success">
                 <Card.Body>
-                  <p className="text-primary mb-1 fs-12 uppercase fw-semibold">
-                    Fatturato Filtrato 2025
+                  <p className="text-success mb-1 fs-12 uppercase fw-semibold">
+                    Totale Utile
                   </p>
-                  <h4 className="fw-bold mb-0">{stats.v25}</h4>
+                  <h4 className="fw-bold mb-0">{stats.utile}</h4>
                 </Card.Body>
               </Card>
             </Col>
-            <Col xl={4} md={4}>
-              <Card className="custom-card shadow-sm border-top border-4 border-light">
+            <Col xl={4}>
+              <Card className="custom-card shadow-sm border-top border-4 border-info">
                 <Card.Body>
                   <p className="text-muted mb-1 fs-12 uppercase fw-semibold">
-                    Trend Performance
+                    Volume Quantità
                   </p>
-                  <h4
-                    className={`fw-bold mb-0 ${stats.isPositive ? "text-success" : "text-danger"}`}
-                  >
-                    {stats.isPositive ? "+" : ""}
-                    {stats.delta}%
-                    <i
-                      className={`${stats.isPositive ? "ri-arrow-up-fill" : "ri-arrow-down-fill"} ms-1`}
-                    ></i>
-                  </h4>
+                  <h4 className="fw-bold mb-0">{stats.quantita}</h4>
                 </Card.Body>
               </Card>
             </Col>
           </Row>
 
-          {/* BOX DI RICERCA */}
+          {/* BOX RICERCA */}
           <Card className="custom-card mb-4 shadow-sm">
             <Card.Body>
               <SearchBox
                 data={listaClienti}
-                name="Cerca nel portafoglio Clienti"
+                name="Cerca Cliente"
                 onSearch={handleFilter}
-                placeholder="Inserisci ragione sociale..."
+                placeholder="Scrivi la ragione sociale..."
               />
             </Card.Body>
           </Card>
 
-          {/* TABELLA DETTAGLIO */}
+          {/* TABELLA DATI */}
           <Card className="custom-card shadow-sm">
             <Card.Header className="justify-content-between">
-              <Card.Title>Dettaglio Clienti Agente 1</Card.Title>
+              <Card.Title>Dettaglio Portafoglio: {user?.username}</Card.Title>
               <Badge bg="primary-transparent">
                 {stats.count} Clienti visualizzati
               </Badge>
             </Card.Header>
             <Card.Body className="p-0">
-              <Table responsive hover striped className="mb-0 align-middle">
-                <thead>
-                  <tr className="table-light">
-                    <th className="ps-3">Ragione Sociale</th>
-                    <th className="text-end">Fatturato 2024</th>
-                    <th className="text-end text-primary">Fatturato 2025</th>
-                    <th className="text-end">Delta 25/24</th>
-                    <th className="text-end pe-3">Totale Complessivo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.length > 0 ? (
-                    filteredData.map((row, i) => {
-                      const d24 = Number(row["DELTA 25/24"]) || 0;
-                      return (
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead>
+                    <tr className="table-light">
+                      <th className="ps-3" style={{ width: "120px" }}>
+                        Codice
+                      </th>
+                      <th>Ragione Sociale</th>
+                      <th className="text-end">Quantità</th>
+                      <th className="text-end text-primary">Valore</th>
+                      <th className="text-end pe-3">Utile Totale</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.length > 0 ? (
+                      filteredData.map((row, i) => (
                         <tr key={i}>
-                          <td className="ps-3 fw-medium">{row["CLIENTI"]}</td>
+                          {/* Codice */}
+                          <td className="ps-3 text-muted fs-11 fw-semibold">
+                            {row["Cliente/Fornitore"]}
+                          </td>
+                          {/* Ragione Sociale */}
+                          <td className="fw-medium">
+                            {row["Descrizione Cliente/Fornitore"]}
+                          </td>
+                          {/* Quantità */}
                           <td className="text-end">
-                            {formatCurrency(row["2024"])}
+                            {Number(row["Quantita'"]).toLocaleString("it-IT")}
                           </td>
+                          {/* Valore */}
                           <td className="text-end text-primary fw-bold">
-                            {formatCurrency(row["2025"])}
+                            {formatCurrency(row["Valore"])}
                           </td>
-                          <td
-                            className={`text-end fw-semibold ${d24 >= 0 ? "text-success" : "text-danger"}`}
-                          >
-                            {(d24 * 100).toFixed(1).replace(".", ",")}%
-                            <i
-                              className={
-                                d24 >= 0
-                                  ? "ri-arrow-up-fill ms-1"
-                                  : "ri-arrow-down-fill ms-1"
-                              }
-                            ></i>
-                          </td>
+                          {/* Utile */}
                           <td className="text-end pe-3 fw-bold">
-                            {formatCurrency(row["Totale complessivo"])}
+                            {formatCurrency(row["Utile totale"])}
                           </td>
                         </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="text-center p-4 text-muted">
-                        Nessun dato trovato per i criteri di ricerca.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center p-4 text-muted">
+                          Nessun dato trovato per la ricerca effettuata.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </div>
             </Card.Body>
           </Card>
         </Fragment>

@@ -9,7 +9,14 @@ export async function GET(req) {
   return await check(req, async () => {
     // Ottenere il tenant
     const token = await getTokenData();
-    const tenant = token.tenant;
+    const { tenant, role, codice_agente, codice_cliente } = token;
+
+    // LOG per debug dei filtri
+    console.log("--- DEBUG FILTRO ---");
+    console.log("Ruolo:", role);
+    console.log("Agente:", codice_agente);
+    console.log("Cliente:", codice_cliente);
+    console.log("--------------------");
 
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
@@ -49,8 +56,9 @@ export async function GET(req) {
     const jsonFile = path.join(
       process.env.DRIVE_PATH,
       path.parse(resource.path).dir,
-      path.parse(resource.path).name + ".json"
+      path.parse(resource.path).name + ".json",
     );
+
     let jsonSheet = undefined;
     let fileDate = undefined;
 
@@ -79,6 +87,33 @@ export async function GET(req) {
       fileDate = fileInfo.mtime;
     }
 
+    // Applichiamo il filtro solo se i dati sono stati caricati con successo
+    if (jsonSheet && Array.isArray(jsonSheet) && jsonSheet.length > 0) {
+      const columns = Object.keys(jsonSheet[0]);
+
+      // Filtro per la colonna "Agente"
+      if (role === "AGENTE" && codice_agente) {
+        // Se la colonna ESISTE (senza il !), allora filtriamo
+        if (columns.includes("Agente")) {
+          jsonSheet = jsonSheet.filter(
+            (row) =>
+              String(row["Agente"]).trim() === String(codice_agente).trim(),
+          );
+        }
+      }
+
+      // Filtro per la colonna "Cliente/Fornitore"
+      else if (role === "CLIENTE" && codice_cliente) {
+        // Se la colonna ESISTE, allora filtriamo
+        if (columns.includes("Cliente/Fornitore")) {
+          jsonSheet = jsonSheet.filter(
+            (row) =>
+              String(row["Cliente/Fornitore"]).trim() ===
+              String(codice_cliente).trim(),
+          );
+        }
+      }
+    }
     const jsonData = {
       data: jsonSheet,
       lwt: fileDate,

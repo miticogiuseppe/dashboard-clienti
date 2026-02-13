@@ -40,6 +40,11 @@
     {
       "id": "USAGE-HP",
       "path": "Copral\\4.0\\Usage.csv"
+    },
+
+    {
+      "id": "STATISTICA_VENDUTO_AGENTE",
+      "path": "Copral\\4.0\\STAVEN-001.xlsx"
     }
   ],
   "Dibartolo": [
