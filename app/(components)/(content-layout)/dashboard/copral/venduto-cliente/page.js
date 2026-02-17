@@ -258,6 +258,7 @@ const VendutoCliente = () => {
               },
             ]}
             enableSearch={true}
+            searchPlaceholder="Cerca"
             onFilteredDataChange={handleFilteredChange}
           />
         </Fragment>
