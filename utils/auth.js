@@ -12,6 +12,7 @@ const PERMISSIONS = {
     "venduto_agente",
   ],
   UFFICIO: [
+    "dash_piena",
     "dash_generale",
     "dash_statistiche",
     "app_calendario",
@@ -19,12 +20,19 @@ const PERMISSIONS = {
     "venduto_agente",
   ],
   AGENTE: [
+    "dash_piena",
     "dash_generale",
+    "dash_statistiche",
     "app_calendario",
     "i_miei_clienti",
     "venduto_agente",
+    "venduto_globale",
   ],
-  CLIENTE: ["venduto_cliente"],
+  CLIENTE: [
+    "dash_generale", // Vede la sidebar e la cartella Dashboard
+    "venduto_globale", // Vede la voce Venduto per il redirect
+    "venduto_cliente",
+  ],
 };
 
 // Funzione helper

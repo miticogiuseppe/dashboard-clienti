@@ -16,12 +16,13 @@ export const menuCopral = [
         path: "/dashboard/copral/generalenew",
         title: "Generale",
         type: "link",
-        permission: "dash_generale",
+        permission: "dash_piena",
         ready: true,
       },
       {
         title: "Statistiche",
         type: "sub",
+        permission: "dash_generale",
         active: false,
         selected: false,
         children: [
@@ -29,7 +30,7 @@ export const menuCopral = [
             path: "/dashboard/copral/venduto",
             title: "Venduto",
             type: "link",
-            permission: "venduto_agente",
+            permission: "venduto_globale",
             ready: true,
           },
           {

@@ -31,6 +31,11 @@ const Venduto = () => {
         return;
       }
 
+      if (role === "CLIENTE") {
+        router.push("/dashboard/copral/venduto-cliente");
+        return;
+      }
+
       // Se arriviamo qui, l'utente è Direzione o Ufficio
       setIsAuthorized(true);
 
