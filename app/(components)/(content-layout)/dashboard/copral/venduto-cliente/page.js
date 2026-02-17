@@ -104,7 +104,7 @@ const VendutoCliente = () => {
           setData(finalData);
         }
       } catch (error) {
-        console.error("Errore Copral:", error);
+        console.error("Errore caricamento:", error);
       } finally {
         setIsLoading(false);
       }
@@ -178,23 +178,24 @@ const VendutoCliente = () => {
     },
   ];
 
+  const clienteLabel = user
+    ? `${user.username}${user.codice_cliente ? ` (${user.codice_cliente})` : ""}`
+    : "Utente";
+
   return (
     <Fragment>
-      <Seo title="Copral - Analisi Venduto" />
+      <Seo title={`Area Cliente - ${user?.username || "Analisi"}`} />
 
       {isLoading ? (
         <Preloader show={true} />
       ) : (
         <Fragment>
+          {/* HEADER UNIFORMATO A QUELLO AGENTE */}
           <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
             <Pageheader
-              title="Copral"
-              currentpage={
-                user?.role === "CLIENTE"
-                  ? "I Miei Acquisti"
-                  : "Analisi Venduto Cliente"
-              }
-              activepage="Dashboard"
+              title="Area Cliente"
+              currentpage={`Benvenuto, ${clienteLabel}`}
+              activepage="Analisi Vendite"
             />
 
             <div className="d-flex align-items-center bg-white p-2 rounded shadow-sm border">
@@ -235,7 +236,7 @@ const VendutoCliente = () => {
             title={
               user?.role === "CLIENTE"
                 ? `Dettaglio per ${user.username}`
-                : "Report Vendite Totale"
+                : "Dettaglio Vendite Totali"
             }
             tableHeaders={[
               {
@@ -249,8 +250,12 @@ const VendutoCliente = () => {
               },
               { title: "Data", column: "Data" },
               { title: "Quantità", column: "Quantita'", type: "number" },
-              { title: "Valore", column: "Valore", type: "number" },
-              { title: "Utile", column: "Utile totale", type: "number" },
+              { title: "Totale Venduto", column: "Valore", type: "number" },
+              {
+                title: "Utile (Margine)",
+                column: "Utile totale",
+                type: "number",
+              },
             ]}
             enableSearch={true}
             onFilteredDataChange={handleFilteredChange}
