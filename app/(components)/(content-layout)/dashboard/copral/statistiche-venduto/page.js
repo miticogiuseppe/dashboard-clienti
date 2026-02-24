@@ -18,21 +18,34 @@ const StatisticheVendutoCopral = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         const response = await fetch(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
+          { signal: controller.signal },
         );
+
+        if (!response.ok) {
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
+
         const json = await response.json();
-        setSheetData(json.data || []);
+        setSheetData(json?.data ?? []);
       } catch (error) {
-        console.error("Errore STAVEN:", error);
-        setSheetData([]);
+        if (error.name !== "AbortError") {
+          console.error("Errore STAVEN:", error);
+          setSheetData([]);
+        }
       } finally {
         setIsFetching(false);
       }
     };
+
     fetchData();
+
+    return () => controller.abort();
   }, []);
 
   const { processedData, allFamilies, kpis } = useMemo(() => {
