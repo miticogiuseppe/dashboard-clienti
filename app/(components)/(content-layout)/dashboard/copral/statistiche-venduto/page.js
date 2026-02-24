@@ -2,15 +2,12 @@
 
 import React, { useState, useEffect, useMemo, Fragment } from "react";
 import { Col, Row, Card, Form } from "react-bootstrap";
-
-// Import componenti Xintra e Utility
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-
 // Icone
 import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
 
@@ -74,6 +71,16 @@ const StatisticheVendutoCopral = () => {
       if (famigliaRaw.includes("ALLUMINIO")) globalAlmQ += qta;
       if (famigliaRaw.includes("ACCESSORI")) globalAccQ += qta;
 
+      // Se è un accessorio e ha la virgola, stampalo nella console del browser (F12)
+      const um = row["Descrizione GesUM"] || "NON DEFINITA";
+
+      const qt = row["Quantita'"];
+      if (famiglia.includes("ACCESSORI") && !Number.isInteger(parseFloat(qt))) {
+        console.log(
+          `Sospetto trovato! Articolo: ${row["Descrizione Articolo"]}, Q.tà: ${qt}, UM: ${um}`,
+        );
+      }
+
       if (!grouped[agenteNome]) {
         grouped[agenteNome] = {
           nome: agenteNome,
@@ -126,24 +133,26 @@ const StatisticheVendutoCopral = () => {
     {
       id: 1,
       title: "Fatturato Totale",
-      count: `€ ${kpis.globalVal.toLocaleString("it-IT", { minimumFractionDigits: 2 })}`,
+      // focus qui: aggiungiamo minimum e maximum FractionDigits a 2
+      count: `€ ${kpis.globalVal.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       svgIcon: <PiMoneyThin />,
       backgroundColor: "primary svg-white",
     },
     {
       id: 2,
       title: "Totale Alluminio",
-      count: `${kpis.globalAlmQ.toLocaleString("it-IT")} Kg`,
+      count: `${kpis.globalAlmQ.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`,
       svgIcon: <PiScalesThin />,
       backgroundColor: "primary3 svg-white",
     },
-    {
-      id: 3,
-      title: "Totale Accessori",
-      count: `${kpis.globalAccQ.toLocaleString("it-IT")} Pz`,
-      svgIcon: <PiPackageThin />,
-      backgroundColor: "info svg-white",
-    },
+    // {
+    //   id: 3,
+    //   title: "Totale Accessori",
+    //   // Per gli accessori (pezzi) di solito si usa intero, ma se vuoi coerenza mettiamo 2 decimali anche qui
+    //   count: `${kpis.globalAccQ.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Pz`,
+    //   svgIcon: <PiPackageThin />,
+    //   backgroundColor: "info svg-white",
+    // },
   ];
 
   const toggleAgent = (nome) => {

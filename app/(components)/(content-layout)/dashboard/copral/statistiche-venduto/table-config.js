@@ -1,4 +1,4 @@
-// Configurazione delle colonne per la tabella delle statistiche di vendita
+// Configurazione delle colonne per la tabella delle statistiche di vendita (Mock Data)
 export const copralMockData = [
   {
     agente: "BILARDO ANTONIO",
