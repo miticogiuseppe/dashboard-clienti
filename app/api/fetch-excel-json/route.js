@@ -5,6 +5,12 @@ import { getTokenData } from "@/utils/tokenData";
 import { getFileInfo } from "@/utils/fileTools";
 import { check } from "@/utils/api";
 
+const mappingPath = path.join(process.cwd(), "data", "mappatura_agenti.json");
+
+const agentMapping = fs.existsSync(mappingPath)
+  ? JSON.parse(fs.readFileSync(mappingPath, "utf8"))
+  : {};
+
 export async function GET(req) {
   return await check(req, async () => {
     // Ottenere il tenant
@@ -91,27 +97,50 @@ export async function GET(req) {
     if (jsonSheet && Array.isArray(jsonSheet) && jsonSheet.length > 0) {
       const columns = Object.keys(jsonSheet[0]);
 
-      // Filtro per la colonna "Agente"
-      if (role === "AGENTE" && codice_agente) {
-        // Se la colonna ESISTE (senza il !), allora filtriamo
-        if (columns.includes("Agente")) {
-          jsonSheet = jsonSheet.filter(
-            (row) =>
-              String(row["Agente"]).trim() === String(codice_agente).trim(),
-          );
-        }
-      }
+      // Individuiamo dinamicamente la colonna agente
+      const agenteColumn = columns.find((col) =>
+        ["Agente", "Des. Agente", "Descrizione Agente"].includes(col),
+      );
 
-      // Filtro per la colonna "Cliente/Fornitore"
-      else if (role === "CLIENTE" && codice_cliente) {
-        // Se la colonna ESISTE, allora filtriamo
-        if (columns.includes("Cliente/Fornitore")) {
-          jsonSheet = jsonSheet.filter(
-            (row) =>
-              String(row["Cliente/Fornitore"]).trim() ===
-              String(codice_cliente).trim(),
-          );
-        }
+      // Individuiamo dinamicamente la colonna cliente
+      const clienteColumn = columns.find((col) =>
+        [
+          "Cliente/Fornitore",
+          "Ragione sociale",
+          "Descrizione Cliente/Fornitore",
+        ].includes(col),
+      );
+
+      // Filtro AGENTE con mappatura JSON
+      if (role === "AGENTE" && codice_agente && agenteColumn) {
+        const normalize = (val) =>
+          String(val).replace(/\s+/g, "").toLowerCase();
+
+        const nomeAgente = agentMapping[String(codice_agente)] || null;
+
+        jsonSheet = jsonSheet.filter((row) => {
+          const valore = row[agenteColumn];
+
+          // Caso 1: il foglio contiene il CODICE
+          if (normalize(valore) === normalize(codice_agente)) {
+            return true;
+          }
+
+          // Caso 2: il foglio contiene il NOME
+          if (nomeAgente && normalize(valore) === normalize(nomeAgente)) {
+            return true;
+          }
+
+          return false;
+        });
+      }
+      // Filtro CLIENTE
+      else if (role === "CLIENTE" && codice_cliente && clienteColumn) {
+        jsonSheet = jsonSheet.filter(
+          (row) =>
+            String(row[clienteColumn]).trim().toLowerCase() ===
+            String(codice_cliente).trim().toLowerCase(),
+        );
       }
     }
     const jsonData = {
