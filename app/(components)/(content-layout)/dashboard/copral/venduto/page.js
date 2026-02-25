@@ -27,7 +27,7 @@ const Venduto = () => {
 
       // 4. CONTROLLO RUOLO: Se è un Agente, lo mandiamo via
       if (role === "AGENTE") {
-        router.push("/dashboard/copral/venduto-agente");
+        router.push("/dashboard/copral/statistiche-venduto");
         return;
       }
 

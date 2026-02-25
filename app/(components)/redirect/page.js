@@ -11,7 +11,7 @@ export default async function Page() {
         if (token.role === "CLIENTE") {
           redirect("/dashboard/copral/venduto-cliente");
         } else if (token.role === "AGENTE") {
-          redirect("/dashboard/copral/venduto-agente");
+          redirect("/dashboard/copral/statistiche-venduto");
         } else {
           redirect("/dashboard/copral/generalenew");
         }

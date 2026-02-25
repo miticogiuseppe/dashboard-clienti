@@ -12,8 +12,25 @@ import SpkDropdown from "../../@spk-reusable-components/reusable-uielements/spk-
 import SpkListgroup from "../../@spk-reusable-components/reusable-uielements/spk-listgroup";
 import SpkBadge from "../../@spk-reusable-components/reusable-uielements/spk-badge";
 import store from "../../redux/store";
+//implementazione logout
+import { useRouter } from "next/navigation";
 
 const Header = ({ local_varaiable, ThemeChanger }) => {
+  // Router per il logout
+  const router = useRouter();
+  // Funzione per gestire il logout
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+      });
+
+      router.replace("/"); // Reindirizza alla pagina di login dopo il logout
+    } catch (error) {
+      console.error("Errore durante il logout:", error);
+    }
+  };
+
   //full screen
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -125,7 +142,7 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
                 ThemeChanger({ ...theme, toggled: "double-menu-open" });
                 if (sidemenu.nextElementSibling) {
                   sidemenu.nextElementSibling.classList.add(
-                    "double-menu-active"
+                    "double-menu-active",
                   );
                 } else {
                   ThemeChanger({ ...theme, toggled: "double-menu-close" });
@@ -500,7 +517,7 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
   const handleRemove1 = (id) => {
     // Filter out the notification by id
     const updatedNotifications = notifications.filter(
-      (notification) => notification.id !== id
+      (notification) => notification.id !== id,
     );
     setNotifications(updatedNotifications);
     setUnreadCount(unreadCount - 1); // decrease unread count
@@ -1167,6 +1184,7 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}
+
             {/* <SpkDropdown
               Customclass="header-element"
               toggleas="a"
@@ -1250,6 +1268,18 @@ const Header = ({ local_varaiable, ThemeChanger }) => {
                 </Link>
               </li>
             </SpkDropdown> */}
+            {/* <!-- End::header-element --> */}
+
+            {/* <!-- Start::header-element --> */}
+            <div className="header-element">
+              <button
+                onClick={handleLogout}
+                className="header-link border-0 bg-transparent"
+                title="Logout"
+              >
+                <i className="fe fe-log-out header-link-icon fs-18"></i>
+              </button>
+            </div>
             {/* <!-- End::header-element --> */}
 
             {/* <!-- Start::header-element --> */}

@@ -10,6 +10,7 @@ const PERMISSIONS = {
     "macchine_intestatrice",
     "venduto_globale",
     "venduto_agente",
+    "statistiche_venduto",
   ],
   UFFICIO: [
     "dash_piena",
@@ -18,6 +19,7 @@ const PERMISSIONS = {
     "app_calendario",
     "venduto_globale",
     "venduto_agente",
+    "statistiche_venduto",
   ],
   AGENTE: [
     "dash_piena",
@@ -26,7 +28,7 @@ const PERMISSIONS = {
     "app_calendario",
     "i_miei_clienti",
     "venduto_agente",
-    "venduto_globale",
+    "statistiche_venduto",
   ],
   CLIENTE: [
     "dash_generale", // Vede la sidebar e la cartella Dashboard

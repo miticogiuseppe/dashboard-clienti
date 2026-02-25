@@ -33,6 +33,14 @@ export const menuCopral = [
             permission: "venduto_globale",
             ready: true,
           },
+
+          {
+            path: "/dashboard/copral/statistiche-venduto",
+            title: "Statistiche Venduto",
+            type: "link",
+            permission: "statistiche_venduto",
+            ready: true,
+          },
           {
             //path: "/dashboard/copral/acquistato",
             path: "",
