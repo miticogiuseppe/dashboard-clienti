@@ -42,6 +42,13 @@ export const menuCopral = [
             ready: true,
           },
           {
+            path: "/dashboard/copral/analisi-famiglia",
+            title: "Analisi per Famiglia",
+            type: "link",
+            permission: "statistiche_venduto", // Usiamo lo stesso permesso per ora
+            ready: true,
+          },
+          {
             //path: "/dashboard/copral/acquistato",
             path: "",
             title: "Acquistato",
