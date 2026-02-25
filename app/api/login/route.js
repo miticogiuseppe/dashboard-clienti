@@ -32,9 +32,9 @@ export async function POST(req) {
 
   const token = generateAccessToken({
     username: body.username,
+    nominativo: result.rows[0].nominativo,
     tenant: result.rows[0].tenant,
     role: result.rows[0].role,
-
     codice_agente: result.rows[0].codice_agente,
     codice_cliente: result.rows[0].codice_cliente,
   });
