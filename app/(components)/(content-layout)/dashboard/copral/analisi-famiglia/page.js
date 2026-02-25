@@ -8,7 +8,7 @@ import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashbo
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-import { PiMoneyThin, PiPackageThin, PiChartLineUpThin } from "react-icons/pi";
+import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
 
 const AnalisiPerFamiglia = () => {
   const [sheetData, setSheetData] = useState(undefined);
@@ -20,7 +20,6 @@ const AnalisiPerFamiglia = () => {
     const controller = new AbortController();
     const fetchData = async () => {
       try {
-        // Usiamo la stessa API, cambiamo solo la logica di aggregazione frontend
         const response = await fetch(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
           {
@@ -32,7 +31,7 @@ const AnalisiPerFamiglia = () => {
         setSheetData(json?.data ?? []);
       } catch (error) {
         if (error.name !== "AbortError") {
-          console.error("Errore Analisi Famiglie:", error);
+          console.error("Errore STAVEN:", error);
           setSheetData([]);
         }
       } finally {
@@ -43,77 +42,66 @@ const AnalisiPerFamiglia = () => {
     return () => controller.abort();
   }, []);
 
-  const { processedData, allAgents, kpis } = useMemo(() => {
+  const { matrix, allAgents, kpis, totalsByAgent } = useMemo(() => {
     if (!sheetData || !Array.isArray(sheetData))
-      return { processedData: [], allAgents: [], kpis: {} };
+      return {
+        matrix: [],
+        allAgents: [],
+        kpis: { globalVal: 0, globalAlmQ: 0, globalAccQ: 0 },
+        totalsByAgent: {},
+      };
 
-    const grouped = {};
+    const tree = {};
     const agentsSet = new Set();
-    let globalVal = 0;
+    const agentTotals = {};
+    let globalVal = 0,
+      globalAlmQ = 0,
+      globalAccQ = 0;
 
     sheetData.forEach((row) => {
-      const agenteNome = row["Descrizione Agente"] || "NON ASSEGNATO";
-      let famigliaRaw =
+      const agente = row["Descrizione Agente"] || "NON ASSEGNATO";
+      const macro =
         row["Descrizione Famiglia"]?.toUpperCase().trim() || "VARIE";
-
-      // Pulizia come nel file precedente
-      if (famigliaRaw.includes("INESISTENTE")) famigliaRaw = "VARIE";
-      if (
-        famigliaRaw === "EFFETTO LEGNO ACCIAIO" ||
-        famigliaRaw === "EFFETTO LEGNO/ACCIAIO"
-      ) {
-        famigliaRaw = "EFF. LGN/ACC.";
-      }
-
+      const sotto = (row["Descrizione Gruppo"] || "ALTRO").toUpperCase().trim();
       const valore = parseFloat(row["Valore"]) || 0;
       const qta = parseFloat(row["Quantita'"]) || 0;
 
+      agentsSet.add(agente);
       globalVal += valore;
-      agentsSet.add(agenteNome);
+      if (macro.includes("ALLUMINIO")) globalAlmQ += qta;
+      if (macro.includes("ACCESSORI")) globalAccQ += qta;
 
-      if (!grouped[famigliaRaw]) {
-        grouped[famigliaRaw] = {
-          famiglia: famigliaRaw,
-          agenti: {},
-          totVal: 0,
-          totQta: 0,
-        };
-      }
+      // Aggregazione Macro
+      if (!tree[macro])
+        tree[macro] = { nome: macro, sotto: {}, agenti: {}, totV: 0 };
+      if (!tree[macro].agenti[agente])
+        tree[macro].agenti[agente] = { v: 0, q: 0 };
+      tree[macro].agenti[agente].v += valore;
+      tree[macro].agenti[agente].q += qta;
+      tree[macro].totV += valore;
 
-      if (!grouped[famigliaRaw].agenti[agenteNome]) {
-        grouped[famigliaRaw].agenti[agenteNome] = {
-          nome: agenteNome,
-          v: 0,
-          q: 0,
-        };
-      }
+      // Aggregazione Sotto
+      if (!tree[macro].sotto[sotto])
+        tree[macro].sotto[sotto] = { nome: sotto, agenti: {}, totV: 0 };
+      if (!tree[macro].sotto[sotto].agenti[agente])
+        tree[macro].sotto[sotto].agenti[agente] = { v: 0, q: 0 };
+      tree[macro].sotto[sotto].agenti[agente].v += valore;
+      tree[macro].sotto[sotto].agenti[agente].q += qta;
+      tree[macro].sotto[sotto].totV += valore;
 
-      grouped[famigliaRaw].agenti[agenteNome].v += valore;
-      grouped[famigliaRaw].agenti[agenteNome].q += qta;
-      grouped[famigliaRaw].totVal += valore;
-      grouped[famigliaRaw].totQta += qta;
+      // Totali per Colonna (Agenti)
+      if (!agentTotals[agente]) agentTotals[agente] = { v: 0, q: 0 };
+      agentTotals[agente].v += valore;
+      agentTotals[agente].q += qta;
     });
 
     return {
-      processedData: Object.values(grouped).sort((a, b) => b.totVal - a.totVal),
+      matrix: Object.values(tree).sort((a, b) => a.nome.localeCompare(b.nome)),
       allAgents: Array.from(agentsSet).sort(),
-      kpis: { globalVal, countFam: Object.keys(grouped).length },
+      kpis: { globalVal, globalAlmQ, globalAccQ },
+      totalsByAgent: agentTotals,
     };
   }, [sheetData]);
-
-  const filteredData = useMemo(() => {
-    if (!searchTerm) return processedData;
-    const lowerTerm = searchTerm.toLowerCase();
-    return processedData.filter(
-      (f) =>
-        f.famiglia.toLowerCase().includes(lowerTerm) ||
-        Object.values(f.agenti).some((a) =>
-          a.nome.toLowerCase().includes(lowerTerm),
-        ),
-    );
-  }, [processedData, searchTerm]);
-
-  if (isFetching) return <Preloader show={true} />;
 
   const dynamicCards = [
     {
@@ -125,16 +113,16 @@ const AnalisiPerFamiglia = () => {
     },
     {
       id: 2,
-      title: "Famiglie Gestite",
-      count: kpis.countFam,
-      svgIcon: <PiPackageThin />,
-      backgroundColor: "success svg-white",
+      title: "Totale Alluminio",
+      count: `${kpis.globalAlmQ.toLocaleString("it-IT", { minimumFractionDigits: 2 })} Kg`,
+      svgIcon: <PiScalesThin />,
+      backgroundColor: "primary3 svg-white",
     },
     {
       id: 3,
-      title: "Media per Famiglia",
-      count: `€ ${(kpis.globalVal / kpis.countFam).toLocaleString("it-IT", { maximumFractionDigits: 0 })}`,
-      svgIcon: <PiChartLineUpThin />,
+      title: "Totale Accessori",
+      count: `${kpis.globalAccQ.toLocaleString("it-IT", { minimumFractionDigits: 2 })} Pz`,
+      svgIcon: <PiPackageThin />,
       backgroundColor: "info svg-white",
     },
   ];
@@ -146,11 +134,15 @@ const AnalisiPerFamiglia = () => {
   };
 
   const tableHeader = [
-    { title: "Famiglia / Agente" },
-    { title: "TOTALE VALORE (€)" },
-    { title: "QUANTITÀ TOTALE" },
-    { title: "INCIDENZA %" },
+    { title: "FAMIGLIA / GRUPPO" },
+    ...allAgents.flatMap((ag) => [
+      { title: `${ag} (€)` },
+      { title: `${ag} (Q.tà)` },
+    ]),
+    { title: "TOT. VALORE (€)" },
   ];
+
+  if (isFetching) return <Preloader show={true} />;
 
   return (
     <Fragment>
@@ -163,11 +155,12 @@ const AnalisiPerFamiglia = () => {
 
       <Row>
         {dynamicCards.map((card) => (
-          <Col xxl={4} xl={4} lg={6} key={card.id}>
+          <Col xxl={3} xl={3} lg={6} key={card.id}>
             <Spkcardscomponent
+              cardClass="overflow-hidden main-content-card"
+              mainClass="d-flex align-items-center justify-content-between flex-nowrap"
               card={card}
               svgIcon={card.svgIcon}
-              cardClass="overflow-hidden main-content-card"
             />
           </Col>
         ))}
@@ -177,12 +170,11 @@ const AnalisiPerFamiglia = () => {
         <Col xl={12}>
           <Card className="custom-card">
             <Card.Header className="justify-content-between">
-              <Card.Title>Dettaglio Vendite per Categoria</Card.Title>
+              <Card.Title>Dettaglio Pivot Famiglie</Card.Title>
               <Form.Control
                 type="text"
-                placeholder="Cerca famiglia o agente..."
-                className="form-control-sm"
-                style={{ maxWidth: "250px" }}
+                placeholder="Cerca..."
+                className="form-control-sm w-25"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </Card.Header>
@@ -192,62 +184,135 @@ const AnalisiPerFamiglia = () => {
                   tableClass="table-bordered text-nowrap border-primary sticky-header"
                   header={tableHeader}
                 >
-                  {filteredData.map((item) => (
-                    <Fragment key={item.famiglia}>
-                      <tr
-                        className="table-primary-transparent cursor-pointer"
-                        onClick={() => toggleFamily(item.famiglia)}
-                      >
-                        <th scope="row" className="fw-bold">
-                          <i
-                            className={`ri-arrow-${openFamilies.has(item.famiglia) ? "down" : "right"}-s-line me-1 text-primary`}
-                          ></i>
-                          {item.famiglia}
-                        </th>
-                        <td className="text-end fw-bold">
-                          €{" "}
-                          {item.totVal.toLocaleString("it-IT", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td className="text-center">
-                          <SpkBadge variant="primary-transparent">
-                            {item.totQta.toLocaleString("it-IT")}{" "}
-                            {item.famiglia.includes("ALLUMINIO") ? "Kg" : "Pz"}
-                          </SpkBadge>
-                        </td>
-                        <td className="text-center fw-bold text-primary">
-                          {((item.totVal / kpis.globalVal) * 100).toFixed(1)}%
-                        </td>
-                      </tr>
-                      {openFamilies.has(item.famiglia) &&
-                        Object.values(item.agenti)
-                          .sort((a, b) => b.v - a.v)
-                          .map((agente, idx) => (
-                            <tr key={idx} className="table-hover">
+                  {matrix
+                    .filter((m) =>
+                      m.nome.toLowerCase().includes(searchTerm.toLowerCase()),
+                    )
+                    .map((macro) => (
+                      <Fragment key={macro.nome}>
+                        <tr
+                          className="table-primary-transparent cursor-pointer"
+                          onClick={() => toggleFamily(macro.nome)}
+                        >
+                          <th scope="row" className="fw-bold">
+                            <i
+                              className={`ri-arrow-${openFamilies.has(macro.nome) ? "down" : "right"}-s-line me-1 text-primary`}
+                            ></i>
+                            {macro.nome}
+                          </th>
+                          {allAgents.map((ag) => (
+                            <Fragment key={ag}>
+                              <td className="text-end fw-bold">
+                                €{" "}
+                                {(macro.agenti[ag]?.v || 0).toLocaleString(
+                                  "it-IT",
+                                  { minimumFractionDigits: 2 },
+                                )}
+                              </td>
+                              <td className="text-center fw-bold">
+                                {macro.nome.includes("ALLUMINIO") ? (
+                                  <SpkBadge variant="primary">
+                                    {(macro.agenti[ag]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}{" "}
+                                    Kg
+                                  </SpkBadge>
+                                ) : macro.nome.includes("ACCESSORI") ? (
+                                  <SpkBadge variant="success">
+                                    {(macro.agenti[ag]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}{" "}
+                                    Pz
+                                  </SpkBadge>
+                                ) : (
+                                  (macro.agenti[ag]?.q || 0).toLocaleString(
+                                    "it-IT",
+                                  )
+                                )}
+                              </td>
+                            </Fragment>
+                          ))}
+                          <td className="text-end fw-bold text-primary bg-primary-transparent">
+                            €{" "}
+                            {macro.totV.toLocaleString("it-IT", {
+                              minimumFractionDigits: 2,
+                            })}
+                          </td>
+                        </tr>
+                        {openFamilies.has(macro.nome) &&
+                          Object.values(macro.sotto).map((sotto) => (
+                            <tr key={sotto.nome}>
                               <td
                                 className="ps-5 text-muted text-uppercase"
-                                style={{ fontSize: "11px" }}
+                                style={{ fontSize: "10px" }}
                               >
-                                {agente.nome}
+                                {sotto.nome}
                               </td>
+                              {allAgents.map((ag) => (
+                                <Fragment key={ag}>
+                                  <td className="text-end text-muted">
+                                    €{" "}
+                                    {(sotto.agenti[ag]?.v || 0).toLocaleString(
+                                      "it-IT",
+                                      { minimumFractionDigits: 2 },
+                                    )}
+                                  </td>
+                                  <td className="text-center text-muted">
+                                    {macro.nome.includes("ALLUMINIO") ? (
+                                      <SpkBadge variant="info-transparent">
+                                        {(
+                                          sotto.agenti[ag]?.q || 0
+                                        ).toLocaleString("it-IT")}{" "}
+                                        Kg
+                                      </SpkBadge>
+                                    ) : macro.nome.includes("ACCESSORI") ? (
+                                      <SpkBadge variant="success-transparent">
+                                        {(
+                                          sotto.agenti[ag]?.q || 0
+                                        ).toLocaleString("it-IT")}{" "}
+                                        Pz
+                                      </SpkBadge>
+                                    ) : (
+                                      (sotto.agenti[ag]?.q || 0).toLocaleString(
+                                        "it-IT",
+                                      )
+                                    )}
+                                  </td>
+                                </Fragment>
+                              ))}
                               <td className="text-end text-muted">
                                 €{" "}
-                                {agente.v.toLocaleString("it-IT", {
+                                {sotto.totV.toLocaleString("it-IT", {
                                   minimumFractionDigits: 2,
                                 })}
                               </td>
-                              <td className="text-center text-muted">
-                                {agente.q.toLocaleString("it-IT")}
-                              </td>
-                              <td className="text-center text-muted small">
-                                {((agente.v / item.totVal) * 100).toFixed(1)}%
-                                (su fam.)
-                              </td>
                             </tr>
                           ))}
-                    </Fragment>
-                  ))}
+                      </Fragment>
+                    ))}
+                  {/* RIGA TOTALE COMPLESSIVO */}
+                  <tr className="table-dark">
+                    <th scope="row">TOTALE COMPLESSIVO</th>
+                    {allAgents.map((ag) => (
+                      <Fragment key={ag}>
+                        <td className="text-end fw-bold">
+                          €{" "}
+                          {totalsByAgent[ag].v.toLocaleString("it-IT", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </td>
+                        <td className="text-center fw-bold">
+                          {totalsByAgent[ag].q.toLocaleString("it-IT")}
+                        </td>
+                      </Fragment>
+                    ))}
+                    <td className="text-end fw-bold">
+                      €{" "}
+                      {kpis.globalVal.toLocaleString("it-IT", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                  </tr>
                 </SpkTablescomponent>
               </div>
             </Card.Body>
