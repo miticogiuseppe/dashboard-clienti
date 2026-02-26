@@ -170,7 +170,7 @@ const AnalisiPerFamiglia = () => {
         <Col xl={12}>
           <Card className="custom-card">
             <Card.Header className="justify-content-between">
-              <Card.Title>Dettaglio Pivot Famiglie</Card.Title>
+              <Card.Title>Dettaglio Famiglie</Card.Title>
               <Form.Control
                 type="text"
                 placeholder="Cerca..."

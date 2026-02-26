@@ -1,4 +1,4 @@
-"use client"; // Obbligatorio per usare useState e useEffect
+"use client";
 
 import Link from "next/link";
 import React, { Fragment, useEffect, useState } from "react";
