@@ -31,7 +31,12 @@ export default function PaginaMulini() {
   const [periodoTS, setPeriodoTS] = useState("mese");
 
   // Filtri Produzione Articoli
-  const [pickerDateArt, setPickerDateArt] = useState(undefined);
+  // const [pickerDateArt, setPickerDateArt] = useState(undefined);
+  //modifica temporanea per visualizzare i mulini perché hanno data del 2002 da rimuovere appena aggiustano le date
+  const [pickerDateArt, setPickerDateArt] = useState([
+    new Date("2002-01-01"),
+    new Date("2002-01-31"),
+  ]);
   const [periodoArt, setPeriodoArt] = useState("mese");
 
   const [data, setData] = useState(undefined);
@@ -40,7 +45,7 @@ export default function PaginaMulini() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
       );
       const json = await response.json();
       let data = json.data;
@@ -56,7 +61,7 @@ export default function PaginaMulini() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=MULINI&sheet=Foglio1"
+        "/api/fetch-excel-json?id=MULINI&sheet=Foglio1",
       );
       const json = await response.json();
       let data = json.data;
