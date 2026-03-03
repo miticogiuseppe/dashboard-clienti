@@ -41,7 +41,7 @@ export default function PaginaVariegati() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
       );
       const json = await response.json();
       let data = json.data;
@@ -57,7 +57,7 @@ export default function PaginaVariegati() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=VARIEGATI&sheet=Foglio1"
+        "/api/fetch-excel-json?id=VARIEGATI&sheet=Foglio1",
       );
       const json = await response.json();
       let data = json.data;
@@ -180,6 +180,8 @@ export default function PaginaVariegati() {
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord." },
@@ -207,6 +209,8 @@ export default function PaginaVariegati() {
                 fileExcel="VARIEGATI"
                 dateColumn="DATA"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data", column: "DATA", bold: true },
                   {

@@ -40,7 +40,7 @@ export default function PaginaTostini() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
       );
       const json = await response.json();
       let data = json.data;
@@ -56,7 +56,7 @@ export default function PaginaTostini() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1"
+        "/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1",
       );
       const json = await response.json();
       let data = json.data;
@@ -175,6 +175,8 @@ export default function PaginaTostini() {
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord.", type: "number" },
@@ -212,6 +214,8 @@ export default function PaginaTostini() {
                 fileExcel="TOSTINI"
                 dateColumn="Data"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   {
                     title: "Num. Form.",
