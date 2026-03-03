@@ -19,6 +19,7 @@ function AppmerceTable({
   className,
   enableSearch,
   searchPlaceholder,
+  onFilteredDataChange,
 }) {
   const t = useTranslations("Graph");
 
@@ -36,14 +37,14 @@ function AppmerceTable({
       moment.isMoment(b[dateColumn]) &&
       a[dateColumn].isBefore(b[dateColumn])
         ? 1
-        : -1
+        : -1,
     );
     if (filterDate && filterDate.length === 2)
       sorted = sorted.filter(
         (x) =>
           moment.isMoment(x[dateColumn]) &&
           x[dateColumn].isSameOrAfter(moment(filterDate[0])) &&
-          x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days"))
+          x[dateColumn].isBefore(moment(filterDate[1]).add(1, "days")),
       );
 
     //per riquadro filtro
@@ -65,7 +66,7 @@ function AppmerceTable({
           }
 
           return cellValue.toLowerCase().includes(lowerSearchText);
-        })
+        }),
       );
     }
     return sorted;
@@ -75,6 +76,12 @@ function AppmerceTable({
     setVisibleItemsCount(ITEMS_PER_PAGE);
     setPrevData(filteredData);
   }
+
+  useEffect(() => {
+    if (onFilteredDataChange) {
+      onFilteredDataChange(filteredData);
+    }
+  }, [filteredData, onFilteredDataChange]);
 
   const displayedData = useMemo(() => {
     return filteredData.slice(0, visibleItemsCount);
@@ -143,20 +150,20 @@ function AppmerceTable({
                             .add(row[header.column])
                             .format(header.format ?? "m:ss")
                         : moment.isMoment(row[header.column])
-                        ? header.showSeconds
-                          ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
-                          : row[header.column].format("DD/MM/YYYY")
-                        : row[header.column] !== "" &&
-                          row[header.column] !== "null" &&
-                          row[header.column] !== null &&
-                          row[header.column] !== undefined
-                        ? row[header.column]
-                        : header.default ||
-                          (header.allowZero
-                            ? "0"
-                            : header.allowEmpty
-                            ? ""
-                            : "N/A")}
+                          ? header.showSeconds
+                            ? row[header.column].format("DD/MM/YYYY HH:mm:ss")
+                            : row[header.column].format("DD/MM/YYYY")
+                          : row[header.column] !== "" &&
+                              row[header.column] !== "null" &&
+                              row[header.column] !== null &&
+                              row[header.column] !== undefined
+                            ? row[header.column]
+                            : header.default ||
+                              (header.allowZero
+                                ? "0"
+                                : header.allowEmpty
+                                  ? ""
+                                  : "N/A")}
                     </td>
                   ))}
                 </tr>

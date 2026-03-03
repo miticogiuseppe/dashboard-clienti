@@ -8,7 +8,13 @@ export default async function Page() {
   else
     switch (token.tenant) {
       case "Copral":
-        redirect("/dashboard/copral/generalenew");
+        if (token.role === "CLIENTE") {
+          redirect("/dashboard/copral/venduto-cliente");
+        } else if (token.role === "AGENTE") {
+          redirect("/dashboard/copral/statistiche-venduto");
+        } else {
+          redirect("/dashboard/copral/generalenew");
+        }
       case "Dibartolo":
         redirect("/dashboard/dibartolo/generale");
       case "Rica":

@@ -3,14 +3,20 @@ import { menuDibartolo } from "./menuDibartolo";
 import { menuRica } from "./menuRica";
 
 export function getMenu(tenant) {
+  let menuBase = [];
+
   switch (tenant) {
     case "Copral":
-      return menuCopral;
+      menuBase = menuCopral;
+      break;
     case "Dibartolo":
-      return menuDibartolo;
+      menuBase = menuDibartolo;
+      break;
     case "Rica":
-      return menuRica;
+      menuBase = menuRica;
+      break;
     default:
-      return [];
+      menuBase = [];
   }
+  return menuBase;
 }

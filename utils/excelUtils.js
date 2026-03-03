@@ -96,6 +96,22 @@ const parseDates = (jsonSheet, dateCols) => {
   }
   return result;
 };
+const parseCustom = (jsonSheet, dateCols) => {
+  let result = [];
+  for (let row of jsonSheet) {
+    let newRow = _.cloneDeep(row);
+    for (let dateCol of dateCols) {
+      const val = newRow[dateCol];
+      // Il plotter manda stringhe come "2025-06-24T17:18:39Z"
+      // Moment le legge nativamente in modo perfetto
+      if (val && typeof val === "string") {
+        newRow[dateCol] = moment(val);
+      }
+    }
+    result.push(newRow);
+  }
+  return result;
+};
 const parseTimes = (jsonSheet, dateCols) => {
   let result = [];
   for (let row of jsonSheet) {
@@ -147,7 +163,7 @@ const filterByWeek = (
   jsonSheet,
   dateCol,
   referenceDate = moment(),
-  numberOfWeeks = 1
+  numberOfWeeks = 1,
 ) => {
   const startOfWeek = referenceDate
     .clone()
@@ -157,7 +173,7 @@ const filterByWeek = (
   return jsonSheet.filter(
     (row) =>
       row[dateCol].isSameOrAfter(startOfWeek) &&
-      row[dateCol].isSameOrBefore(endOfWeek)
+      row[dateCol].isSameOrBefore(endOfWeek),
   );
 };
 
@@ -195,8 +211,8 @@ const extractUniques = (data, col) => {
   return _.orderBy(
     _.filter(
       _.uniq(Object.keys(_.groupBy(data, (x) => x[col]))),
-      (x) => x[col] !== ""
-    )
+      (x) => x[col] !== "",
+    ),
   );
 };
 
@@ -208,7 +224,7 @@ const sumByKey = (
   valueKey,
   fixEmpty = false,
   convertCb = undefined,
-  groupCb = undefined
+  groupCb = undefined,
 ) => {
   const getValue = (item) => {
     let value = item ? (convertCb ? convertCb(item) : Number(item)) : 0;
@@ -218,13 +234,13 @@ const sumByKey = (
   // 1. Caso: Calcola la somma totale (groupKey è null o undefined)
   if (!groupKey) {
     return _.sumBy(jsonSheet, (item) =>
-      valueKey ? getValue(item[valueKey]) : 1
+      valueKey ? getValue(item[valueKey]) : 1,
     );
   }
 
   // 2. Caso: Raggruppa per chiave (Comportamento originale)
   const grouped = _.groupBy(jsonSheet, (x) =>
-    groupCb ? groupCb(x[groupKey]) ?? "" : x[groupKey] ?? ""
+    groupCb ? (groupCb(x[groupKey]) ?? "") : (x[groupKey] ?? ""),
   );
 
   return _.map(grouped, (items, key) => {
@@ -234,7 +250,7 @@ const sumByKey = (
     return {
       [groupKey]: computedKey,
       count: _.sumBy(items, (item) =>
-        valueKey ? getValue(item[valueKey]) : 1
+        valueKey ? getValue(item[valueKey]) : 1,
       ),
     };
   });
@@ -296,4 +312,5 @@ export {
   parseDatesString,
   formatExcelTimeDuration,
   getSecondsFromExcelTime,
+  parseCustom,
 };

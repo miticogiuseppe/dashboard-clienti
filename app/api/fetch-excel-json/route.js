@@ -5,11 +5,24 @@ import { getTokenData } from "@/utils/tokenData";
 import { getFileInfo } from "@/utils/fileTools";
 import { check } from "@/utils/api";
 
+const mappingPath = path.join(process.cwd(), "data", "mappatura_agenti.json");
+
+const agentMapping = fs.existsSync(mappingPath)
+  ? JSON.parse(fs.readFileSync(mappingPath, "utf8"))
+  : {};
+
 export async function GET(req) {
   return await check(req, async () => {
     // Ottenere il tenant
     const token = await getTokenData();
-    const tenant = token.tenant;
+    const { tenant, role, codice_agente, codice_cliente } = token;
+
+    // LOG per debug dei filtri
+    console.log("--- DEBUG FILTRO ---");
+    console.log("Ruolo:", role);
+    console.log("Agente:", codice_agente);
+    console.log("Cliente:", codice_cliente);
+    console.log("--------------------");
 
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
@@ -49,8 +62,9 @@ export async function GET(req) {
     const jsonFile = path.join(
       process.env.DRIVE_PATH,
       path.parse(resource.path).dir,
-      path.parse(resource.path).name + ".json"
+      path.parse(resource.path).name + ".json",
     );
+
     let jsonSheet = undefined;
     let fileDate = undefined;
 
@@ -79,6 +93,56 @@ export async function GET(req) {
       fileDate = fileInfo.mtime;
     }
 
+    // Applichiamo il filtro solo se i dati sono stati caricati con successo
+    if (jsonSheet && Array.isArray(jsonSheet) && jsonSheet.length > 0) {
+      const columns = Object.keys(jsonSheet[0]);
+
+      // Individuiamo dinamicamente la colonna agente
+      const agenteColumn = columns.find((col) =>
+        ["Agente", "Des. Agente", "Descrizione Agente"].includes(col),
+      );
+
+      // Individuiamo dinamicamente la colonna cliente
+      const clienteColumn = columns.find((col) =>
+        [
+          "Cliente/Fornitore",
+          "Ragione sociale",
+          "Descrizione Cliente/Fornitore",
+        ].includes(col),
+      );
+
+      // Filtro AGENTE con mappatura JSON
+      if (role === "AGENTE" && codice_agente && agenteColumn) {
+        const normalize = (val) =>
+          String(val).replace(/\s+/g, "").toLowerCase();
+
+        const nomeAgente = agentMapping[String(codice_agente)] || null;
+
+        jsonSheet = jsonSheet.filter((row) => {
+          const valore = row[agenteColumn];
+
+          // Caso 1: il foglio contiene il CODICE
+          if (normalize(valore) === normalize(codice_agente)) {
+            return true;
+          }
+
+          // Caso 2: il foglio contiene il NOME
+          if (nomeAgente && normalize(valore) === normalize(nomeAgente)) {
+            return true;
+          }
+
+          return false;
+        });
+      }
+      // Filtro CLIENTE
+      else if (role === "CLIENTE" && codice_cliente && clienteColumn) {
+        jsonSheet = jsonSheet.filter(
+          (row) =>
+            String(row[clienteColumn]).trim().toLowerCase() ===
+            String(codice_cliente).trim().toLowerCase(),
+        );
+      }
+    }
     const jsonData = {
       data: jsonSheet,
       lwt: fileDate,

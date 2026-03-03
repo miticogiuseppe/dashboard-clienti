@@ -1,3 +1,5 @@
+@use "variables";
+
 @forward "../public/assets/css/styles.css";
 
 //*** ICONS IMPORTS ***//
@@ -16,7 +18,7 @@
 @import "@simonwep/pickr/dist/themes/monolith.min.css";
 @import "@simonwep/pickr/dist/themes/nano.min.css";
 
-@import "variables";
+
 
 /* theme modifications */
 
@@ -273,7 +275,7 @@ body {
 .sc-grid {
   display: flex;
   flex-direction: row;
-  gap: $sep;
+  gap: variables.$sep;
 }
 .sc-grow {
   flex: 1 0 0;
@@ -288,7 +290,7 @@ body {
   justify-content: right;
 }
 .sc-margin {
-  margin-bottom: $sep;
+  margin-bottom: variables.$sep;
 }
 .vertical-left {
   display: flex;
@@ -315,7 +317,7 @@ body {
   text-align: right;
 }
 .spacing {
-  margin-bottom: $sep;
+  margin-bottom: variables.$sep;
 }
 .fixed-height {
   height: 560px;

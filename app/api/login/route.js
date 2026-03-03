@@ -1,7 +1,6 @@
-import jwt from "jsonwebtoken";
 import { pool } from "@/utils/db";
-import { jsonResponse } from "@/utils/api";
 import argon2 from "argon2";
+import jwt from "jsonwebtoken";
 
 function generateAccessToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -33,7 +32,11 @@ export async function POST(req) {
 
   const token = generateAccessToken({
     username: body.username,
+    nominativo: result.rows[0].nominativo,
     tenant: result.rows[0].tenant,
+    role: result.rows[0].role,
+    codice_agente: result.rows[0].codice_agente,
+    codice_cliente: result.rows[0].codice_cliente,
   });
 
   return new Response("ok", {

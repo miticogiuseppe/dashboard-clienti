@@ -13,7 +13,11 @@ const RootLayout = ({ children }) => {
   return (
     <Provider store={store}>
       <Initialload.Provider value={{ pageloading, setpageloading }}>
-        <NextIntlClientProvider locale="it" messages={messages}>
+        <NextIntlClientProvider
+          locale="it"
+          messages={messages}
+          timeZone="Europe/Rome"
+        >
           {children}
         </NextIntlClientProvider>
       </Initialload.Provider>
