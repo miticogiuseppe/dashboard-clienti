@@ -184,6 +184,8 @@ export default function PaginaMulini() {
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord." },
@@ -211,6 +213,8 @@ export default function PaginaMulini() {
                 fileExcel="MULINI"
                 dateColumn="DATA"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data", column: "DATA", bold: true },
                   {

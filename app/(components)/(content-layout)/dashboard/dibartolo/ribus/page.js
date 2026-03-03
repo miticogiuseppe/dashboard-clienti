@@ -40,7 +40,7 @@ export default function PaginaRibus() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
       );
       const json = await response.json();
       let data = json.data;
@@ -56,7 +56,7 @@ export default function PaginaRibus() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=RIBUS&sheet=Foglio1"
+        "/api/fetch-excel-json?id=RIBUS&sheet=Foglio1",
       );
       const json = await response.json();
       let data = json.data;
@@ -176,6 +176,8 @@ export default function PaginaRibus() {
                 title="Produzione"
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord.", type: "number" },
@@ -212,6 +214,8 @@ export default function PaginaRibus() {
                 title="Produzione per articolo"
                 fileExcel="RIBUS"
                 dateColumn="planned_date"
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   {
                     title: "id",

@@ -40,7 +40,7 @@ export default function PaginaConfezionatrice() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
       );
       const json = await response.json();
       let data = json.data;
@@ -56,7 +56,7 @@ export default function PaginaConfezionatrice() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch(
-        "/api/fetch-excel-json?id=CONFEZIONATRICE&sheet=Foglio1"
+        "/api/fetch-excel-json?id=CONFEZIONATRICE&sheet=Foglio1",
       );
       const json = await response.json();
       let data = json.data;
@@ -176,6 +176,8 @@ export default function PaginaConfezionatrice() {
                 fileExcel="ANALISI"
                 dateColumn="Data ordine"
                 filterDate={computeDate(pickerDateTS, periodoTS)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Data ord.", column: "Data ordine" },
                   { title: "Num. ord.", column: "Nr. ord." },
@@ -203,6 +205,8 @@ export default function PaginaConfezionatrice() {
                 fileExcel="CONFEZIONATRICE"
                 dateColumn="Data e Ora"
                 filterDate={computeDate(pickerDateArt, periodoArt)}
+                enableSearch={true}
+                searchPlaceholder="Cerca..."
                 tableHeaders={[
                   { title: "Indice", column: "Indice" },
                   { title: "Data e ora", column: "Data e Ora", bold: true },
