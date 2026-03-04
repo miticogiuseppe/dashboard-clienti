@@ -18,13 +18,15 @@ import Preloader from "@/utils/Preloader";
 import _ from "lodash";
 import dynamic from "next/dynamic";
 import { useEffect, useState, useMemo } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import { Dropdown, Card, Col, Row } from "react-bootstrap";
 import { Pie } from "react-chartjs-2";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
 import { useTranslations } from "next-intl";
 import AppmerceTable from "@/components/AppmerceTable";
+import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import { Fragment } from "react";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -42,6 +44,37 @@ const Ecommerce = () => {
   const [isFetching, setIsFetching] = useState(true);
 
   const t = useTranslations("Graph");
+
+  const [selectedCustomer, setSelectedCustomer] = useState("Tutti i Clienti");
+  const [selectedAgent, setSelectedAgent] = useState("Tutti gli Agenti");
+
+  // Estrae i clienti unici dai dati originali per il dropdown
+  const uniqueCustomers = useMemo(() => {
+    if (!sheetData) return ["Tutti i Clienti"];
+
+    // Se è selezionato un agente, estraiamo solo i suoi clienti
+    let dataForCustomers = sheetData;
+    if (selectedAgent !== "Tutti gli Agenti") {
+      dataForCustomers = sheetData.filter(
+        (item) => item["Des. Agente"] === selectedAgent,
+      );
+    }
+
+    const customers = extractUniques(
+      dataForCustomers,
+      "Ragione sociale",
+    ).sort();
+    return ["Tutti i Clienti", ...customers];
+  }, [sheetData, selectedAgent]); // Ricalcola quando cambia l'agente
+
+  // Estrae gli agenti unici dai dati originali per il dropdown
+  const uniqueAgents = useMemo(() => {
+    if (!sheetData) return ["Tutti gli Agenti"];
+    return [
+      "Tutti gli Agenti",
+      ...extractUniques(sheetData, "Des. Agente").sort(),
+    ];
+  }, [sheetData]);
 
   // Effetto per il caricamento dati (Solo una volta al mount)
   useEffect(() => {
@@ -61,21 +94,31 @@ const Ecommerce = () => {
   }, []);
 
   // 3. Logica di Elaborazione Dati (useMemo)
-  // Questo blocco ricalcola tutto solo quando cambiano i dati o i filtri
   const data = useMemo(() => {
     if (!sheetData) return null;
 
     // --- FILTRAGGIO ---
-    let filtered = sheetData;
-    if (startDate && endDate) {
-      filtered = sheetData.filter((item) => {
+    let filtered = sheetData.filter((item) => {
+      // Filtro Data
+      let dateMatch = true;
+      if (startDate && endDate) {
         const d = item["Data ord"];
-        return (
-          d.isSameOrAfter(startDate, "day") && d.isSameOrBefore(endDate, "day")
-        );
-      });
-    }
+        dateMatch =
+          d.isSameOrAfter(startDate, "day") && d.isSameOrBefore(endDate, "day");
+      }
 
+      // Filtro Agente
+      const agentMatch =
+        selectedAgent === "Tutti gli Agenti" ||
+        item["Des. Agente"] === selectedAgent;
+
+      // Filtro Cliente
+      const customerMatch =
+        selectedCustomer === "Tutti i Clienti" ||
+        (item["Ragione sociale"] === selectedCustomer && agentMatch);
+
+      return dateMatch && agentMatch && customerMatch;
+    });
     // --- GRAFICO A BARRE (Famiglie) ---
     let groupedFam = sumByKey(filtered, "descfam", "Totale gen", true);
     groupedFam = groupedFam.filter((x) => x["descfam"] !== "0");
@@ -142,7 +185,7 @@ const Ecommerce = () => {
       top3,
       categoryCount: chartOptions?.xaxis?.categories?.length || 0,
     };
-  }, [sheetData, startDate, endDate]);
+  }, [sheetData, startDate, endDate, selectedCustomer, selectedAgent]);
 
   // Configurazione Card Dinamiche
   const dynamicCards = [
@@ -173,6 +216,13 @@ const Ecommerce = () => {
     },
   ];
 
+  const handleResetFilters = () => {
+    setSelectedCustomer("Tutti i Clienti");
+    setSelectedAgent("Tutti gli Agenti");
+    setStartDate(null);
+    setEndDate(null);
+  };
+
   if (isFetching) return <Preloader show={true} />;
 
   return (
@@ -182,8 +232,76 @@ const Ecommerce = () => {
         title="Dashboards"
         currentpage="Generale"
         activepage="Generale"
-        showActions={false}
-      />
+        showActions={true}
+      >
+        <div className="d-flex flex-wrap gap-2">
+          {/* Tasto Reset: appare solo se un filtro è attivo */}
+          {(selectedCustomer !== "Tutti i Clienti" ||
+            selectedAgent !== "Tutti gli Agenti" ||
+            startDate !== null) && (
+            <button
+              className="btn btn-danger-light btn-sm btn-icon"
+              onClick={handleResetFilters}
+              title="Reset filtri"
+            >
+              <i className="ti ti-refresh"></i>
+            </button>
+          )}
+          <SpkDropdown
+            toggleas="a"
+            Customtoggleclass="btn btn-outline-light btn-sm border d-flex align-items-center text-muted no-caret"
+            Toggletext={selectedCustomer}
+            Arrowicon={true}
+          >
+            <div
+              className="dropdown-menu-filter"
+              style={{
+                maxHeight: "250px",
+                overflowY: "auto",
+                minWidth: "200px",
+              }}
+            >
+              {uniqueCustomers.map((c) => (
+                <Dropdown.Item key={c} onClick={() => setSelectedCustomer(c)}>
+                  {c}
+                </Dropdown.Item>
+              ))}
+            </div>
+          </SpkDropdown>
+
+          <SpkDropdown
+            toggleas="a"
+            Customtoggleclass="btn btn-outline-light btn-sm border d-flex align-items-center text-muted no-caret"
+            Toggletext={selectedAgent}
+            Arrowicon={true}
+          >
+            <div
+              className="dropdown-menu-filter"
+              style={{ maxHeight: "250px", overflowY: "auto" }}
+            >
+              {uniqueAgents.map((a) => (
+                <Dropdown.Item
+                  key={a}
+                  onClick={() => {
+                    setSelectedAgent(a); // Imposta l'agente
+                    setSelectedCustomer("Tutti i Clienti"); // Resetta il cliente contestualmente
+                  }}
+                >
+                  {a}
+                </Dropdown.Item>
+              ))}
+            </div>
+          </SpkDropdown>
+
+          <PeriodDropdown
+            onChange={(period) => {
+              let dateRange = computeDate(undefined, period);
+              setStartDate(dateRange[0]);
+              setEndDate(dateRange[1]);
+            }}
+          />
+        </div>
+      </Pageheader>
 
       {/* Cards */}
       <Row>
@@ -210,13 +328,6 @@ const Ecommerce = () => {
               <div className="card-title">
                 Incidenza degli importi sulle famiglie (€)
               </div>
-              <PeriodDropdown
-                onChange={(period) => {
-                  let dateRange = computeDate(undefined, period);
-                  setStartDate(dateRange[0]);
-                  setEndDate(dateRange[1]);
-                }}
-              />
             </Card.Header>
             <Card.Body className="fill">
               {data?.chartSeries?.[0]?.data?.length > 0 ? (
