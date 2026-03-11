@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useMemo, Fragment } from "react";
 import { Col, Row, Card, Form, Dropdown } from "react-bootstrap";
-import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-import { PiMoneyThin, PiScalesThin } from "react-icons/pi";
+// Icone
+import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
 import DateRangeFilter from "@/components/Copral/DaterangeFilter";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 
@@ -23,7 +23,7 @@ const StatisticheVendutoCopral = () => {
   const [selectedFamily, setSelectedFamily] = useState("Tutte le Famiglie");
   const [selectedCustomer, setSelectedCustomer] = useState("Tutti i Clienti");
 
-  // Funzione utility per trasformare "Inesistente" in "VUOTO"
+  // Funzione di utilità per bonificare i nomi "Inesistente" -> "VUOTO"
   const cleanValue = (val) => {
     const s = String(val || "").trim();
     if (!s || s.toUpperCase().includes("INESISTENTE")) return "VUOTO";
@@ -45,6 +45,12 @@ const StatisticheVendutoCopral = () => {
     return new Date((serial - 25569) * 86400 * 1000);
   };
 
+  const toggleAgent = (nome) => {
+    const next = new Set(openAgents);
+    next.has(nome) ? next.delete(nome) : next.add(nome);
+    setOpenAgents(next);
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     const fetchData = async () => {
@@ -56,13 +62,14 @@ const StatisticheVendutoCopral = () => {
         const json = await response.json();
         const rawData = json?.data ?? [];
 
-        const parsedData = rawData.map((row) => ({
-          ...row,
-          DataObj:
-            typeof row["Data"] === "number"
-              ? excelDateToJS(row["Data"])
-              : new Date(row["Data"]),
-        }));
+        const parsedData = rawData.map((row) => {
+          const serialDate = row["Data"];
+          const dateObj =
+            typeof serialDate === "number"
+              ? excelDateToJS(serialDate)
+              : new Date(serialDate);
+          return { ...row, DataObj: dateObj };
+        });
 
         setSheetData(parsedData);
       } catch (error) {
@@ -75,23 +82,19 @@ const StatisticheVendutoCopral = () => {
     return () => controller.abort();
   }, []);
 
-  // --- LOGICA DI ELABORAZIONE DATI ---
-  const { processedData, allFamilies, kpis } = useMemo(() => {
+  const { matrixData, allFamilies, kpis, totalsByFamily } = useMemo(() => {
     if (!sheetData || !Array.isArray(sheetData))
-      return {
-        processedData: [],
-        allFamilies: [],
-        kpis: { globalVal: 0, globalAlmQ: 0, globalAccQ: 0 },
-      };
+      return { matrixData: [], allFamilies: [], kpis: {}, totalsByFamily: {} };
 
     const grouped = {};
     const familiesSet = new Set();
+    const familyTotals = {};
     let globalVal = 0,
       globalAlmQ = 0,
       globalAccQ = 0;
 
     sheetData.forEach((row) => {
-      // 1. BONIFICA IMMEDIATA DEI NOMI (Tutto passa da qui prima del resto)
+      // 1. BONIFICA NOMI
       const agenteNome = cleanValue(row["Descrizione Agente"]);
       const clienteNome = cleanValue(row["Descrizione Cliente/Fornitore"]);
       const famRaw = cleanValue(row["Descrizione Famiglia"]);
@@ -111,32 +114,32 @@ const StatisticheVendutoCopral = () => {
       )
         return;
 
-      // 3. LOGICA VISUALIZZAZIONE FAMIGLIE (MAIUSCOLO + ABBREVIAZIONE)
-      let famigliaTabella = famRaw.toUpperCase().trim();
+      // 3. LOGICA NOMI FAMIGLIA PER TABELLA
+      let famiglia = famRaw.toUpperCase().trim();
       if (
-        famigliaTabella === "EFFETTO LEGNO ACCIAIO" ||
-        famigliaTabella === "EFFETTO LEGNO/ACCIAIO"
+        famiglia === "EFFETTO LEGNO ACCIAIO" ||
+        famiglia === "EFFETTO LEGNO/ACCIAIO"
       ) {
-        famigliaTabella = "EFF. LGN/ACC.";
+        famiglia = "EFF. LGN/ACC.";
       }
 
       const valore = parseFloat(row["Valore"]) || 0;
       const qta = parseFloat(row["Quantita'"]) || 0;
-      familiesSet.add(famigliaTabella);
+      familiesSet.add(famiglia);
 
-      // Calcoli globali
       globalVal += valore;
-      if (famigliaTabella.includes("ALLUMINIO")) globalAlmQ += qta;
-      if (famigliaTabella.includes("ACCESSORI")) globalAccQ += qta;
+      if (famiglia.includes("ALLUMINIO")) globalAlmQ += qta;
+      if (famiglia.includes("ACCESSORI")) globalAccQ += qta;
 
-      // Log sospetti per q.tà decimali negli accessori
-      if (famigliaTabella.includes("ACCESSORI") && !Number.isInteger(qta)) {
+      // LOG SOSPETTI (Ripristinati)
+      const um = row["Descrizione GesUM"] || "NON DEFINITA";
+      if (famiglia.includes("ACCESSORI") && !Number.isInteger(qta)) {
         console.log(
-          `Sospetto trovato! Articolo: ${row["Descrizione Articolo"]}, Q.tà: ${qta}`,
+          `Sospetto trovato! Articolo: ${row["Descrizione Articolo"]}, Q.tà: ${qta}, UM: ${um}`,
         );
       }
 
-      // Aggregazione ad Albero
+      // 4. AGGREGAZIONE (Agente -> Cliente -> Famiglia)
       if (!grouped[agenteNome]) {
         grouped[agenteNome] = {
           nome: agenteNome,
@@ -152,23 +155,33 @@ const StatisticheVendutoCopral = () => {
           totVal: 0,
         };
       }
+      if (!familyTotals[famiglia]) {
+        familyTotals[famiglia] = { v: 0, q: 0 };
+      }
 
       const updateEntry = (entry) => {
-        if (!entry.famiglie[famigliaTabella])
-          entry.famiglie[famigliaTabella] = { v: 0, q: 0 };
-        entry.famiglie[famigliaTabella].v += valore;
-        entry.famiglie[famigliaTabella].q += qta;
+        if (!entry.famiglie[famiglia])
+          entry.famiglie[famiglia] = { v: 0, q: 0 };
+        entry.famiglie[famiglia].v += valore;
+        entry.famiglie[famiglia].q += qta;
         entry.totVal += valore;
       };
 
       updateEntry(grouped[agenteNome]);
       updateEntry(grouped[agenteNome].clienti[clienteNome]);
+
+      // Totali Generali per Colonna
+      familyTotals[famiglia].v += valore;
+      familyTotals[famiglia].q += qta;
     });
 
     return {
-      processedData: Object.values(grouped),
+      matrixData: Object.values(grouped).sort((a, b) =>
+        a.nome.localeCompare(b.nome),
+      ),
       allFamilies: Array.from(familiesSet).sort(),
       kpis: { globalVal, globalAlmQ, globalAccQ },
+      totalsByFamily: familyTotals,
     };
   }, [
     sheetData,
@@ -180,18 +193,18 @@ const StatisticheVendutoCopral = () => {
   ]);
 
   const filteredData = useMemo(() => {
-    if (!searchTerm) return processedData;
+    if (!searchTerm) return matrixData;
     const lowerTerm = searchTerm.toLowerCase();
-    return processedData.filter(
-      (agente) =>
-        agente.nome.toLowerCase().includes(lowerTerm) ||
-        Object.values(agente.clienti).some((cli) =>
+    return matrixData.filter(
+      (ag) =>
+        ag.nome.toLowerCase().includes(lowerTerm) ||
+        Object.values(ag.clienti).some((cli) =>
           cli.nome.toLowerCase().includes(lowerTerm),
         ),
     );
-  }, [processedData, searchTerm]);
+  }, [matrixData, searchTerm]);
 
-  // Liste per i Dropdown (Sempre bonificate con VUOTO)
+  // Liste uniche per Dropdown
   const uniqueAgents = useMemo(() => {
     if (!sheetData) return ["Tutti gli Agenti"];
     const agents = [
@@ -236,32 +249,24 @@ const StatisticheVendutoCopral = () => {
     {
       id: 1,
       title: "Fatturato Totale",
-      count: `€ ${kpis.globalVal.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      count: `€ ${kpis.globalVal?.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       svgIcon: <PiMoneyThin />,
       backgroundColor: "primary svg-white",
     },
     {
       id: 2,
       title: "Totale Alluminio",
-      count: `${kpis.globalAlmQ.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`,
+      count: `${kpis.globalAlmQ?.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`,
       svgIcon: <PiScalesThin />,
       backgroundColor: "primary3 svg-white",
     },
-  ];
-
-  const toggleAgent = (nome) => {
-    const next = new Set(openAgents);
-    next.has(nome) ? next.delete(nome) : next.add(nome);
-    setOpenAgents(next);
-  };
-
-  const tableHeader = [
-    { title: "Agente / Cliente" },
-    ...allFamilies.flatMap((f) => [
-      { title: `${f} (€)` },
-      { title: `${f} (Q.tà)` },
-    ]),
-    { title: "TOTALE (€)" },
+    {
+      id: 3,
+      title: "Totale Accessori",
+      count: `${kpis.globalAccQ?.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Pz`,
+      svgIcon: <PiPackageThin />,
+      backgroundColor: "info svg-white",
+    },
   ];
 
   return (
@@ -360,6 +365,7 @@ const StatisticheVendutoCopral = () => {
                 setSelectedFamily("Tutte le Famiglie");
                 setSelectedCustomer("Tutti i Clienti");
               }}
+              title="Reset"
             >
               <i className="ti ti-refresh"></i>
             </button>
@@ -369,7 +375,7 @@ const StatisticheVendutoCopral = () => {
 
       <Row>
         {dynamicCards.map((card) => (
-          <Col xxl={3} xl={3} lg={6} key={card.id}>
+          <Col xxl={4} xl={4} lg={6} key={card.id}>
             <Spkcardscomponent
               cardClass="overflow-hidden main-content-card"
               mainClass="d-flex align-items-center justify-content-between flex-nowrap"
@@ -387,104 +393,179 @@ const StatisticheVendutoCopral = () => {
               <Card.Title>Analisi Dettagliata Vendite</Card.Title>
               <Form.Control
                 type="text"
-                placeholder="Cerca agente o cliente..."
+                placeholder="Cerca..."
                 className="form-control-sm w-25"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </Card.Header>
             <Card.Body>
-              <div className="table-responsive">
-                <SpkTablescomponent
-                  tableClass="table-bordered text-nowrap border-primary sticky-header"
-                  header={tableHeader}
-                >
-                  {filteredData.map((agente) => (
-                    <Fragment key={agente.nome}>
-                      <tr
-                        className="table-primary-transparent cursor-pointer"
-                        onClick={() => toggleAgent(agente.nome)}
+              <div className="table-responsive border rounded">
+                <table className="table table-bordered text-nowrap border-primary sticky-header mb-0">
+                  <thead className="table-primary">
+                    <tr>
+                      <th
+                        rowSpan="2"
+                        className="align-middle text-center border"
                       >
-                        <th scope="row" className="fw-bold">
-                          <i
-                            className={`ri-arrow-${openAgents.has(agente.nome) ? "down" : "right"}-s-line me-1 text-primary`}
-                          ></i>
-                          {agente.nome}
+                        SOGGETTO (Agente / Cliente)
+                      </th>
+                      {allFamilies.map((fam) => (
+                        <th
+                          key={fam}
+                          colSpan="2"
+                          className="text-center border"
+                        >
+                          {fam}
                         </th>
-                        {allFamilies.map((fam) => (
-                          <Fragment key={fam}>
-                            <td className="text-end fw-bold">
-                              €{" "}
-                              {(agente.famiglie[fam]?.v || 0).toLocaleString(
-                                "it-IT",
-                                { minimumFractionDigits: 2 },
-                              )}
-                            </td>
-                            <td className="text-center fw-bold">
-                              {fam.includes("ALLUMINIO") ? (
-                                <SpkBadge variant="primary">
-                                  {(
-                                    agente.famiglie[fam]?.q || 0
-                                  ).toLocaleString("it-IT")}{" "}
-                                  Kg
-                                </SpkBadge>
-                              ) : fam.includes("ACCESSORI") ? (
-                                <SpkBadge variant="success">
-                                  {(
-                                    agente.famiglie[fam]?.q || 0
-                                  ).toLocaleString("it-IT")}{" "}
-                                  Pz
-                                </SpkBadge>
-                              ) : (
-                                (agente.famiglie[fam]?.q || 0).toLocaleString(
+                      ))}
+                      <th
+                        rowSpan="2"
+                        className="align-middle text-center border"
+                      >
+                        TOTALE (€)
+                      </th>
+                    </tr>
+                    <tr>
+                      {allFamilies.map((fam) => (
+                        <Fragment key={`${fam}-sub`}>
+                          <th
+                            className="text-center border"
+                            style={{ fontSize: "0.7rem" }}
+                          >
+                            VALORE (€)
+                          </th>
+                          <th
+                            className="text-center border"
+                            style={{ fontSize: "0.7rem" }}
+                          >
+                            Q.TÀ
+                          </th>
+                        </Fragment>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((ag) => (
+                      <Fragment key={ag.nome}>
+                        {/* RIGA AGENTE */}
+                        <tr
+                          className="table-primary-transparent"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => toggleAgent(ag.nome)}
+                        >
+                          <th scope="row" className="fw-bold">
+                            <i
+                              className={`ri-arrow-${openAgents.has(ag.nome) ? "down" : "right"}-s-line me-1 text-primary`}
+                            ></i>
+                            {ag.nome}
+                          </th>
+                          {allFamilies.map((fam) => (
+                            <Fragment key={fam}>
+                              <td className="text-end fw-bold">
+                                €{" "}
+                                {(ag.famiglie[fam]?.v || 0).toLocaleString(
                                   "it-IT",
-                                )
-                              )}
-                            </td>
-                          </Fragment>
-                        ))}
-                        <td className="text-end fw-bold text-primary bg-primary-transparent">
-                          €{" "}
-                          {agente.totVal.toLocaleString("it-IT", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </td>
-                      </tr>
-                      {openAgents.has(agente.nome) &&
-                        Object.values(agente.clienti).map((cli, idx) => (
-                          <tr key={idx} className="table-hover">
-                            <td
-                              className="ps-5 text-muted text-uppercase"
-                              style={{ fontSize: "10px" }}
-                            >
-                              {cli.nome}
-                            </td>
-                            {allFamilies.map((fam) => (
-                              <Fragment key={fam}>
-                                <td className="text-end text-muted">
-                                  €{" "}
-                                  {(cli.famiglie[fam]?.v || 0).toLocaleString(
-                                    "it-IT",
-                                    { minimumFractionDigits: 2 },
-                                  )}
-                                </td>
-                                <td className="text-center">
-                                  {(cli.famiglie[fam]?.q || 0).toLocaleString(
-                                    "it-IT",
-                                  )}
-                                </td>
-                              </Fragment>
-                            ))}
-                            <td className="text-end fw-medium text-muted">
-                              €{" "}
-                              {cli.totVal.toLocaleString("it-IT", {
-                                minimumFractionDigits: 2,
-                              })}
-                            </td>
-                          </tr>
-                        ))}
-                    </Fragment>
-                  ))}
-                </SpkTablescomponent>
+                                  { minimumFractionDigits: 2 },
+                                )}
+                              </td>
+                              <td className="text-center">
+                                {fam.includes("ALLUMINIO") ? (
+                                  <SpkBadge variant="primary">
+                                    {(ag.famiglie[fam]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}{" "}
+                                    Kg
+                                  </SpkBadge>
+                                ) : fam.includes("ACCESSORI") ? (
+                                  <SpkBadge variant="success">
+                                    {(ag.famiglie[fam]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}{" "}
+                                    Pz
+                                  </SpkBadge>
+                                ) : (
+                                  <span className="text-muted">
+                                    {(ag.famiglie[fam]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}
+                                  </span>
+                                )}
+                              </td>
+                            </Fragment>
+                          ))}
+                          <td className="text-end fw-bold text-primary bg-primary-transparent">
+                            €{" "}
+                            {ag.totVal.toLocaleString("it-IT", {
+                              minimumFractionDigits: 2,
+                            })}
+                          </td>
+                        </tr>
+
+                        {/* RIGHE CLIENTI (Sotto l'Agente) */}
+                        {openAgents.has(ag.nome) &&
+                          Object.values(ag.clienti).map((cli) => (
+                            <tr key={cli.nome} className="table-hover">
+                              <td
+                                className="ps-5 text-muted text-uppercase"
+                                style={{ fontSize: "10px" }}
+                              >
+                                <i className="ri-corner-down-right-line me-2"></i>
+                                {cli.nome}
+                              </td>
+                              {allFamilies.map((fam) => (
+                                <Fragment key={fam}>
+                                  <td className="text-end text-muted">
+                                    €{" "}
+                                    {(cli.famiglie[fam]?.v || 0).toLocaleString(
+                                      "it-IT",
+                                      { minimumFractionDigits: 2 },
+                                    )}
+                                  </td>
+                                  <td className="text-center text-muted">
+                                    {(cli.famiglie[fam]?.q || 0).toLocaleString(
+                                      "it-IT",
+                                    )}
+                                  </td>
+                                </Fragment>
+                              ))}
+                              <td className="text-end fw-medium text-muted italic">
+                                €{" "}
+                                {cli.totVal.toLocaleString("it-IT", {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </td>
+                            </tr>
+                          ))}
+                      </Fragment>
+                    ))}
+                    {/* RIGA TOTALE COMPLESSIVO */}
+                    <tr className="table-dark">
+                      <th scope="row">TOTALE COMPLESSIVO</th>
+                      {allFamilies.map((fam) => (
+                        <Fragment key={fam}>
+                          <td className="text-end fw-bold">
+                            €{" "}
+                            {(totalsByFamily[fam]?.v || 0).toLocaleString(
+                              "it-IT",
+                              { minimumFractionDigits: 2 },
+                            )}
+                          </td>
+                          <td className="text-center fw-bold">
+                            {(totalsByFamily[fam]?.q || 0).toLocaleString(
+                              "it-IT",
+                            )}
+                          </td>
+                        </Fragment>
+                      ))}
+                      <td className="text-end fw-bold">
+                        €{" "}
+                        {kpis.globalVal?.toLocaleString("it-IT", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </Card.Body>
           </Card>
