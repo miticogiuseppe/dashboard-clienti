@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, Fragment } from "react";
-import { Col, Row, Card, Form } from "react-bootstrap";
+import { Col, Row, Card, Form, Dropdown } from "react-bootstrap";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
@@ -11,6 +11,7 @@ import Preloader from "@/utils/Preloader";
 // Icone
 import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
 import DateRangeFilter from "@/components/Copral/DaterangeFilter";
+import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 
 const StatisticheVendutoCopral = () => {
   const [sheetData, setSheetData] = useState(undefined);
@@ -19,6 +20,9 @@ const StatisticheVendutoCopral = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [selectedAgent, setSelectedAgent] = useState("Tutti gli Agenti");
+  const [selectedFamily, setSelectedFamily] = useState("Tutte le Famiglie");
+  const [selectedCustomer, setSelectedCustomer] = useState("Tutti i Clienti");
 
   const handleFlatpickrChange = (dates) => {
     if (dates.length === 2) {
@@ -84,14 +88,31 @@ const StatisticheVendutoCopral = () => {
       globalAlmQ = 0,
       globalAccQ = 0;
 
-    sheetData.forEach((row, index) => {
+    sheetData.forEach((row) => {
       if (startDate && endDate) {
-        const d = row.DataObj; // Assicurati che l'useEffect le converta in Date
-        if (d && (d < startDate || d > endDate)) {
-          return; // Salta questa riga e passa alla prossima
-        }
+        const d = row.DataObj;
+        if (!d || d < startDate || d > endDate) return;
       }
+      // 2. Filtro Agente
+      if (
+        selectedAgent !== "Tutti gli Agenti" &&
+        row["Descrizione Agente"] !== selectedAgent
+      )
+        return;
 
+      // 3. Filtro Famiglia
+      if (
+        selectedFamily !== "Tutte le Famiglie" &&
+        row["Descrizione Famiglia"] !== selectedFamily
+      )
+        return;
+
+      // 4. Filtro Cliente
+      if (
+        selectedCustomer !== "Tutti i Clienti" &&
+        row["Descrizione Cliente/Fornitore"] !== selectedCustomer
+      )
+        return;
       const agenteNome = row["Descrizione Agente"] || "NON ASSEGNATO";
       const clienteNome =
         row["Descrizione Cliente/Fornitore"] || "CLIENTE GENERICO";
@@ -159,7 +180,14 @@ const StatisticheVendutoCopral = () => {
       allFamilies: Array.from(familiesSet).sort(),
       kpis: { globalVal, globalAlmQ, globalAccQ },
     };
-  }, [sheetData, startDate, endDate]);
+  }, [
+    sheetData,
+    startDate,
+    endDate,
+    selectedAgent,
+    selectedFamily,
+    selectedCustomer,
+  ]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return processedData;
@@ -172,6 +200,45 @@ const StatisticheVendutoCopral = () => {
         ),
     );
   }, [processedData, searchTerm]);
+
+  // Lista Agenti Unici
+  const uniqueAgents = useMemo(() => {
+    if (!sheetData) return ["Tutti gli Agenti"];
+    const agents = [
+      ...new Set(sheetData.map((row) => row["Descrizione Agente"])),
+    ]
+      .filter(Boolean)
+      .sort();
+    return ["Tutti gli Agenti", ...agents];
+  }, [sheetData]);
+
+  // Lista Famiglie Uniche
+  const uniqueFamiliesList = useMemo(() => {
+    if (!sheetData) return ["Tutte le Famiglie"];
+    const families = [
+      ...new Set(sheetData.map((row) => row["Descrizione Famiglia"])),
+    ]
+      .filter(Boolean)
+      .sort();
+    return ["Tutte le Famiglie", ...families];
+  }, [sheetData]);
+
+  // Lista Clienti (filtrata in base all'agente selezionato per comodità)
+  const uniqueCustomers = useMemo(() => {
+    if (!sheetData) return ["Tutti i Clienti"];
+    let filtered = sheetData;
+    if (selectedAgent !== "Tutti gli Agenti") {
+      filtered = sheetData.filter(
+        (row) => row["Descrizione Agente"] === selectedAgent,
+      );
+    }
+    const customers = [
+      ...new Set(filtered.map((row) => row["Descrizione Cliente/Fornitore"])),
+    ]
+      .filter(Boolean)
+      .sort();
+    return ["Tutti i Clienti", ...customers];
+  }, [sheetData, selectedAgent]);
 
   if (isFetching) return <Preloader show={true} />;
 
@@ -229,22 +296,94 @@ const StatisticheVendutoCopral = () => {
           className="d-flex flex-wrap gap-2 align-items-center"
           style={{ overflow: "visible" }}
         >
-          {/* USIAMO IL COMPONENTE COPRAL */}
+          {/* CALENDARIO */}
           <DateRangeFilter
             startDate={startDate}
             endDate={endDate}
             onDateChange={handleFlatpickrChange}
           />
-          {/* Tasto Reset (mostrato solo se c'è una data o una ricerca) */}
-          {(startDate || searchTerm) && (
+
+          {/* DROPDOWN AGENTI */}
+          <SpkDropdown
+            toggleas="a"
+            Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
+            Toggletext={selectedAgent}
+            Arrowicon={true}
+          >
+            <div
+              className="dropdown-menu-filter"
+              style={{ maxHeight: "250px", overflowY: "auto" }}
+            >
+              {uniqueAgents.map((a) => (
+                <Dropdown.Item
+                  key={a}
+                  onClick={() => {
+                    setSelectedAgent(a);
+                    setSelectedCustomer("Tutti i Clienti");
+                  }}
+                >
+                  {a}
+                </Dropdown.Item>
+              ))}
+            </div>
+          </SpkDropdown>
+
+          {/* DROPDOWN FAMIGLIE */}
+          <SpkDropdown
+            toggleas="a"
+            Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
+            Toggletext={selectedFamily}
+            Arrowicon={true}
+          >
+            <div
+              className="dropdown-menu-filter"
+              style={{ maxHeight: "250px", overflowY: "auto" }}
+            >
+              {uniqueFamiliesList.map((f) => (
+                <Dropdown.Item key={f} onClick={() => setSelectedFamily(f)}>
+                  {f}
+                </Dropdown.Item>
+              ))}
+            </div>
+          </SpkDropdown>
+
+          {/* DROPDOWN CLIENTI */}
+          <SpkDropdown
+            toggleas="a"
+            Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
+            Toggletext={selectedCustomer}
+            Arrowicon={true}
+          >
+            <div
+              className="dropdown-menu-filter"
+              style={{
+                maxHeight: "250px",
+                overflowY: "auto",
+                minWidth: "250px",
+              }}
+            >
+              {uniqueCustomers.map((c) => (
+                <Dropdown.Item key={c} onClick={() => setSelectedCustomer(c)}>
+                  {c}
+                </Dropdown.Item>
+              ))}
+            </div>
+          </SpkDropdown>
+
+          {/* RESET */}
+          {(startDate ||
+            selectedAgent !== "Tutti gli Agenti" ||
+            selectedFamily !== "Tutte le Famiglie" ||
+            selectedCustomer !== "Tutti i Clienti") && (
             <button
               className="btn btn-danger-light btn-sm btn-icon"
               onClick={() => {
                 setStartDate(null);
                 setEndDate(null);
-                setSearchTerm("");
+                setSelectedAgent("Tutti gli Agenti");
+                setSelectedFamily("Tutte le Famiglie");
+                setSelectedCustomer("Tutti i Clienti");
               }}
-              title="Reset filtri"
             >
               <i className="ti ti-refresh"></i>
             </button>
