@@ -24,6 +24,8 @@ export async function GET(req) {
     console.log("Cliente:", codice_cliente);
     console.log("--------------------");
 
+    console.log("1 " + new Date());
+
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
         status: 400,
@@ -147,6 +149,8 @@ export async function GET(req) {
       data: jsonSheet,
       lwt: fileDate,
     };
+
+    console.log("2 " + new Date());
 
     return new Response(JSON.stringify(jsonData), {
       status: 200,

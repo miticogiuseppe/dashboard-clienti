@@ -8,8 +8,7 @@ import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashbo
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-// Icone
-import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
+import { PiMoneyThin, PiScalesThin } from "react-icons/pi";
 import DateRangeFilter from "@/components/Copral/DaterangeFilter";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 
@@ -24,6 +23,13 @@ const StatisticheVendutoCopral = () => {
   const [selectedFamily, setSelectedFamily] = useState("Tutte le Famiglie");
   const [selectedCustomer, setSelectedCustomer] = useState("Tutti i Clienti");
 
+  // Funzione utility per trasformare "Inesistente" in "VUOTO"
+  const cleanValue = (val) => {
+    const s = String(val || "").trim();
+    if (!s || s.toUpperCase().includes("INESISTENTE")) return "VUOTO";
+    return s;
+  };
+
   const handleFlatpickrChange = (dates) => {
     if (dates.length === 2) {
       setStartDate(dates[0]);
@@ -36,10 +42,7 @@ const StatisticheVendutoCopral = () => {
 
   const excelDateToJS = (serial) => {
     if (!serial || isNaN(serial)) return null;
-    // Excel conta dal 1/1/1900, JS dal 1/1/1970.
-    // La differenza è di 25569 giorni.
-    const date = new Date((serial - 25569) * 86400 * 1000);
-    return date;
+    return new Date((serial - 25569) * 86400 * 1000);
   };
 
   useEffect(() => {
@@ -53,19 +56,13 @@ const StatisticheVendutoCopral = () => {
         const json = await response.json();
         const rawData = json?.data ?? [];
 
-        const parsedData = rawData.map((row) => {
-          const serialDate = row["Data"];
-          // Trasformiamo il numero 45236 in un oggetto Date vero
-          const dateObj =
-            typeof serialDate === "number"
-              ? excelDateToJS(serialDate)
-              : new Date(serialDate);
-
-          return {
-            ...row,
-            DataObj: dateObj, // Usiamo questo per il filtro
-          };
-        });
+        const parsedData = rawData.map((row) => ({
+          ...row,
+          DataObj:
+            typeof row["Data"] === "number"
+              ? excelDateToJS(row["Data"])
+              : new Date(row["Data"]),
+        }));
 
         setSheetData(parsedData);
       } catch (error) {
@@ -78,9 +75,14 @@ const StatisticheVendutoCopral = () => {
     return () => controller.abort();
   }, []);
 
+  // --- LOGICA DI ELABORAZIONE DATI ---
   const { processedData, allFamilies, kpis } = useMemo(() => {
     if (!sheetData || !Array.isArray(sheetData))
-      return { processedData: [], allFamilies: [], kpis: {} };
+      return {
+        processedData: [],
+        allFamilies: [],
+        kpis: { globalVal: 0, globalAlmQ: 0, globalAccQ: 0 },
+      };
 
     const grouped = {};
     const familiesSet = new Set();
@@ -89,65 +91,52 @@ const StatisticheVendutoCopral = () => {
       globalAccQ = 0;
 
     sheetData.forEach((row) => {
+      // 1. BONIFICA IMMEDIATA DEI NOMI (Tutto passa da qui prima del resto)
+      const agenteNome = cleanValue(row["Descrizione Agente"]);
+      const clienteNome = cleanValue(row["Descrizione Cliente/Fornitore"]);
+      const famRaw = cleanValue(row["Descrizione Famiglia"]);
+
+      // 2. FILTRI
       if (startDate && endDate) {
         const d = row.DataObj;
         if (!d || d < startDate || d > endDate) return;
       }
-      // 2. Filtro Agente
-      if (
-        selectedAgent !== "Tutti gli Agenti" &&
-        row["Descrizione Agente"] !== selectedAgent
-      )
+      if (selectedAgent !== "Tutti gli Agenti" && agenteNome !== selectedAgent)
         return;
-
-      // 3. Filtro Famiglia
-      if (
-        selectedFamily !== "Tutte le Famiglie" &&
-        row["Descrizione Famiglia"] !== selectedFamily
-      )
+      if (selectedFamily !== "Tutte le Famiglie" && famRaw !== selectedFamily)
         return;
-
-      // 4. Filtro Cliente
       if (
         selectedCustomer !== "Tutti i Clienti" &&
-        row["Descrizione Cliente/Fornitore"] !== selectedCustomer
+        clienteNome !== selectedCustomer
       )
         return;
-      const agenteNome = row["Descrizione Agente"] || "NON ASSEGNATO";
-      const clienteNome =
-        row["Descrizione Cliente/Fornitore"] || "CLIENTE GENERICO";
 
-      // --- LOGICA DI PULIZIA E ABBREVIAZIONE NOMI FAMIGLIA ---
-      let famigliaRaw =
-        row["Descrizione Famiglia"]?.toUpperCase().trim() || "VARIE";
-      let famiglia = famigliaRaw;
-
+      // 3. LOGICA VISUALIZZAZIONE FAMIGLIE (MAIUSCOLO + ABBREVIAZIONE)
+      let famigliaTabella = famRaw.toUpperCase().trim();
       if (
-        famigliaRaw === "EFFETTO LEGNO ACCIAIO" ||
-        famigliaRaw === "EFFETTO LEGNO/ACCIAIO"
+        famigliaTabella === "EFFETTO LEGNO ACCIAIO" ||
+        famigliaTabella === "EFFETTO LEGNO/ACCIAIO"
       ) {
-        famiglia = "EFF. LGN/ACC.";
-      } else if (famigliaRaw.includes("INESISTENTE")) {
-        famiglia = "VARIE";
+        famigliaTabella = "EFF. LGN/ACC.";
       }
+
       const valore = parseFloat(row["Valore"]) || 0;
       const qta = parseFloat(row["Quantita'"]) || 0;
-      familiesSet.add(famiglia);
+      familiesSet.add(famigliaTabella);
 
+      // Calcoli globali
       globalVal += valore;
-      if (famigliaRaw.includes("ALLUMINIO")) globalAlmQ += qta;
-      if (famigliaRaw.includes("ACCESSORI")) globalAccQ += qta;
+      if (famigliaTabella.includes("ALLUMINIO")) globalAlmQ += qta;
+      if (famigliaTabella.includes("ACCESSORI")) globalAccQ += qta;
 
-      // Se è un accessorio e ha la virgola, stampalo nella console del browser (F12)
-      const um = row["Descrizione GesUM"] || "NON DEFINITA";
-
-      const qt = row["Quantita'"];
-      if (famiglia.includes("ACCESSORI") && !Number.isInteger(parseFloat(qt))) {
+      // Log sospetti per q.tà decimali negli accessori
+      if (famigliaTabella.includes("ACCESSORI") && !Number.isInteger(qta)) {
         console.log(
-          `Sospetto trovato! Articolo: ${row["Descrizione Articolo"]}, Q.tà: ${qt}, UM: ${um}`,
+          `Sospetto trovato! Articolo: ${row["Descrizione Articolo"]}, Q.tà: ${qta}`,
         );
       }
 
+      // Aggregazione ad Albero
       if (!grouped[agenteNome]) {
         grouped[agenteNome] = {
           nome: agenteNome,
@@ -165,12 +154,13 @@ const StatisticheVendutoCopral = () => {
       }
 
       const updateEntry = (entry) => {
-        if (!entry.famiglie[famiglia])
-          entry.famiglie[famiglia] = { v: 0, q: 0 };
-        entry.famiglie[famiglia].v += valore;
-        entry.famiglie[famiglia].q += qta;
+        if (!entry.famiglie[famigliaTabella])
+          entry.famiglie[famigliaTabella] = { v: 0, q: 0 };
+        entry.famiglie[famigliaTabella].v += valore;
+        entry.famiglie[famigliaTabella].q += qta;
         entry.totVal += valore;
       };
+
       updateEntry(grouped[agenteNome]);
       updateEntry(grouped[agenteNome].clienti[clienteNome]);
     });
@@ -201,39 +191,39 @@ const StatisticheVendutoCopral = () => {
     );
   }, [processedData, searchTerm]);
 
-  // Lista Agenti Unici
+  // Liste per i Dropdown (Sempre bonificate con VUOTO)
   const uniqueAgents = useMemo(() => {
     if (!sheetData) return ["Tutti gli Agenti"];
     const agents = [
-      ...new Set(sheetData.map((row) => row["Descrizione Agente"])),
+      ...new Set(sheetData.map((r) => cleanValue(r["Descrizione Agente"]))),
     ]
       .filter(Boolean)
       .sort();
     return ["Tutti gli Agenti", ...agents];
   }, [sheetData]);
 
-  // Lista Famiglie Uniche
   const uniqueFamiliesList = useMemo(() => {
     if (!sheetData) return ["Tutte le Famiglie"];
     const families = [
-      ...new Set(sheetData.map((row) => row["Descrizione Famiglia"])),
+      ...new Set(sheetData.map((r) => cleanValue(r["Descrizione Famiglia"]))),
     ]
       .filter(Boolean)
       .sort();
     return ["Tutte le Famiglie", ...families];
   }, [sheetData]);
 
-  // Lista Clienti (filtrata in base all'agente selezionato per comodità)
   const uniqueCustomers = useMemo(() => {
     if (!sheetData) return ["Tutti i Clienti"];
-    let filtered = sheetData;
+    let data = sheetData;
     if (selectedAgent !== "Tutti gli Agenti") {
-      filtered = sheetData.filter(
-        (row) => row["Descrizione Agente"] === selectedAgent,
+      data = sheetData.filter(
+        (r) => cleanValue(r["Descrizione Agente"]) === selectedAgent,
       );
     }
     const customers = [
-      ...new Set(filtered.map((row) => row["Descrizione Cliente/Fornitore"])),
+      ...new Set(
+        data.map((r) => cleanValue(r["Descrizione Cliente/Fornitore"])),
+      ),
     ]
       .filter(Boolean)
       .sort();
@@ -246,7 +236,6 @@ const StatisticheVendutoCopral = () => {
     {
       id: 1,
       title: "Fatturato Totale",
-      // focus qui: aggiungiamo minimum e maximum FractionDigits a 2
       count: `€ ${kpis.globalVal.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       svgIcon: <PiMoneyThin />,
       backgroundColor: "primary svg-white",
@@ -258,14 +247,6 @@ const StatisticheVendutoCopral = () => {
       svgIcon: <PiScalesThin />,
       backgroundColor: "primary3 svg-white",
     },
-    // {
-    //   id: 3,
-    //   title: "Totale Accessori",
-    //   // Per gli accessori (pezzi) di solito si usa intero, ma se vuoi coerenza mettiamo 2 decimali anche qui
-    //   count: `${kpis.globalAccQ.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Pz`,
-    //   svgIcon: <PiPackageThin />,
-    //   backgroundColor: "info svg-white",
-    // },
   ];
 
   const toggleAgent = (nome) => {
@@ -280,7 +261,7 @@ const StatisticheVendutoCopral = () => {
       { title: `${f} (€)` },
       { title: `${f} (Q.tà)` },
     ]),
-    { title: "TOT. VALORE (€)" },
+    { title: "TOTALE (€)" },
   ];
 
   return (
@@ -296,14 +277,12 @@ const StatisticheVendutoCopral = () => {
           className="d-flex flex-wrap gap-2 align-items-center"
           style={{ overflow: "visible" }}
         >
-          {/* CALENDARIO */}
           <DateRangeFilter
             startDate={startDate}
             endDate={endDate}
             onDateChange={handleFlatpickrChange}
           />
 
-          {/* DROPDOWN AGENTI */}
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -328,7 +307,6 @@ const StatisticheVendutoCopral = () => {
             </div>
           </SpkDropdown>
 
-          {/* DROPDOWN FAMIGLIE */}
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -347,7 +325,6 @@ const StatisticheVendutoCopral = () => {
             </div>
           </SpkDropdown>
 
-          {/* DROPDOWN CLIENTI */}
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -370,7 +347,6 @@ const StatisticheVendutoCopral = () => {
             </div>
           </SpkDropdown>
 
-          {/* RESET */}
           {(startDate ||
             selectedAgent !== "Tutti gli Agenti" ||
             selectedFamily !== "Tutte le Famiglie" ||
@@ -404,16 +380,15 @@ const StatisticheVendutoCopral = () => {
         ))}
       </Row>
 
-      <Row>
+      <Row className="mt-4">
         <Col xl={12}>
           <Card className="custom-card">
             <Card.Header className="justify-content-between">
               <Card.Title>Analisi Dettagliata Vendite</Card.Title>
               <Form.Control
                 type="text"
-                placeholder="Cerca..."
-                className="form-control-sm"
-                style={{ maxWidth: "250px" }}
+                placeholder="Cerca agente o cliente..."
+                className="form-control-sm w-25"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </Card.Header>
@@ -460,11 +435,9 @@ const StatisticheVendutoCopral = () => {
                                   Pz
                                 </SpkBadge>
                               ) : (
-                                <span className="text-muted">
-                                  {(
-                                    agente.famiglie[fam]?.q || 0
-                                  ).toLocaleString("it-IT")}
-                                </span>
+                                (agente.famiglie[fam]?.q || 0).toLocaleString(
+                                  "it-IT",
+                                )
                               )}
                             </td>
                           </Fragment>
@@ -495,26 +468,8 @@ const StatisticheVendutoCopral = () => {
                                   )}
                                 </td>
                                 <td className="text-center">
-                                  {fam.includes("ALLUMINIO") ? (
-                                    <SpkBadge variant="info-transparent">
-                                      {(
-                                        cli.famiglie[fam]?.q || 0
-                                      ).toLocaleString("it-IT")}{" "}
-                                      Kg
-                                    </SpkBadge>
-                                  ) : fam.includes("ACCESSORI") ? (
-                                    <SpkBadge variant="success-transparent">
-                                      {(
-                                        cli.famiglie[fam]?.q || 0
-                                      ).toLocaleString("it-IT")}{" "}
-                                      Pz
-                                    </SpkBadge>
-                                  ) : (
-                                    <span className="text-muted">
-                                      {(
-                                        cli.famiglie[fam]?.q || 0
-                                      ).toLocaleString("it-IT")}
-                                    </span>
+                                  {(cli.famiglie[fam]?.q || 0).toLocaleString(
+                                    "it-IT",
                                   )}
                                 </td>
                               </Fragment>

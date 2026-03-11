@@ -25,6 +25,13 @@ const AnalisiPerFamiglia = () => {
   const [selectedFamily, setSelectedFamily] = useState("Tutte le Famiglie");
   const [selectedGroup, setSelectedGroup] = useState("Tutti i Gruppi");
 
+  // Funzione di utilità per bonificare i nomi "Inesistente"
+  const cleanValue = (val) => {
+    const s = String(val || "").trim();
+    if (!s || s.toUpperCase().includes("INESISTENTE")) return "VUOTO";
+    return s;
+  };
+
   const excelDateToJS = (serial) => {
     if (!serial || isNaN(serial)) return null;
     return new Date((serial - 25569) * 86400 * 1000);
@@ -78,10 +85,12 @@ const AnalisiPerFamiglia = () => {
     return () => controller.abort();
   }, []);
 
-  // --- ESTRAZIONE LISTE UNICHE ---
+  // --- ESTRAZIONE LISTE UNICHE (BONIFICATE) ---
   const uniqueAgents = useMemo(() => {
     if (!sheetData) return ["Tutti gli Agenti"];
-    const agents = [...new Set(sheetData.map((r) => r["Descrizione Agente"]))]
+    const agents = [
+      ...new Set(sheetData.map((r) => cleanValue(r["Descrizione Agente"]))),
+    ]
       .filter(Boolean)
       .sort();
     return ["Tutti gli Agenti", ...agents];
@@ -90,7 +99,7 @@ const AnalisiPerFamiglia = () => {
   const uniqueFamiliesList = useMemo(() => {
     if (!sheetData) return ["Tutte le Famiglie"];
     const families = [
-      ...new Set(sheetData.map((r) => r["Descrizione Famiglia"])),
+      ...new Set(sheetData.map((r) => cleanValue(r["Descrizione Famiglia"]))),
     ]
       .filter(Boolean)
       .sort();
@@ -102,11 +111,11 @@ const AnalisiPerFamiglia = () => {
     let dataForGroups = sheetData;
     if (selectedFamily !== "Tutte le Famiglie") {
       dataForGroups = sheetData.filter(
-        (r) => r["Descrizione Famiglia"] === selectedFamily,
+        (r) => cleanValue(r["Descrizione Famiglia"]) === selectedFamily,
       );
     }
     const groups = [
-      ...new Set(dataForGroups.map((r) => r["Descrizione Gruppo"])),
+      ...new Set(dataForGroups.map((r) => cleanValue(r["Descrizione Gruppo"]))),
     ]
       .filter(Boolean)
       .sort();
@@ -131,31 +140,29 @@ const AnalisiPerFamiglia = () => {
       globalAccQ = 0;
 
     sheetData.forEach((row) => {
-      // FILTRI
+      // 1. Bonifica immediata dei nomi per coerenza con i filtri
+      const agente = cleanValue(row["Descrizione Agente"]);
+      const macro = cleanValue(row["Descrizione Famiglia"]).toUpperCase();
+      const sotto = cleanValue(row["Descrizione Gruppo"]).toUpperCase();
+
+      // 2. FILTRI
       if (startDate && endDate) {
         const d = row.DataObj;
         if (!d || d < startDate || d > endDate) return;
       }
-      if (
-        selectedAgent !== "Tutti gli Agenti" &&
-        row["Descrizione Agente"] !== selectedAgent
-      )
+      if (selectedAgent !== "Tutti gli Agenti" && agente !== selectedAgent)
         return;
       if (
         selectedFamily !== "Tutte le Famiglie" &&
-        row["Descrizione Famiglia"] !== selectedFamily
+        macro !== selectedFamily.toUpperCase()
       )
         return;
       if (
         selectedGroup !== "Tutti i Gruppi" &&
-        row["Descrizione Gruppo"] !== selectedGroup
+        sotto !== selectedGroup.toUpperCase()
       )
         return;
 
-      const agente = row["Descrizione Agente"] || "NON ASSEGNATO";
-      const macro =
-        row["Descrizione Famiglia"]?.toUpperCase().trim() || "VARIE";
-      const sotto = (row["Descrizione Gruppo"] || "ALTRO").toUpperCase().trim();
       const valore = parseFloat(row["Valore"]) || 0;
       const qta = parseFloat(row["Quantita'"]) || 0;
 
@@ -215,8 +222,6 @@ const AnalisiPerFamiglia = () => {
     setSearchTerm("");
   };
 
-  if (isFetching) return <Preloader show={true} />;
-
   const dynamicCards = [
     {
       id: 1,
@@ -241,6 +246,8 @@ const AnalisiPerFamiglia = () => {
     },
   ];
 
+  if (isFetching) return <Preloader show={true} />;
+
   return (
     <Fragment>
       <Seo title={"Analisi per Famiglia - Copral"} />
@@ -259,7 +266,6 @@ const AnalisiPerFamiglia = () => {
             endDate={endDate}
             onDateChange={handleFlatpickrChange}
           />
-
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -277,7 +283,6 @@ const AnalisiPerFamiglia = () => {
               ))}
             </div>
           </SpkDropdown>
-
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -301,7 +306,6 @@ const AnalisiPerFamiglia = () => {
               ))}
             </div>
           </SpkDropdown>
-
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border text-muted no-caret"
@@ -319,7 +323,6 @@ const AnalisiPerFamiglia = () => {
               ))}
             </div>
           </SpkDropdown>
-
           {(startDate ||
             selectedAgent !== "Tutti gli Agenti" ||
             selectedFamily !== "Tutte le Famiglie" ||
@@ -337,7 +340,7 @@ const AnalisiPerFamiglia = () => {
 
       <Row>
         {dynamicCards.map((card) => (
-          <Col xxl={3} xl={3} lg={6} key={card.id}>
+          <Col xxl={4} xl={4} lg={6} key={card.id}>
             <Spkcardscomponent
               cardClass="overflow-hidden main-content-card"
               mainClass="d-flex align-items-center justify-content-between flex-nowrap"
@@ -448,24 +451,8 @@ const AnalisiPerFamiglia = () => {
                                     )}
                                   </td>
                                   <td className="text-center text-muted">
-                                    {macro.nome.includes("ALLUMINIO") ? (
-                                      <SpkBadge variant="info-transparent">
-                                        {(
-                                          sotto.agenti[ag]?.q || 0
-                                        ).toLocaleString("it-IT")}{" "}
-                                        Kg
-                                      </SpkBadge>
-                                    ) : macro.nome.includes("ACCESSORI") ? (
-                                      <SpkBadge variant="success-transparent">
-                                        {(
-                                          sotto.agenti[ag]?.q || 0
-                                        ).toLocaleString("it-IT")}{" "}
-                                        Pz
-                                      </SpkBadge>
-                                    ) : (
-                                      (sotto.agenti[ag]?.q || 0).toLocaleString(
-                                        "it-IT",
-                                      )
+                                    {(sotto.agenti[ag]?.q || 0).toLocaleString(
+                                      "it-IT",
                                     )}
                                   </td>
                                 </Fragment>
