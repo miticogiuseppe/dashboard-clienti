@@ -10,41 +10,67 @@ import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
 // Icone
 import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
+import DateRangeFilter from "@/components/Copral/DaterangeFilter";
 
 const StatisticheVendutoCopral = () => {
   const [sheetData, setSheetData] = useState(undefined);
   const [isFetching, setIsFetching] = useState(true);
   const [openAgents, setOpenAgents] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const handleFlatpickrChange = (dates) => {
+    if (dates.length === 2) {
+      setStartDate(dates[0]);
+      setEndDate(dates[1]);
+    } else if (dates.length === 0) {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  };
+
+  const excelDateToJS = (serial) => {
+    if (!serial || isNaN(serial)) return null;
+    // Excel conta dal 1/1/1900, JS dal 1/1/1970.
+    // La differenza è di 25569 giorni.
+    const date = new Date((serial - 25569) * 86400 * 1000);
+    return date;
+  };
 
   useEffect(() => {
     const controller = new AbortController();
-
     const fetchData = async () => {
       try {
         const response = await fetch(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
           { signal: controller.signal },
         );
-
-        if (!response.ok) {
-          throw new Error(`Errore HTTP: ${response.status}`);
-        }
-
         const json = await response.json();
-        setSheetData(json?.data ?? []);
+        const rawData = json?.data ?? [];
+
+        const parsedData = rawData.map((row) => {
+          const serialDate = row["Data"];
+          // Trasformiamo il numero 45236 in un oggetto Date vero
+          const dateObj =
+            typeof serialDate === "number"
+              ? excelDateToJS(serialDate)
+              : new Date(serialDate);
+
+          return {
+            ...row,
+            DataObj: dateObj, // Usiamo questo per il filtro
+          };
+        });
+
+        setSheetData(parsedData);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Errore STAVEN:", error);
-          setSheetData([]);
-        }
+        if (error.name !== "AbortError") setSheetData([]);
       } finally {
         setIsFetching(false);
       }
     };
-
     fetchData();
-
     return () => controller.abort();
   }, []);
 
@@ -58,7 +84,14 @@ const StatisticheVendutoCopral = () => {
       globalAlmQ = 0,
       globalAccQ = 0;
 
-    sheetData.forEach((row) => {
+    sheetData.forEach((row, index) => {
+      if (startDate && endDate) {
+        const d = row.DataObj; // Assicurati che l'useEffect le converta in Date
+        if (d && (d < startDate || d > endDate)) {
+          return; // Salta questa riga e passa alla prossima
+        }
+      }
+
       const agenteNome = row["Descrizione Agente"] || "NON ASSEGNATO";
       const clienteNome =
         row["Descrizione Cliente/Fornitore"] || "CLIENTE GENERICO";
@@ -126,7 +159,7 @@ const StatisticheVendutoCopral = () => {
       allFamilies: Array.from(familiesSet).sort(),
       kpis: { globalVal, globalAlmQ, globalAccQ },
     };
-  }, [sheetData]);
+  }, [sheetData, startDate, endDate]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return processedData;
@@ -190,7 +223,34 @@ const StatisticheVendutoCopral = () => {
         title="Statistiche Venduto"
         currentpage="Copral"
         activepage="Dashboard"
-      />
+        showActions={true}
+      >
+        <div
+          className="d-flex flex-wrap gap-2 align-items-center"
+          style={{ overflow: "visible" }}
+        >
+          {/* USIAMO IL COMPONENTE COPRAL */}
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onDateChange={handleFlatpickrChange}
+          />
+          {/* Tasto Reset (mostrato solo se c'è una data o una ricerca) */}
+          {(startDate || searchTerm) && (
+            <button
+              className="btn btn-danger-light btn-sm btn-icon"
+              onClick={() => {
+                setStartDate(null);
+                setEndDate(null);
+                setSearchTerm("");
+              }}
+              title="Reset filtri"
+            >
+              <i className="ti ti-refresh"></i>
+            </button>
+          )}
+        </div>
+      </Pageheader>
 
       <Row>
         {dynamicCards.map((card) => (

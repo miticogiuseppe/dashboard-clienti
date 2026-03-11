@@ -27,6 +27,8 @@ import { useTranslations } from "next-intl";
 import AppmerceTable from "@/components/AppmerceTable";
 import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import { Fragment } from "react";
+import SpkFlatpickr from "@/shared/@spk-reusable-components/reusable-plugins/spk-flatpicker";
+import DateRangeFilter from "@/components/Copral/DaterangeFilter";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -42,6 +44,19 @@ const Ecommerce = () => {
   const [endDate, setEndDate] = useState(null);
   const [fileDate, setFileDate] = useState(undefined);
   const [isFetching, setIsFetching] = useState(true);
+
+  // Gestore per il nuovo SpkFlatpickr (Range Mode)
+  const handleFlatpickrChange = (dates) => {
+    if (dates.length === 2) {
+      // Flatpickr restituisce oggetti Date puri, li salviamo negli stati
+      setStartDate(dates[0]);
+      setEndDate(dates[1]);
+    } else if (dates.length === 0) {
+      // Gestione del reset/clear
+      setStartDate(null);
+      setEndDate(null);
+    }
+  };
 
   const t = useTranslations("Graph");
 
@@ -234,19 +249,44 @@ const Ecommerce = () => {
         activepage="Generale"
         showActions={true}
       >
-        <div className="d-flex flex-wrap gap-2">
-          {/* Tasto Reset: appare solo se un filtro è attivo */}
-          {(selectedCustomer !== "Tutti i Clienti" ||
-            selectedAgent !== "Tutti gli Agenti" ||
-            startDate !== null) && (
-            <button
-              className="btn btn-danger-light btn-sm btn-icon"
-              onClick={handleResetFilters}
-              title="Reset filtri"
+        {/* Aggiungiamo overflow visible per evitare che il calendario venga tagliato */}
+        <div
+          className="d-flex flex-wrap gap-2 align-items-center"
+          style={{ overflow: "visible" }}
+        >
+          {/* 1. CALENDARIO (Spostato per primo così ha spazio a destra per aprirsi) */}
+          {/* <div
+            className="input-group"
+            style={{ width: "auto", minWidth: "210px" }}
+          >
+            <div
+              className="input-group-text bg-white border py-0"
+              style={{ height: "31px" }}
             >
-              <i className="ti ti-refresh"></i>
-            </button>
-          )}
+              <i className="ri-calendar-line text-muted"></i>
+            </div>
+
+            <SpkFlatpickr
+              inputClass="form-control form-control-sm border"
+              value={[startDate, endDate]}
+              options={{
+                mode: "range",
+                dateFormat: "d-m-Y",
+                showMonths: 1,
+                static: true,
+              }}
+              onfunChange={handleFlatpickrChange}
+              placeholder="Seleziona periodo..."
+            />
+          </div> */}
+
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onDateChange={handleFlatpickrChange}
+          />
+
+          {/* 2. DROPDOWN CLIENTI */}
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border d-flex align-items-center text-muted no-caret"
@@ -269,6 +309,7 @@ const Ecommerce = () => {
             </div>
           </SpkDropdown>
 
+          {/* 3. DROPDOWN AGENTI */}
           <SpkDropdown
             toggleas="a"
             Customtoggleclass="btn btn-outline-light btn-sm border d-flex align-items-center text-muted no-caret"
@@ -283,8 +324,8 @@ const Ecommerce = () => {
                 <Dropdown.Item
                   key={a}
                   onClick={() => {
-                    setSelectedAgent(a); // Imposta l'agente
-                    setSelectedCustomer("Tutti i Clienti"); // Resetta il cliente contestualmente
+                    setSelectedAgent(a);
+                    setSelectedCustomer("Tutti i Clienti");
                   }}
                 >
                   {a}
@@ -293,16 +334,20 @@ const Ecommerce = () => {
             </div>
           </SpkDropdown>
 
-          <PeriodDropdown
-            onChange={(period) => {
-              let dateRange = computeDate(undefined, period);
-              setStartDate(dateRange[0]);
-              setEndDate(dateRange[1]);
-            }}
-          />
+          {/* 4. TASTO RESET */}
+          {(selectedCustomer !== "Tutti i Clienti" ||
+            selectedAgent !== "Tutti gli Agenti" ||
+            startDate !== null) && (
+            <button
+              className="btn btn-danger-light btn-sm btn-icon"
+              onClick={handleResetFilters}
+              title="Reset filtri"
+            >
+              <i className="ti ti-refresh"></i>
+            </button>
+          )}
         </div>
       </Pageheader>
-
       {/* Cards */}
       <Row>
         {dynamicCards.map((card) => (
