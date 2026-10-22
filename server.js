@@ -24,9 +24,10 @@ const queue = async.queue(async (task) => {
   }
 }, 1);
 
-function readXlsx(filePath) {
+function readXlsx(filePath, sheetId = 0) {
   const workbook = xlsx.readFile(filePath, { dense: true, raw: true });
-  const sheetName = workbook.SheetNames[0];
+  const sheetName =
+    typeof sheetId === "string" ? sheetId : workbook.SheetNames[sheetId ?? 0];
   const sheet = workbook.Sheets[sheetName];
   return xlsx.utils.sheet_to_json(sheet, { header: 1 });
 }
@@ -45,12 +46,12 @@ function readJson(filePath) {
   }
   return [data];
 }
-function readFile(filePath) {
+function readFile(filePath, sheetId = 0) {
   const ext = path.extname(filePath).toLowerCase();
   switch (ext) {
     case ".xlsx":
     case ".xls":
-      return readXlsx(filePath);
+      return readXlsx(filePath, sheetId);
     case ".csv":
       return readCsv(filePath);
     case ".json":
@@ -62,6 +63,16 @@ function readFile(filePath) {
       console.warn(`  ⚠ Formato non supportato: ${ext}`);
       return null;
   }
+}
+function headFix(headRow) {
+  const counts = new Map();
+
+  return headRow.map((item) => {
+    const count = (counts.get(item) ?? 0) + 1;
+    counts.set(item, count);
+
+    return count === 1 ? item : `${item}_${count}`;
+  });
 }
 function convertRowsToCsv(rows) {
   let count = rows[0].length;
@@ -88,13 +99,13 @@ function enqueueFile(tenant, file) {
     console.log(`▶ ${tenant}  ${file.id}`);
 
     const filePath = path.join(process.env.DRIVE_PATH, file.path);
-    let content = readFile(filePath);
+    let content = readFile(filePath, file.sheet);
     if (!content || content.length === 0) {
       console.warn(`  ⚠ File vuoto o non supportato: ${filePath}`);
       return;
     }
 
-    let headRow = content[0];
+    let headRow = headFix(content[0]);
     let csvContent = convertRowsToCsv(content);
 
     // inferisce tipi di dato
