@@ -1,6 +1,10 @@
 "use client";
+import AppmerceTable from "@/components/AppmerceTable";
+import DateRangeFilter from "@/components/Copral/DaterangeFilter";
+import GlobalContext from "@/context/GlobalContext";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
@@ -8,23 +12,21 @@ import { formatDate, formatTime } from "@/utils/format";
 import {
   createOptions,
   createSeries,
+  currencyFormatter,
   pieOptions,
   randomColor,
-  currencyFormatter,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import _ from "lodash";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import { useEffect, useState, useMemo } from "react";
-import { Dropdown, Card, Col, Row } from "react-bootstrap";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Card, Col, Dropdown, Row } from "react-bootstrap";
 import { Pie } from "react-chartjs-2";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
-import { useTranslations } from "next-intl";
-import AppmerceTable from "@/components/AppmerceTable";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import DateRangeFilter from "@/components/Copral/DaterangeFilter";
 
 const Spkapexcharts = dynamic(
   () =>
@@ -60,6 +62,8 @@ const MultiSelectItem = ({ label, checked, onToggle, bold = false }) => (
 );
 
 const Ecommerce = () => {
+  const { username } = useContext(GlobalContext);
+
   const [sheetData, setSheetData] = useState(undefined);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -82,10 +86,11 @@ const Ecommerce = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=APPMERCE-000",
+        undefined,
+        username,
       );
-      let json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Data ord"]);
       setSheetData(data);

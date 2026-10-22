@@ -5,13 +5,14 @@ import AppmerceTable from "@/components/AppmerceTable";
 import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
-import { allowContextMenu } from "@fullcalendar/core/internal";
-import { useEffect, useMemo, useState } from "react";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
 const resources = {
@@ -20,6 +21,8 @@ const resources = {
 };
 
 export default function PaginaIntestatrice() {
+  const { username } = useContext(GlobalContext);
+
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
 
@@ -31,11 +34,12 @@ export default function PaginaIntestatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=APPMERCE-000",
+        undefined,
+        username,
       );
-      const resp = await res.json();
-      let data = resp.data;
+      let data = json.data;
 
       data = parseDates(data, ["Data ord"]);
       data = orderSheet(data, ["Data ord"], ["asc"]);
@@ -48,11 +52,12 @@ export default function PaginaIntestatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch(
-        "/api/fetch-excel-json?id=intestatrice&sheet=foglio1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=intestatrice",
+        undefined,
+        username,
       );
-      const resp = await res.json();
-      let data = resp.data;
+      let data = json.data;
       data = parseDates(data, ["Data"]);
       data = parseTimes(data, ["ora_inizio", "ora_fine", "durata"]);
       data = orderSheet(data, ["Data"], ["asc"]);

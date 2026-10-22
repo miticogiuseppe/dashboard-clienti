@@ -1,11 +1,9 @@
-/**@type {import('next').NextConfig} */
-const {
-  devIndicatorServerState,
-} = require("next/dist/server/dev/dev-indicator-server-state");
-const path = require("path");
+import path from "path";
+
 const isProd = process.env.NODE_ENV === "production";
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: "export",  // Uncomment the following line only for building purposes. By default, this line should remain commented out.
   reactStrictMode: false,
   trailingSlash: true,
   basePath: isProd ? "" : undefined,
@@ -18,16 +16,14 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   sassOptions: {
-    includePaths: [path.join(__dirname, "public/assets/scss")],
+    includePaths: [path.join(process.cwd(), "public/assets/scss")],
     silenceDeprecations: ["legacy-js-api"],
     quietDeps: true,
   },
-
   devIndicators: false,
-
   eslint: {
     ignoreDuringBuilds: true,
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

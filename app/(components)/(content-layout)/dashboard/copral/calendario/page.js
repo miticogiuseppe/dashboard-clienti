@@ -1,19 +1,24 @@
 "use client";
 import OrderCalendar from "@/components/OrderCalendar";
+import GlobalContext from "@/context/GlobalContext";
 import { parseDates } from "@/utils/excelUtils";
-import { useEffect, useState } from "react";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import { useContext, useEffect, useState } from "react";
 
 export default function Home() {
+  const { username } = useContext(GlobalContext);
+
   const [orders, setOrders] = useState([]);
   const [fileDate, setFileDate] = useState(undefined);
 
   useEffect(() => {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=APPMERCE-000",
+        undefined,
+        username,
       );
-      const json = await response.json();
 
       setFileDate(new Date(json.lwt));
 

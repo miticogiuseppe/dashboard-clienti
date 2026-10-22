@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
 import { Card, Col, Form, Nav, Tab } from "react-bootstrap";
-import { basePath } from "../next.config";
+import { basePath } from "@/config/runtime";
 import SpkAlert from "../shared/@spk-reusable-components/reusable-uielements/spk-alert";
 import { restPost } from "@/utils/restUtils";
 

@@ -1,5 +1,7 @@
 "use client";
+import AppmerceTable from "@/components/AppmerceTable";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
@@ -10,21 +12,21 @@ import { formatDate, formatTime } from "@/utils/format";
 import {
   createOptions,
   createSeries,
+  currencyFormatter,
   pieOptions,
   randomColor,
-  currencyFormatter,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import _ from "lodash";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import { Pie } from "react-chartjs-2";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
-import { useTranslations } from "next-intl";
-import AppmerceTable from "@/components/AppmerceTable";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
@@ -34,6 +36,8 @@ const Spkapexcharts = dynamic(
 );
 
 const Ecommerce = () => {
+  const { username } = useContext(GlobalContext);
+
   // Stati unificati e logica di filtro per data
   const [isLoading, setIsLoading] = useState(true);
   const [sheetData, setSheetData] = useState(undefined);
@@ -61,10 +65,11 @@ const Ecommerce = () => {
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
-      const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=APPMERCE-000",
+        undefined,
+        username,
       );
-      let json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Data ord"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);

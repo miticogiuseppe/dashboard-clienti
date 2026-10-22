@@ -5,14 +5,16 @@ import AppmerceTable from "@/components/AppmerceTable";
 import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate, fmt } from "@/utils/dateUtils";
-import { orderSheet, parseDates, parseCustom } from "@/utils/excelUtils";
+import { orderSheet, parseCustom, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
-import { useEffect, useMemo, useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import moment from "moment";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Card, Col, Row } from "react-bootstrap";
 
 const resources = {
   fileAppmerce: "/api/download-resource?id=APPMERCE-000",
@@ -20,6 +22,8 @@ const resources = {
 };
 
 export default function PaginaPlotter() {
+  const { username } = useContext(GlobalContext);
+
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
   const [pickerDateArt, setPickerDateArt] = useState(undefined);
@@ -32,10 +36,11 @@ export default function PaginaPlotter() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const response = await fetch(
-          "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        const json = await fetchCsvCached(
+          "/api/fetch-excel-json?id=APPMERCE-000",
+          undefined,
+          username,
         );
-        const json = await response.json();
         let fetchedData = parseDates(json.data, ["Data ord"]);
         setData(orderSheet(fetchedData, ["Data ord"], ["asc"]));
       } catch (error) {

@@ -13,7 +13,12 @@ const ServerLayout = async ({ children }) => {
   let menu = getMenu(token.tenant);
   menu = filterMenu(menu, token.role);
 
-  let globalData = { menu, tenant: token.tenant, role: token.role };
+  let globalData = {
+    menu,
+    tenant: token.tenant,
+    role: token.role,
+    username: token.username,
+  };
 
   return <ClientLayout globalData={globalData}>{children}</ClientLayout>;
 };

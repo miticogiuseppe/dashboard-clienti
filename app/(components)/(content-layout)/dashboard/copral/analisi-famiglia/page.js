@@ -1,16 +1,25 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Fragment, useRef } from "react";
-import { Col, Row, Card, Form, Dropdown } from "react-bootstrap";
+import DateRangeFilter from "@/components/Copral/DaterangeFilter";
+import GlobalContext from "@/context/GlobalContext";
+import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import SpkTablescomponent from "@/shared/@spk-reusable-components/reusable-tables/tables-component";
 import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
-import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
-import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
-import DateRangeFilter from "@/components/Copral/DaterangeFilter";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import {
+  Fragment,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
+import { PiMoneyThin, PiPackageThin, PiScalesThin } from "react-icons/pi";
 
 const formatNum = (val, decimals = 2) => {
   const n = Number(val) || 0;
@@ -66,6 +75,8 @@ const DropdownSearch = ({ value, onChange, placeholder = "Cerca..." }) => (
 );
 
 const AnalisiPerFamiglia = () => {
+  const { username } = useContext(GlobalContext);
+
   const [sheetData, setSheetData] = useState(undefined);
   const [isFetching, setIsFetching] = useState(true);
   const [openFamilies, setOpenFamilies] = useState(new Set());
@@ -113,12 +124,11 @@ const AnalisiPerFamiglia = () => {
     const controller = new AbortController();
     const fetchData = async () => {
       try {
-        const response = await fetch(
+        const json = await fetchCsvCached(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_AGENTE",
           { signal: controller.signal },
+          username,
         );
-        if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
-        const json = await response.json();
         const rawData = json?.data ?? [];
         const parsedData = rawData.map((row) => ({
           ...row,

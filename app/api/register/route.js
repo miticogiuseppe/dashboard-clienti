@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { hash } from "argon2";
-import { pool } from "@/utils/db";
+import { getPool } from "@/utils/db";
+
+const pool = getPool();
 
 export async function POST(request) {
   try {

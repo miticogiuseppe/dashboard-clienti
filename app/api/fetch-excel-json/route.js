@@ -1,30 +1,91 @@
-import fs from "fs";
-import path from "path";
-import * as XLSX from "xlsx";
-import { getTokenData } from "@/utils/tokenData";
-import { getFileInfo } from "@/utils/fileTools";
 import { check } from "@/utils/api";
+import { createCsvStream, createGzipStream } from "@/utils/csvStreams";
+import { readTableInfo } from "@/utils/db";
+import { getPool } from "@/utils/db.js";
+import { dbReadData, dbReadLwt } from "@/utils/db_utils";
+import { getFileInfo, getFileStats } from "@/utils/fileTools";
+import { buildTableName } from "@/utils/misc";
+import { getTokenData } from "@/utils/tokenData";
+import fs, { createReadStream } from "fs";
+import path from "path";
+import { Readable } from "stream";
+import * as XLSX from "xlsx";
 
+const pool = getPool();
+
+const agenteCols = ["Agente", "Des. Agente", "Descrizione Agente"];
+const clienteCols = [
+  "Cliente/Fornitore",
+  "Ragione sociale",
+  "Descrizione Cliente/Fornitore",
+];
 const mappingPath = path.join(process.cwd(), "data", "mappatura_agenti.json");
-
 const agentMapping = fs.existsSync(mappingPath)
   ? JSON.parse(fs.readFileSync(mappingPath, "utf8"))
   : {};
 
+// Legge dal file (logica attuale invariata)
+async function readFromRes(resource) {
+  let jsonSheet, fileDate;
+
+  const filePath = path.join(process.env.DRIVE_PATH, resource.path);
+  const fileBuffer = fs.readFileSync(filePath);
+  const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+  const sheetName =
+    resource.sheet && workbook.SheetNames.includes(resource.sheet)
+      ? resource.sheet
+      : workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+  const fileInfo = await getFileInfo(filePath);
+  fileDate = fileInfo.mtime;
+
+  return { jsonSheet, fileDate };
+}
+async function getResDate(resource) {
+  const filePath = path.join(process.env.DRIVE_PATH, resource.path);
+
+  const fileInfo = getFileStats(filePath);
+  return fileInfo.mtime;
+}
+
+// Applica i filtri agente/cliente
+function applyFilters(jsonSheet, role, codice_agente, codice_cliente) {
+  if (!jsonSheet || !Array.isArray(jsonSheet) || jsonSheet.length === 0)
+    return jsonSheet;
+
+  const columns = Object.keys(jsonSheet[0]);
+
+  const agenteColumn = columns.find((col) => agenteCols.includes(col));
+  const clienteColumn = columns.find((col) => clienteCols.includes(col));
+
+  if (role === "AGENTE" && codice_agente && agenteColumn) {
+    const normalize = (val) => String(val).replace(/\s+/g, "").toLowerCase();
+    const nomeAgente = agentMapping[String(codice_agente)] || null;
+    return jsonSheet.filter((row) => {
+      const valore = row[agenteColumn];
+      if (normalize(valore) === normalize(codice_agente)) return true;
+      if (nomeAgente && normalize(valore) === normalize(nomeAgente))
+        return true;
+      return false;
+    });
+  }
+
+  if (role === "CLIENTE" && codice_cliente && clienteColumn) {
+    return jsonSheet.filter(
+      (row) =>
+        String(row[clienteColumn]).trim().toLowerCase() ===
+        String(codice_cliente).trim().toLowerCase(),
+    );
+  }
+
+  return jsonSheet;
+}
+
 export async function GET(req) {
   return await check(req, async () => {
-    // Ottenere il tenant
     const token = await getTokenData();
     const { tenant, role, codice_agente, codice_cliente } = token;
-
-    // LOG per debug dei filtri
-    console.log("--- DEBUG FILTRO ---");
-    console.log("Ruolo:", role);
-    console.log("Agente:", codice_agente);
-    console.log("Cliente:", codice_cliente);
-    console.log("--------------------");
-
-    console.log("1 " + new Date());
 
     if (!tenant)
       return new Response(JSON.stringify({ error: "Missing tenant" }), {
@@ -34,7 +95,7 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    const sheetNameParam = searchParams.get("sheet"); // il nome del foglio
+    const lwt = searchParams.get("lwt");
 
     if (!id)
       return new Response(JSON.stringify({ error: "Missing id" }), {
@@ -43,8 +104,7 @@ export async function GET(req) {
       });
 
     const dbPath = path.join(process.cwd(), "data", "filedb.json");
-    const dbContent = fs.readFileSync(dbPath, "utf8");
-    const db = JSON.parse(dbContent);
+    const db = JSON.parse(fs.readFileSync(dbPath, "utf8"));
 
     const tenantResources = db[tenant];
     if (!tenantResources)
@@ -60,101 +120,122 @@ export async function GET(req) {
         headers: { "Content-Type": "application/json" },
       });
 
-    const filePath = path.join(process.env.DRIVE_PATH, resource.path);
-    const jsonFile = path.join(
-      process.env.DRIVE_PATH,
-      path.parse(resource.path).dir,
-      path.parse(resource.path).name + ".json",
-    );
+    console.log("--- DEBUG FILTRO ---");
+    console.log("Ruolo:", role);
+    console.log("Agente:", codice_agente);
+    console.log("Cliente:", codice_cliente);
+    console.log("--------------------");
 
-    let jsonSheet = undefined;
-    let fileDate = undefined;
+    // get lwt
+    const cacheLwt = await dbReadLwt(pool, tenant, resource.id);
+    const fileLwt = await getResDate(resource);
+    const mergeLwt = cacheLwt ?? fileLwt.toISOString();
 
-    if (fs.existsSync(jsonFile)) {
-      let data = fs.readFileSync(jsonFile, "utf-8");
-      jsonSheet = JSON.parse(data);
+    // compare lwt
+    if (lwt === mergeLwt)
+      return new Response(null, {
+        status: 204,
+      });
 
-      const fileInfo = await getFileInfo(jsonFile);
-      fileDate = fileInfo.mtime;
-    } else {
-      console.log(`JSON not found: ${jsonFile}. Reading XLS.`);
+    // set variables
+    let stream;
+    let filtering = false;
+    if (role === "AGENTE" && codice_agente) filtering = true;
+    if (role === "CLIENTE" && codice_cliente) filtering = true;
 
-      const fileBuffer = fs.readFileSync(filePath);
-      const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    // casistica
+    if (cacheLwt) {
+      const tableName = buildTableName(tenant, id);
+      const csvFn = path.join("csv_cache", tableName + ".csv");
 
-      // se il foglio passato esiste, lo usiamo; altrimenti primo foglio
-      const sheetName =
-        sheetNameParam && workbook.SheetNames.includes(sheetNameParam)
-          ? sheetNameParam
-          : workbook.SheetNames[0];
+      if (fs.existsSync(csvFn) && !filtering) {
+        // 1) preleva dalla cache CSV
+        console.log(`Fonte: cache CSV (${csvFn})`);
 
-      const sheet = workbook.Sheets[sheetName];
-      jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-      const fileInfo = await getFileInfo(filePath);
-      fileDate = fileInfo.mtime;
-    }
-
-    // Applichiamo il filtro solo se i dati sono stati caricati con successo
-    if (jsonSheet && Array.isArray(jsonSheet) && jsonSheet.length > 0) {
-      const columns = Object.keys(jsonSheet[0]);
-
-      // Individuiamo dinamicamente la colonna agente
-      const agenteColumn = columns.find((col) =>
-        ["Agente", "Des. Agente", "Descrizione Agente"].includes(col),
-      );
-
-      // Individuiamo dinamicamente la colonna cliente
-      const clienteColumn = columns.find((col) =>
-        [
-          "Cliente/Fornitore",
-          "Ragione sociale",
-          "Descrizione Cliente/Fornitore",
-        ].includes(col),
-      );
-
-      // Filtro AGENTE con mappatura JSON
-      if (role === "AGENTE" && codice_agente && agenteColumn) {
-        const normalize = (val) =>
-          String(val).replace(/\s+/g, "").toLowerCase();
-
-        const nomeAgente = agentMapping[String(codice_agente)] || null;
-
-        jsonSheet = jsonSheet.filter((row) => {
-          const valore = row[agenteColumn];
-
-          // Caso 1: il foglio contiene il CODICE
-          if (normalize(valore) === normalize(codice_agente)) {
-            return true;
-          }
-
-          // Caso 2: il foglio contiene il NOME
-          if (nomeAgente && normalize(valore) === normalize(nomeAgente)) {
-            return true;
-          }
-
-          return false;
+        const nodeStream = createReadStream(csvFn, {
+          highWaterMark: 4 * 1024 * 1024,
         });
+        stream = Readable.toWeb(nodeStream);
+      } else {
+        // 2) preleva dal DB
+        console.log(`Fonte: cache DB (${tableName})`);
+
+        // legge info tabella
+        const tableColumns = await readTableInfo(pool, tableName);
+
+        // crea clausola WHERE per il filtraggio
+        let filters = [],
+          params = [];
+        let prog = 0;
+        if (role === "AGENTE" && codice_agente) {
+          for (let col of agenteCols)
+            if (tableColumns[col]) {
+              let nomeAgente = agentMapping[codice_agente];
+              if (nomeAgente && tableColumns[col] === "character varying") {
+                filters.push(
+                  `("${col}" = $${++prog} OR "${col}" = $${++prog})`,
+                );
+                params.push(codice_agente);
+                params.push(agentMapping[codice_agente]);
+              } else {
+                filters.push(`"${col}" = $${++prog}`);
+                params.push(codice_agente);
+              }
+              break;
+            }
+        }
+        if (role === "CLIENTE" && codice_cliente) {
+          for (let col of clienteCols)
+            if (tableColumns[col]) {
+              filters.push(`"${col}" = $${++prog}`);
+              params.push(codice_cliente);
+              break;
+            }
+        }
+        let filter =
+          filters.length > 0 ? "WHERE " + filters.join(" AND ") : undefined;
+
+        // ottiene dal db dati e lwt
+        const res = await dbReadData(pool, tenant, resource.id, filter, params);
+
+        // manda stream in output
+        let jsonSheet = res.rows;
+        let source = "db";
+        let fileDate = res.lwt;
+
+        let uncompressedStream = createCsvStream(jsonSheet, {
+          lwt: fileDate,
+          source,
+        });
+        stream = createGzipStream(uncompressedStream);
       }
-      // Filtro CLIENTE
-      else if (role === "CLIENTE" && codice_cliente && clienteColumn) {
-        jsonSheet = jsonSheet.filter(
-          (row) =>
-            String(row[clienteColumn]).trim().toLowerCase() ===
-            String(codice_cliente).trim().toLowerCase(),
-        );
-      }
+    } else {
+      // 3) fallback su file
+      console.log(`Fonte: file originale (${resource.id})`);
+
+      // legge il file
+      const fileResult = await readFromRes(resource);
+      let jsonSheet = fileResult.jsonSheet;
+      let fileDate = fileResult.fileDate;
+      let source = "file";
+
+      // applica filtri
+      jsonSheet = applyFilters(jsonSheet, role, codice_agente, codice_cliente);
+
+      // manda stream
+      let uncompressedStream = createCsvStream(jsonSheet, {
+        lwt: fileDate,
+        source,
+      });
+      stream = createGzipStream(uncompressedStream);
     }
-    const jsonData = {
-      data: jsonSheet,
-      lwt: fileDate,
-    };
 
-    console.log("2 " + new Date());
-
-    return new Response(JSON.stringify(jsonData), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="export.csv"',
+        "Content-Encoding": "gzip",
+      },
     });
   });
 }

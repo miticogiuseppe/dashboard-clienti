@@ -2,24 +2,29 @@
   "Copral": [
     {
       "id": "APPMERCE-000",
-      "path": "Copral\\4.0\\APPMERCE-000.xlsx"
+      "path": "Copral\\4.0\\APPMERCE-000.xlsx",
+      "sheet": "APPMERCE-000_1"
     },
     {
       "id": "imballatrice_a",
-      "path": "Copral\\4.0\\imballatrice_a.xlsx"
+      "path": "Copral\\4.0\\imballatrice_a.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "pulitrice",
-      "path": "Copral\\4.0\\Arsv.xlsx"
+      "path": "Copral\\4.0\\Arsv.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "intestatrice",
-      "path": "Copral\\4.0\\LogRun.xlsx"
+      "path": "Copral\\4.0\\LogRun.xlsx",
+      "sheet": "Foglio1"
     },
 
     {
       "id": "TRONCATRICE_ESTESO",
-      "path": "Copral\\4.0\\troncatrice.xlsx"
+      "path": "Copral\\4.0\\troncatrice.xlsx",
+      "sheet":"Foglio1"
     },
     {
       "id": "STORICO_TRONCATRICE",
@@ -31,7 +36,8 @@
     },
     {
       "id": "TOP20_VENDUTO",
-      "path": "Copral\\4.0\\STATISTICA_VENDUTO_311225.xlsx"
+      "path": "Copral\\4.0\\STATISTICA_VENDUTO_311225.xlsx",
+      "sheet": "TOP20_2025"
     },
     {
       "id": "STATISTICA_VENDUTO_1",
@@ -44,11 +50,13 @@
 
     {
       "id": "STATISTICA_VENDUTO_AGENTE",
-      "path": "Copral\\4.0\\STAVEN-001.xlsx"
+      "path": "Copral\\4.0\\STAVEN-001.xlsx",
+      "idx": ["Agente"]
     },
     {
       "id": "STATISTICA_VENDUTO_CLIENTE",
-      "path": "Copral\\4.0\\STAVEN-001.xlsx"
+      "path": "Copral\\4.0\\STAVEN-001.xlsx",
+      "idx": ["Cliente/Fornitore"]
     },
     {
       "id": "STATISTICA_ACQUISTATO",
@@ -58,33 +66,40 @@
   "Dibartolo": [
     {
       "id": "ANALISI",
-      "path": "Dibartolo\\4.0\\Analisi\\Analisi.xlsx"
+      "path": "Dibartolo\\4.0\\Analisi\\Analisi.xlsx",
+      "sheet": "appmerce_db"
     },
     {
       "id": "CONFEZIONATRICE",
-      "path": "Dibartolo\\4.0\\dati_bi\\dati_confezionatrice.xlsx"
+      "path": "Dibartolo\\4.0\\dati_bi\\dati_confezionatrice.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "VARIEGATI",
-      "path": "Dibartolo\\4.0\\dati_bi\\dati_variegati.xlsx"
+      "path": "Dibartolo\\4.0\\dati_bi\\dati_variegati.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "MULINI",
-      "path": "Dibartolo\\4.0\\dati_bi\\dati_mulini.xlsx"
+      "path": "Dibartolo\\4.0\\dati_bi\\dati_mulini.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "TOSTINI",
-      "path": "Dibartolo\\4.0\\dati_bi\\dati_tostini.xlsx"
+      "path": "Dibartolo\\4.0\\dati_bi\\dati_tostini.xlsx",
+      "sheet": "Foglio1"
     },
     {
       "id": "RIBUS",
-      "path": "Dibartolo\\4.0\\dati_bi\\dati_ribus.xlsx"
+      "path": "Dibartolo\\4.0\\dati_bi\\dati_ribus.xlsx",
+      "sheet": "Foglio1"
     }
   ],
   "Rica": [
     {
       "id": "ANALISI",
-      "path": "Rica\\4.0\\analisi.xlsx"
+      "path": "Rica\\4.0\\analisi.xlsx",
+      "sheet": "_0000"
     },
     {
       "id": "STORICO",

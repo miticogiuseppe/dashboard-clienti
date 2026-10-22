@@ -1,15 +1,17 @@
 "use client";
-import React, { useEffect, useState, useMemo, Fragment } from "react";
-import { Row, Col, Card, Form, Dropdown } from "react-bootstrap";
+import DateRangeFilter from "@/components/Copral/DaterangeFilter";
+import GlobalContext from "@/context/GlobalContext";
+import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
+import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
+import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import Preloader from "@/utils/Preloader";
-import SpkBadge from "@/shared/@spk-reusable-components/reusable-uielements/spk-badge";
-import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
-import SpkDropdown from "@/shared/@spk-reusable-components/reusable-uielements/spk-dropdown";
-import DateRangeFilter from "@/components/Copral/DaterangeFilter";
-import { PiMoneyThin, PiScalesThin, PiPackageThin } from "react-icons/pi";
 import { useRouter } from "next/navigation";
+import { Fragment, useContext, useEffect, useMemo, useState } from "react";
+import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
+import { PiMoneyThin, PiPackageThin, PiScalesThin } from "react-icons/pi";
 
 // ─── Formattatori ─────────────────────────────────────────────────────────────
 const formatNum = (val, decimals = 2) => {
@@ -84,6 +86,8 @@ const DropdownSearch = ({ value, onChange, placeholder = "Cerca..." }) => (
 );
 
 const AcquistatoPage = () => {
+  const { username } = useContext(GlobalContext);
+
   const router = useRouter();
 
   const [session, setSession] = useState(null);
@@ -218,10 +222,11 @@ const AcquistatoPage = () => {
       setIsAuthorized(true);
 
       try {
-        const response = await fetch(
+        const json = await fetchCsvCached(
           "/api/fetch-excel-json?id=STATISTICA_ACQUISTATO",
+          undefined,
+          username,
         );
-        const json = await response.json();
         const rawData = json?.data ?? [];
 
         // ── DEBUG temporaneo: verifica nomi colonne e valori ──

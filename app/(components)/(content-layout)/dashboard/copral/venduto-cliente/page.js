@@ -1,14 +1,8 @@
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  Fragment,
-  useCallback,
-} from "react";
-import { Row, Col } from "react-bootstrap";
 import { useRouter } from "next/navigation";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Col, Row } from "react-bootstrap";
 
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
@@ -17,11 +11,16 @@ import { formatCurrency } from "@/utils/currency";
 
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import { FaEuroSign, FaUserFriends } from "react-icons/fa";
-import { PiTrendUp, PiPackage } from "react-icons/pi";
+import { PiPackage, PiTrendUp } from "react-icons/pi";
 
 import AppmerceTable from "@/components/AppmerceTable";
+import GlobalContext from "@/context/GlobalContext";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import { useContext } from "react";
 
 const VendutoCliente = () => {
+  const { username } = useContext(GlobalContext);
+
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -59,10 +58,11 @@ const VendutoCliente = () => {
 
         setUser(session.user);
 
-        const response = await fetch(
+        const json = await fetchCsvCached(
           "/api/fetch-excel-json?id=STATISTICA_VENDUTO_CLIENTE",
+          undefined,
+          username,
         );
-        const json = await response.json();
 
         if (json.data) {
           let rawData = json.data;

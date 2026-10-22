@@ -1,13 +1,15 @@
 import fs from "fs";
 import csv from "csv-parser";
-import { pool } from "@/utils/db";
+import { getPool } from "@/utils/db";
 import argon2 from "argon2";
+
+const pool = getPool();
 
 export async function caricaAgentiDaCSV() {
   const agenti = [];
 
   // 1. Leggiamo il file CSV generato da Python
-  fs.createReadStream("agenti_per_database.csv")
+  fs.createReadStream("data\\agenti_per_database.csv")
     .pipe(csv())
     .on("data", (row) => agenti.push(row))
     .on("end", async () => {

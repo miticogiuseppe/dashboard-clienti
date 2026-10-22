@@ -1,15 +1,19 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Row, Col } from "react-bootstrap";
 import AppmerceTable from "@/components/AppmerceTable";
+import VendutoChart from "@/components/VendutoChart";
+import GlobalContext from "@/context/GlobalContext";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import Preloader from "@/utils/Preloader";
 import { formatCurrency } from "@/utils/currency";
-import VendutoChart from "@/components/VendutoChart";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import { useRouter } from "next/navigation"; // 1. Importa il router
+import { useContext, useEffect, useState } from "react";
+import { Col, Row } from "react-bootstrap";
 
 const Venduto = () => {
+  const { username } = useContext(GlobalContext);
+
   const router = useRouter(); // 2. Inizializza il router
   const [isLoading, setIsLoading] = useState(true);
   const [top20Data, setTop20Data] = useState([]);
@@ -40,10 +44,11 @@ const Venduto = () => {
       setIsAuthorized(true);
 
       try {
-        const response = await fetch(
-          "/api/fetch-excel-json?id=TOP20_VENDUTO&sheet=TOP20_2025",
+        const json = await fetchCsvCached(
+          "/api/fetch-excel-json?id=TOP20_VENDUTO",
+          undefined,
+          username,
         );
-        const json = await response.json();
 
         if (json.data) {
           // ... (Tutta la tua logica di filtraggio e map che avevi già scritto)

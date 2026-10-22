@@ -1,16 +1,18 @@
 "use client";
 import AppmerceChart from "@/components/AppmerceChart";
 import AppmerceTable from "@/components/AppmerceTable";
-import CustomDateComponent from "@/components/CustomDateComponent";
 import LogTroncatriceChart from "@/components/Copral/LogTroncatriceChart";
+import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
 import { computeDate, fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates, parseTimes } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
-import { useEffect, useMemo, useState } from "react";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
 const resources = {
@@ -19,6 +21,8 @@ const resources = {
 };
 
 export default function PaginaTroncatrice() {
+  const { username } = useContext(GlobalContext);
+
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
 
@@ -30,10 +34,11 @@ export default function PaginaTroncatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=APPMERCE-000",
+        undefined,
+        username,
       );
-      const json = await response.json();
       let data = json.data;
 
       data = parseDates(data, ["Data ord"]);
@@ -47,10 +52,11 @@ export default function PaginaTroncatrice() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=TRONCATRICE_ESTESO&sheet=Foglio1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=TRONCATRICE_ESTESO",
+        undefined,
+        username,
       );
-      const json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Timestamp"]);
       data = parseTimes(data, ["Tempo"]);

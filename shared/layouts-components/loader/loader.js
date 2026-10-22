@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { basePath } from "../../../next.config";
+import { basePath } from "@/config/runtime";
 
 const Loader = () => {
   const [loading, setLoading] = useState(true);

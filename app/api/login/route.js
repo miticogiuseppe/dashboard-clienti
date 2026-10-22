@@ -1,6 +1,8 @@
-import { pool } from "@/utils/db";
+import { getPool } from "@/utils/db";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+
+const pool = getPool();
 
 function generateAccessToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, {

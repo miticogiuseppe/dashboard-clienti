@@ -5,12 +5,14 @@ import AppmerceTable from "@/components/AppmerceTable";
 import CustomDateComponent from "@/components/CustomDateComponent";
 import MacchinaDashboard from "@/components/MacchinaDashboard";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
 import Seo from "@/shared/layouts-components/seo/seo";
-import { computeDate, fmt } from "@/utils/dateUtils";
+import { fmt } from "@/utils/dateUtils";
 import { orderSheet, parseDates } from "@/utils/excelUtils";
 import Preloader from "@/utils/Preloader";
-import { useEffect, useMemo, useState } from "react";
+import { fetchCsvCached } from "@/utils/resourceCache";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
 const ribus = {
@@ -26,6 +28,8 @@ const ribus = {
 
 // COMPONENTE PRINCIPALE
 export default function PaginaRibus() {
+  const { username } = useContext(GlobalContext);
+
   // Filtri TS Azienda
   const [pickerDateTS, setPickerDateTS] = useState(undefined);
   const [periodoTS, setPeriodoTS] = useState("mese");
@@ -39,10 +43,11 @@ export default function PaginaRibus() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=ANALISI",
+        undefined,
+        username,
       );
-      const json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Data ordine", "Data cons. rich."]);
       data = orderSheet(data, ["Data ordine"], ["asc"]);
@@ -55,10 +60,11 @@ export default function PaginaRibus() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch(
-        "/api/fetch-excel-json?id=RIBUS&sheet=Foglio1",
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=RIBUS",
+        undefined,
+        username,
       );
-      const json = await response.json();
       let data = json.data;
       data = parseDates(data, ["insert_datetime"]);
       data = orderSheet(data, ["insert_datetime"], ["asc"]);

@@ -1,5 +1,6 @@
 "use client";
 import AppmerceTable from "@/components/AppmerceTable";
+import GlobalContext from "@/context/GlobalContext";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
@@ -8,10 +9,11 @@ import { extractUniques, parseDates, sumByKey } from "@/utils/excelUtils";
 import { formatDate, formatTime } from "@/utils/format";
 import { createOptions } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import _ from "lodash";
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
@@ -21,7 +23,7 @@ import { PiPackage } from "react-icons/pi";
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
+  { ssr: false },
 );
 
 // Opzioni base per ilgrafico a barre
@@ -54,6 +56,8 @@ const barChartOptions = createOptions({
 });
 
 const Ecommerce = () => {
+  const { username } = useContext(GlobalContext);
+
   // Stati unificati e logica di filtro per data
   const [isLoading, setIsLoading] = useState(true);
   const [sheetData, setSheetData] = useState(undefined);
@@ -84,10 +88,11 @@ const Ecommerce = () => {
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
-      const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db"
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=ANALISI",
+        undefined,
+        username,
       );
-      let json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Data ordine", "Data cons. rich."]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
@@ -115,7 +120,7 @@ const Ecommerce = () => {
     // ----------------------- Logica per Tabella (Ordini recenti)
 
     const sortedData = filteredData.sort((a, b) =>
-      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1
+      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1,
     );
     const uniqData = _.uniqBy(sortedData, "Nr. ord.");
     setRecentOrders(uniqData);
@@ -129,21 +134,21 @@ const Ecommerce = () => {
     // Totale clienti unici
     const uniqueCustomersCount = extractUniques(
       filteredData,
-      "Ragione sociale"
+      "Ragione sociale",
     ).length;
     setTotalUniqueCustomers(uniqueCustomersCount);
 
     // ----------------------- Logica per Grafico a Barre (Analisi Quantità)
     // Filtra i dati escludendo la famiglia "IMBALLAGGI"
     const filteredDataExcludingImballaggi = filteredData.filter(
-      (item) => item["Descrizione famiglia"] !== "IMBALLAGGI"
+      (item) => item["Descrizione famiglia"] !== "IMBALLAGGI",
     );
 
     // Somma la quantità per ogni "Descrizione famiglia"
     const counters = sumByKey(
       filteredDataExcludingImballaggi,
       "Descrizione famiglia",
-      "Qta/kg da ev."
+      "Qta/kg da ev.",
     );
 
     // Ordina i risultati e prepara le serie per ApexCharts

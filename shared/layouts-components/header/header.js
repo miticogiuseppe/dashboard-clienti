@@ -6,7 +6,7 @@ import { ThemeChanger, removeFromCart } from "../../redux/action";
 import { connect, useDispatch, useSelector } from "react-redux";
 import { MENUITEMS } from "../sidebar/nav";
 import SimpleBar from "simplebar-react";
-import { basePath } from "../../../next.config";
+import { basePath } from "@/config/runtime";
 import SpkButton from "../../@spk-reusable-components/reusable-uielements/spk-button";
 import SpkDropdown from "../../@spk-reusable-components/reusable-uielements/spk-dropdown";
 import SpkListgroup from "../../@spk-reusable-components/reusable-uielements/spk-listgroup";

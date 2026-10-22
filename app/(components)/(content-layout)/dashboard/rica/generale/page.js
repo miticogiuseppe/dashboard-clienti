@@ -1,5 +1,7 @@
 "use client";
+import AppmerceTable from "@/components/AppmerceTable";
 import PeriodDropdown from "@/components/PeriodDropdown";
+import GlobalContext from "@/context/GlobalContext";
 import "@/lib/chart-setup";
 import Spkcardscomponent from "@/shared/@spk-reusable-components/reusable-dashboards/spk-cards";
 import Pageheader from "@/shared/layouts-components/page-header/pageheader";
@@ -12,28 +14,29 @@ import {
   createSeries,
   pieOptions,
   randomColor,
-  currencyFormatter,
 } from "@/utils/graphUtils";
 import Preloader from "@/utils/Preloader";
+import { fetchCsvCached } from "@/utils/resourceCache";
 import _ from "lodash";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import { Pie } from "react-chartjs-2";
 import { FaUsers } from "react-icons/fa6";
 import { IoIosCalendar } from "react-icons/io";
 import { PiPackage } from "react-icons/pi";
-import { useTranslations } from "next-intl";
-import AppmerceTable from "@/components/AppmerceTable";
 
 // Componente ApexCharts caricato dinamicamente
 const Spkapexcharts = dynamic(
   () =>
     import("@/shared/@spk-reusable-components/reusable-plugins/spk-apexcharts"),
-  { ssr: false }
+  { ssr: false },
 );
 
 const Ecommerce = () => {
+  const { username } = useContext(GlobalContext);
+
   // Stati unificati e logica di filtro per data
   const [isLoading, setIsLoading] = useState(true);
   const [sheetData, setSheetData] = useState(undefined);
@@ -61,10 +64,11 @@ const Ecommerce = () => {
   useEffect(() => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
-      const response = await fetch(
-        "/api/fetch-excel-json?id=ANALISI&sheet=_0000"
+      const json = await fetchCsvCached(
+        "/api/fetch-excel-json?id=ANALISI",
+        undefined,
+        username,
       );
-      let json = await response.json();
       let data = json.data;
       data = parseDates(data, ["Data ordine"]); // Converte le date in oggetti Moment/Date
       setSheetData(data);
@@ -93,7 +97,7 @@ const Ecommerce = () => {
 
     let grouped = sumByKey(filteredData, "Des Area/Zon", "Qta da ev.", true);
     grouped = grouped.filter(
-      (x) => x["Des Area/Zon"] && x["Des Area/Zon"] !== "0"
+      (x) => x["Des Area/Zon"] && x["Des Area/Zon"] !== "0",
     );
     setChartOptions(
       createOptions(
@@ -102,15 +106,15 @@ const Ecommerce = () => {
         undefined,
         (val) => val.toLocaleString("it-IT"),
         "bar",
-        "#b94eed"
-      )
+        "#b94eed",
+      ),
     );
     setChartSeries(createSeries(grouped, "Qta da ev."));
 
     // ----------------------- Logica per Tabella (Ordini recenti)
 
     const sortedData = filteredData.sort((a, b) =>
-      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1
+      a["Data ordine"].isBefore(b["Data ordine"]) ? 1 : -1,
     );
     const uniqData = _.uniqBy(sortedData, "Nr. ord.");
     setRecentOrders(uniqData);
@@ -124,7 +128,7 @@ const Ecommerce = () => {
     // Totale clienti unici
     const uniqueCustomersCount = extractUniques(
       filteredData,
-      "Ragione sociale"
+      "Ragione sociale",
     ).length;
     setTotalUniqueCustomers(uniqueCustomersCount);
 
@@ -176,7 +180,7 @@ const Ecommerce = () => {
           originalIndex: index,
         }))
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
+        .slice(0, 3),
     );
 
     // ----------------------- fine caricamento

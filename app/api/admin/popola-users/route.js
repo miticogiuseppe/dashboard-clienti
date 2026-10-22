@@ -2,13 +2,19 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import { pool } from "@/utils/db"; // Usa il tuo helper per il DB
+import { getPool } from "@/utils/db"; // Usa il tuo helper per il DB
 import argon2 from "argon2";
+
+const pool = getPool();
 
 export async function POST(req) {
   try {
     // 1. Percorso del file CSV (nella root del progetto)
-    const filePath = path.join(process.cwd(), "agenti_per_database.csv");
+    const filePath = path.join(
+      process.cwd(),
+      "data",
+      "agenti_per_database.csv",
+    );
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json(

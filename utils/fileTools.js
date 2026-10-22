@@ -21,4 +21,13 @@ async function getFileInfo(filePath, algorithm = "md5") {
   });
 }
 
-export { getFileInfo };
+function getFileStats(filePath) {
+  if (!fs.existsSync(filePath)) return undefined;
+  let stats = fs.statSync(filePath);
+  return {
+    size: stats.size,
+    mtime: stats.mtime,
+  };
+}
+
+export { getFileInfo, getFileStats };
