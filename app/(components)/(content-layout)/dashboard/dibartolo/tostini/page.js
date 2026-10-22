@@ -44,7 +44,7 @@ export default function PaginaTostini() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
+        "/api/fetch-excel-json?id=ANALISI",
         undefined,
         username,
       );
@@ -61,7 +61,7 @@ export default function PaginaTostini() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=TOSTINI&sheet=Foglio1",
+        "/api/fetch-excel-json?id=TOSTINI",
         undefined,
         username,
       );

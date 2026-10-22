@@ -37,7 +37,7 @@ export default function PaginaPlotter() {
     async function fetchOrders() {
       try {
         const json = await fetchCsvCached(
-          "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+          "/api/fetch-excel-json?id=APPMERCE-000",
           undefined,
           username,
         );

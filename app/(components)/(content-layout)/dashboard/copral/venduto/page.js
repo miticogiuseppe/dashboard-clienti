@@ -45,7 +45,7 @@ const Venduto = () => {
 
       try {
         const json = await fetchCsvCached(
-          "/api/fetch-excel-json?id=TOP20_VENDUTO&sheet=TOP20_2025",
+          "/api/fetch-excel-json?id=TOP20_VENDUTO",
           undefined,
           username,
         );

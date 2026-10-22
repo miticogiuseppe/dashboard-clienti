@@ -15,7 +15,7 @@ export default function Home() {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        "/api/fetch-excel-json?id=APPMERCE-000",
         undefined,
         username,
       );

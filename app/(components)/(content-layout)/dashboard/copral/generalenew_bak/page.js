@@ -66,7 +66,7 @@ const Ecommerce = () => {
     const fetchData = async () => {
       // 1. Fetch del foglio Excel
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        "/api/fetch-excel-json?id=APPMERCE-000",
         undefined,
         username,
       );

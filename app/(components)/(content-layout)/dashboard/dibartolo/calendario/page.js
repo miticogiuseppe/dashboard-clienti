@@ -14,7 +14,7 @@ export default function Calendar() {
     // Carica automaticamente il file Excel
     const fetchOrders = async () => {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
+        "/api/fetch-excel-json?id=ANALISI",
         undefined,
         username,
       );

@@ -44,7 +44,7 @@ export default function PaginaVariegati() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
+        "/api/fetch-excel-json?id=ANALISI",
         undefined,
         username,
       );
@@ -61,7 +61,7 @@ export default function PaginaVariegati() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=VARIEGATI&sheet=Foglio1",
+        "/api/fetch-excel-json?id=VARIEGATI",
         undefined,
         username,
       );

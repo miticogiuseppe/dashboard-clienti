@@ -49,7 +49,7 @@ export default function PaginaMulini() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=ANALISI&sheet=appmerce_db",
+        "/api/fetch-excel-json?id=ANALISI",
         undefined,
         username,
       );
@@ -66,7 +66,7 @@ export default function PaginaMulini() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=MULINI&sheet=Foglio1",
+        "/api/fetch-excel-json?id=MULINI",
         undefined,
         username,
       );

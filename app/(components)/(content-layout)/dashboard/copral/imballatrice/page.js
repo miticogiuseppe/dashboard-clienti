@@ -35,7 +35,7 @@ export default function PaginaImballatrice() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=APPMERCE-000&sheet=APPMERCE-000_1",
+        "/api/fetch-excel-json?id=APPMERCE-000",
         undefined,
         username,
       );
@@ -53,7 +53,7 @@ export default function PaginaImballatrice() {
   useEffect(() => {
     async function fetchData() {
       const json = await fetchCsvCached(
-        "/api/fetch-excel-json?id=imballatrice_a&sheet=Foglio1",
+        "/api/fetch-excel-json?id=imballatrice_a",
         undefined,
         username,
       );

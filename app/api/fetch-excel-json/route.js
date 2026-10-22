@@ -25,15 +25,15 @@ const agentMapping = fs.existsSync(mappingPath)
   : {};
 
 // Legge dal file (logica attuale invariata)
-async function readFromRes(resource, sheetNameParam) {
+async function readFromRes(resource) {
   let jsonSheet, fileDate;
 
   const filePath = path.join(process.env.DRIVE_PATH, resource.path);
   const fileBuffer = fs.readFileSync(filePath);
   const workbook = XLSX.read(fileBuffer, { type: "buffer" });
   const sheetName =
-    sheetNameParam && workbook.SheetNames.includes(sheetNameParam)
-      ? sheetNameParam
+    resource.sheet && workbook.SheetNames.includes(resource.sheet)
+      ? resource.sheet
       : workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   jsonSheet = XLSX.utils.sheet_to_json(sheet, { defval: "" });
@@ -96,7 +96,6 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     const lwt = searchParams.get("lwt");
-    const sheetNameParam = searchParams.get("sheet");
 
     if (!id)
       return new Response(JSON.stringify({ error: "Missing id" }), {
@@ -215,7 +214,7 @@ export async function GET(req) {
       console.log(`Fonte: file originale (${resource.id})`);
 
       // legge il file
-      const fileResult = await readFromRes(resource, sheetNameParam);
+      const fileResult = await readFromRes(resource);
       let jsonSheet = fileResult.jsonSheet;
       let fileDate = fileResult.fileDate;
       let source = "file";
